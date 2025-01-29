@@ -38,8 +38,7 @@ def admin_login():
 
 a = Tk()
 a.title("Admin Login")
-a.geometry('700x400')
-a.resizable(1, 1)
+a.attributes('-fullscreen', True)
 
 def adjust_frames(event=None):
     a.update_idletasks()
@@ -55,8 +54,8 @@ def adjust_frames(event=None):
         x_main, y_main = 0, 0
         button_x = 500
 
-    framemain.place(x=0, y=0, width=2560, height=1600)
-    topframemain.place(x=0, y=0, width=2560, height=25)
+    framemain.place(x=0, y=0, width=window_width, height=window_height)
+    topframemain.place(x=0, y=0, width=window_width, height=25)
     welcomeframe.place(x=x_main + 150, y=y_main + 70, width=400, height=60)
     frame.place(x=x_main + 200, y=y_main + 140, width=300, height=250)
     infotopframe.place(x=x_main + 200, y=y_main + 140, width=300, height=20)
