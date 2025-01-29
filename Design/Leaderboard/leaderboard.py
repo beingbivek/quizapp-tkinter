@@ -38,7 +38,7 @@ def populate_table(selected_course):
 root=Tk()
 root.geometry('1000x800')
 
-root.title('Quize')
+root.title('Leaderboard')
               
 mainframe= Frame(root, bd=2, relief="ridge")
 mainframe.place(x=0,y=0,width=1000, height=800)
@@ -91,7 +91,6 @@ Label(text="To:",font=('Arial',14),).place(x=728,y=250)
 table_frame = Frame(root, bd=2, relief="ridge", bg="lightgrey")
 table_frame.place(x=150,y=400, width=660, height=200)
 
-# Initialize table with default course
 populate_table("Loksewa")
 
 root.mainloop()
