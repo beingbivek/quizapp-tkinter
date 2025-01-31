@@ -64,16 +64,16 @@ class QuizAdminDashboard:
         # No. of user displayed
         def user_no_selected(selected_user_no):
             # Clear the existing rows in the Treeview
-            for row in tree.get_children():
-                tree.delete(row)
+            for row in self.tree.get_children():
+                self.tree.delete(row)
 
             # Insert only the selected number of rows
             num_rows = int(selected_user_no)
-            for i in range(min(num_rows, len(rows))):  # Ensure we don't exceed the total number of rows
-                tree.insert("", "end", values=rows[i])
+            for i in range(min(num_rows, len(self.rows))):  # Ensure we don't exceed the total number of rows
+                self.tree.insert("", "end", values=self.rows[i])
 
             # Adjust the height of the Treeview to match the number of rows
-            tree.configure(height=num_rows)
+            self.tree.configure(height=num_rows)
 
         no_of_user = ["3", "6", "9", "12"]
         selected_user_no = StringVar(value="No. of user displayed")
@@ -85,26 +85,26 @@ class QuizAdminDashboard:
         # Filter with
         def filter_info(filter_with):
             # Clear the existing rows in the Treeview
-            for row in tree.get_children():
-                tree.delete(row)
+            for row in self.tree.get_children():
+                self.tree.delete(row)
 
             # Sort rows based on the selected filter criteria
             if filter_with == "Username":
                 # Sort by username (alphabetically)
-                sorted_rows = sorted(rows, key=lambda x: x[1].lower())  # Case-insensitive sorting
+                sorted_rows = sorted(self.rows, key=lambda x: x[1].lower())  # Case-insensitive sorting
             elif filter_with == "SN":
                 # Sort by serial number (ascending order)
-                sorted_rows = sorted(rows, key=lambda x: int(x[0]))
+                sorted_rows = sorted(self.rows, key=lambda x: int(x[0]))
             else:
                 # Default: No sorting
-                sorted_rows = rows
+                sorted_rows = self.rows
 
             # Insert sorted rows into the Treeview
             for row in sorted_rows:
-                tree.insert("", "end", values=row)
+                self.tree.insert("", "end", values=row)
 
             # Adjust the height of the Treeview to match the number of rows
-            tree.configure(height=len(sorted_rows))
+            self.tree.configure(height=len(sorted_rows))
 
         filter_value = ["Username", "SN"]  # Updated filter options
         filter_with = StringVar(value="Filter With:")
