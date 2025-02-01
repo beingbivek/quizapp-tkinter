@@ -128,7 +128,7 @@ class QuizAdminDashboard:
         table_frame = tk.Frame(main_frame, bg="#E0E0E0")
         table_frame.place(relx=0.05, rely=0.35, relwidth=0.9, relheight=0.5)
 
-        columns = ("Sn", "Username", "Name", "Contact", "Email", "Button")
+        columns = ("Sn", "Username", "Name", "Contact", "Email")
         self.tree = ttk.Treeview(table_frame, columns=columns, show="headings")
 
         for col in columns:
@@ -137,16 +137,16 @@ class QuizAdminDashboard:
 
         # Insert rows
         self.rows = [
-            ("1", "poplol2", "Ram Rai", "9876543210", "a@gmail.com", "Edit Delete"),
-            ("2", "user123", "John Doe", "1234567890", "john@example.com", "Edit Delete"),
-            ("3", "testuser", "Jane Doe", "0987654321", "jane@example.com", "Edit Delete"),
-            ("4", "demo", "Demo User", "1122334455", "demo@example.com", "Edit Delete"),
-            ("5", "user5", "User Five", "1111111111", "user5@example.com", "Edit Delete"),
-            ("6", "user6", "User Six", "2222222222", "user6@example.com", "Edit Delete"),
-            ("7", "user7", "User Seven", "3333333333", "user7@example.com", "Edit Delete"),
-            ("8", "user8", "User Eight", "4444444444", "user8@example.com", "Edit Delete"),
-            ("9", "user9", "User Nine", "5555555555", "user9@example.com", "Edit Delete"),
-            ("10", "user10", "User Ten", "6666666666", "user10@example.com", "Edit Delete"),
+            ("1", "poplol2", "Ram Rai", "9876543210", "a@gmail.com"),
+            ("2", "user123", "John Doe", "1234567890", "john@example.com"),
+            ("3", "testuser", "Jane Doe", "0987654321", "jane@example.com"),
+            ("4", "demo", "Demo User", "1122334455", "demo@example.com"),
+            ("5", "user5", "User Five", "1111111111", "user5@example.com"),
+            ("6", "user6", "User Six", "2222222222", "user6@example.com"),
+            ("7", "user7", "User Seven", "3333333333", "user7@example.com"),
+            ("8", "user8", "User Eight", "4444444444", "user8@example.com"),
+            ("9", "user9", "User Nine", "5555555555", "user9@example.com"),
+            ("10", "user10", "User Ten", "6666666666", "user10@example.com"),
         ]
 
         # Initially display all rows
