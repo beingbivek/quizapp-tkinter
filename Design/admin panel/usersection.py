@@ -61,6 +61,10 @@ class QuizAdminDashboard:
             stat_desc = tk.Label(stat_box, text=stat[1], font=("Arial", 10), fg="white", bg="#34495E")
             stat_desc.place(relx=0.5, rely=0.7, anchor=tk.CENTER)
 
+        # Add Button
+        add_button = tk.Button(stats_frame, text="Add User", bg="#1F618D", fg="black", relief=tk.FLAT, command=self.register_user)
+        add_button.place(relx=0.8, rely=0.2, relwidth=0.15, relheight=0.6)
+
         # No. of user displayed
         def user_no_selected(selected_user_no):
             # Clear the existing rows in the Treeview
@@ -158,6 +162,13 @@ class QuizAdminDashboard:
 
         self.tree.place(relx=0, rely=0, relwidth=1, relheight=1)
 
+        # Edit and Delete Buttons
+        edit_button = tk.Button(main_frame, text="Edit", bg="#1F618D", fg="black", relief=tk.FLAT, command=self.edit_user)
+        edit_button.place(relx=0.05, rely=0.9, relwidth=0.1, relheight=0.05)
+
+        delete_button = tk.Button(main_frame, text="Delete", bg="#E74C3C", fg="black", relief=tk.FLAT, command=self.delete_user)
+        delete_button.place(relx=0.15, rely=0.9, relwidth=0.1, relheight=0.05)
+
     def search_table(self):
         # Get the search term from the entry widget
         search_term = self.search_entry.get().strip().lower()
@@ -178,6 +189,116 @@ class QuizAdminDashboard:
 
         # Adjust the height of the Treeview to match the number of filtered rows
         self.tree.configure(height=len(filtered_rows))
+
+    def register_user(self):
+        # Open a new window for user registration
+        register_window = tk.Toplevel(self.root)
+        register_window.title("Register User")
+        register_window.geometry("400x300")
+
+        # Add labels and entry fields for user registration
+        tk.Label(register_window, text="Username:").place(relx=0.1, rely=0.1)
+        username_entry = tk.Entry(register_window)
+        username_entry.place(relx=0.3, rely=0.1)
+
+        tk.Label(register_window, text="Name:").place(relx=0.1, rely=0.2)
+        name_entry = tk.Entry(register_window)
+        name_entry.place(relx=0.3, rely=0.2)
+
+        tk.Label(register_window, text="Contact:").place(relx=0.1, rely=0.3)
+        contact_entry = tk.Entry(register_window)
+        contact_entry.place(relx=0.3, rely=0.3)
+
+        tk.Label(register_window, text="Email:").place(relx=0.1, rely=0.4)
+        email_entry = tk.Entry(register_window)
+        email_entry.place(relx=0.3, rely=0.4)
+
+        # Add a button to submit the registration
+        submit_button = tk.Button(register_window, text="Submit", command=lambda: self.submit_registration(
+            username_entry.get(), name_entry.get(), contact_entry.get(), email_entry.get(), register_window))
+        submit_button.place(relx=0.4, rely=0.6)
+
+    def submit_registration(self, username, name, contact, email, window):
+        # Add the new user to the rows list
+        new_user = (str(len(self.rows) + 1), username, name, contact, email)
+        self.rows.append(new_user)
+
+        # Insert the new user into the Treeview
+        self.tree.insert("", "end", values=new_user)
+
+        # Close the registration window
+        window.destroy()
+
+    def edit_user(self):
+        # Get the selected user from the Treeview
+        selected_item = self.tree.selection()
+        if not selected_item:
+            messagebox.showwarning("No Selection", "Please select a user to edit.")
+            return
+
+        # Get the selected user's details
+        selected_user = self.tree.item(selected_item, "values")
+
+        # Open a new window for editing the user
+        edit_window = tk.Toplevel(self.root)
+        edit_window.title("Edit User")
+        edit_window.geometry("400x300")
+
+        # Add labels and entry fields for editing the user
+        tk.Label(edit_window, text="Username:").place(relx=0.1, rely=0.1)
+        username_entry = tk.Entry(edit_window)
+        username_entry.insert(0, selected_user[1])
+        username_entry.place(relx=0.3, rely=0.1)
+
+        tk.Label(edit_window, text="Name:").place(relx=0.1, rely=0.2)
+        name_entry = tk.Entry(edit_window)
+        name_entry.insert(0, selected_user[2])
+        name_entry.place(relx=0.3, rely=0.2)
+
+        tk.Label(edit_window, text="Contact:").place(relx=0.1, rely=0.3)
+        contact_entry = tk.Entry(edit_window)
+        contact_entry.insert(0, selected_user[3])
+        contact_entry.place(relx=0.3, rely=0.3)
+
+        tk.Label(edit_window, text="Email:").place(relx=0.1, rely=0.4)
+        email_entry = tk.Entry(edit_window)
+        email_entry.insert(0, selected_user[4])
+        email_entry.place(relx=0.3, rely=0.4)
+
+        # Add a button to submit the changes
+        submit_button = tk.Button(edit_window, text="Submit", command=lambda: self.submit_edit(
+            selected_item, username_entry.get(), name_entry.get(), contact_entry.get(), email_entry.get(), edit_window))
+        submit_button.place(relx=0.4, rely=0.6)
+
+    def submit_edit(self, selected_item, username, name, contact, email, window):
+        # Update the user's details in the rows list
+        for i, row in enumerate(self.rows):
+            if row[0] == self.tree.item(selected_item, "values")[0]:
+                self.rows[i] = (row[0], username, name, contact, email)
+                break
+
+        # Update the Treeview with the new details
+        self.tree.item(selected_item, values=(self.rows[i]))
+
+        # Close the edit window
+        window.destroy()
+
+    def delete_user(self):
+        # Get the selected user from the Treeview
+        selected_item = self.tree.selection()
+        if not selected_item:
+            messagebox.showwarning("No Selection", "Please select a user to delete.")
+            return
+
+        # Display a confirmation popup
+        confirm = messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this user?")
+        if confirm:
+            # Remove the user from the rows list
+            selected_user = self.tree.item(selected_item, "values")
+            self.rows = [row for row in self.rows if row[0] != selected_user[0]]
+
+            # Remove the user from the Treeview
+            self.tree.delete(selected_item)
 
 
 if __name__ == "__main__":
