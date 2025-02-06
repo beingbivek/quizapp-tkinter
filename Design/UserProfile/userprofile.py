@@ -85,7 +85,10 @@ canvas = Canvas(root, width=250, height=250)
 canvas.place(x=350, y=70)
 canvas.create_oval(80, 80, 200, 200, fill="lightgrey", outline="black")
 
+# Username below canvas
+Label(text=user[1]).place(x=460,y=270)
 
+# Labels and Entries
 labels_entries = [
     ("Name", 70, 320, user[0]),
     ("User Name", 70, 400, user[1]),
