@@ -118,7 +118,7 @@ class QuizAdminDashboard:
         filter_with.place(relx=0.25, rely=0.25)
 
         # Search Bar
-        search_label = tk.Label(main_frame, text="Search:", font=("Arial", 10), bg="#E0E0E0")
+        search_label = tk.Label(main_frame, text="Search:", font=("Arial", 13), bg="#E0E0E0",fg='black')
         search_label.place(relx=0.45, rely=0.25)
 
         self.search_entry = tk.Entry(main_frame, font=("Arial", 10), width=20)
