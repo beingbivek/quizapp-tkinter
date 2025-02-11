@@ -1,7 +1,11 @@
 import sqlite3
 
-def dbconnect(close):
+def dbconnect(open):
     conn = sqlite3.connect('quiz.db')
-    conn.commit()
-    conn.close()
-    return conn
+    if open:
+        return conn.cursor()
+    else:
+        conn.commit()
+        # conn.close()
+        return conn.close()
+    # return conn
