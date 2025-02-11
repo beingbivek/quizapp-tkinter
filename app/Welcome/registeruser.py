@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
 conn.commit()
 conn.close()
 
+# Add user in db
 def submit():
     # password changed to base64 encrypt
     secret = password.get()
