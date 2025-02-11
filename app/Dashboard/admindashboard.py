@@ -1,15 +1,9 @@
-import sys
-import os
+from tkinter import *
+import sqlite3
 
-# Add the 'quizdb' folder to the system path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'quizdb'))
-
-# Now you can import 'database' from the 'quizdb' module
-import database as db
-
-import tkinter as tk
-
-c = db.dbconnect(True)
+# Database connect
+conn = sqlite3.connect('quiz.db')
+c = conn.cursor()
 c.execute("""
 CREATE TABLE IF NOT EXISTS users (
     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,13 +15,45 @@ CREATE TABLE IF NOT EXISTS users (
     password TEXT NOT NULL
 )
 """)
-db.dbconnect(False)
-# print(db.dbconnect(False))
+# close database
+conn.commit()
+conn.close()
 
-root = tk.Tk()
+def submit():
+    conn = sqlite3.connect('quiz.db')
+    c = conn.cursor()
+    c.execute('''
+    INSERT INTO users (fullname, email, username, contact, address, password)
+    VALUES (?, ?, ?, ?, ?, ?)
+    ''', (full_name.get(), email.get(), user_name.get(), contact.get(), address.get(), password.get())
+    )
+    full_name.delete(0,END)
+    email.delete(0,END)
+    user_name.delete(0,END)
+    contact.delete(0,END)
+    address.delete(0,END)
+    password.delete(0,END)
+    conn.commit()
+    conn.close()
+
+root = Tk()
 root.geometry('400x400')
 root.title('Admin Dashboard')
 
-e1 = Entry.
+full_name = Entry(root, width=80)
+full_name.grid(row = 0 , column= 0,padx=20)
+email = Entry(root, width=80)
+email.grid(row = 1 , column= 0,padx=20)
+user_name = Entry(root, width=80)
+user_name.grid(row = 2 , column= 0,padx=20)
+contact = Entry(root, width=80)
+contact.grid(row = 3 , column= 0,padx=20)
+address = Entry(root, width=80)
+address.grid(row = 4 , column= 0,padx=20)
+password = Entry(root, width=80)
+password.grid(row = 5 , column= 0,padx=20)
 
+# Create submit btn
+submit_btn = Button(root, text='Add User', command=submit)
+submit_btn.grid(row=6,column=0,columnspan=2, padx=10,pady=10,ipadx=100)
 root.mainloop()
