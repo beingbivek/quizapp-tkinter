@@ -1,3 +1,4 @@
 pip
 pillow
 sqllite3
+pybase64
