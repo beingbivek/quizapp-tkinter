@@ -12,7 +12,7 @@ delete_color = "#E74C3C"
 # Create main window
 a = Tk()
 a.title("Quiz App - Admin Dashboard")
-a.geometry("900x600")
+a.attributes("-fullscreen",True)
 a.configure(bg=bgcolor)
 
 # Sidebar
