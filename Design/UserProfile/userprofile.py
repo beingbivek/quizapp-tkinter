@@ -1,92 +1,55 @@
 from tkinter import *
+from tkinter import messagebox
+import json
 
-def update_info():
-    
-    update_window = Toplevel(root)
-    update_window.title("Update User Info")
-    update_window.geometry("500x350")
+# File to store user profile data
+PROFILE_FILE = "user_profile.json"
 
-    
-    update_labels_entries = [
-        ("Name", 20, 20, user[0]),
-        ("User Name", 20, 70, user[1]),
-        ("Contact Number", 20, 120, user[2]),
-        ("Email", 20, 170, user[3]),
-        ("New Password", 20, 220, ""),
-        ("Confirm Password", 20, 270, "")
-    ]
+def load_profile():
+    """Load user profile data from a file."""
+    try:
+        with open(PROFILE_FILE, "r") as file:
+            return json.load(file)
+    except FileNotFoundError:
+        # Return default data if the file doesn't exist
+        return ['Mukesh Babu Acharya', 'Babu.net', '9862148844', 'babu@gmail.com']
 
-    update_entries = []  
+def save_profile(data):
+    """Save user profile data to a file."""
+    with open(PROFILE_FILE, "w") as file:
+        json.dump(data, file)
 
-    for text, x, y, value in update_labels_entries:
-        Label(update_window, text=text).place(x=x, y=y)
-        
-        if "new password" in text.lower() or "confirm password" in text.lower():
-            entry = Entry(update_window, width=25,show='*')
-        else:
-            entry = Entry(update_window, width=25,)
-            
-        entry.place(x=x + 120, y=y)
-        entry.insert(0, value)
-        update_entries.append(entry)  
-
-    def save_updates():
-        
-        updated_user = [
-            update_entries[0].get(),
-            update_entries[1].get(),
-            update_entries[2].get(),
-            update_entries[3].get(),
-            update_entries[4].get(),
-            update_entries[5].get()
-        ]
-
-        user[0] = updated_user[0]  
-        user[1] = updated_user[1]  
-        user[2] = updated_user[2]  
-        user[3] = updated_user[3]  
-        f = open(r'C:\Project\quizapp-tkinter\Design\UserProfile\userprofile.txt','w')
-        for i in user:
-            if user.index(i) == 0:
-                f.write(i+'\n')
-            else:
-                f.write(i)
-        f.close()
-
-        
-        for i, entry in enumerate(entries):
-            entry.delete(0, END)  
-            entry.insert(0, updated_user[i])  
-
-        print("Updated User Info:", updated_user)  
-        update_window.destroy() 
-
-    Button(update_window, text='SAVE', font=('Arial', 12, 'bold'), command=save_updates).place(x=400, y=300)
+def update_profile():
+    """Update the user profile and save it to the file."""
+    updated_values = [entry.get() for entry in entries]
+    user[:] = updated_values[:4]  # Only update the first four fields
+    save_profile(user)
+    messagebox.showinfo("Profile Updated", "Your profile has been updated successfully!")
 
 def cancel():
-    root.destroy()  
+    """Close the application."""
+    root.destroy()
 
+# Load user profile data
+user = load_profile()
+
+# Initialize the Tkinter application
 root = Tk()
 root.title("User Profile")
 root.geometry("1000x800")
 
-f = open(r'C:\Project\quizapp-tkinter\Design\UserProfile\userprofile.txt')
-user = f.readlines()
-f.close()
-
+# Frames
 mainframe = Frame(root, bd=2, relief="ridge")
 mainframe.place(x=0, y=0, width=1000, height=800)
 
 secframe = Frame(root, bd=2, relief='ridge')
 secframe.place(x=50, y=50, width=900, height=700)
 
+username = Label(root, text=user[1], font=('Arial', 14, 'bold')).place(x=445, y=255)
 
-canvas = Canvas(root, width=250, height=250)
-canvas.place(x=350, y=70)
-canvas.create_oval(80, 80, 200, 200, fill="lightgrey", outline="black")
-
-# Username below canvas
-Label(text=user[1]).place(x=460,y=270)
+canvas = Canvas(root, width=200, height=200)
+canvas.place(x=400, y=55)
+canvas.create_oval(50, 50, 150, 150)
 
 # Labels and Entries
 labels_entries = [
@@ -98,17 +61,16 @@ labels_entries = [
     ("Confirm Password", 640, 400, "")
 ]
 
-entries = []  
-
+entries = []
 for text, x, y, value in labels_entries:
     Label(root, text=text).place(x=x, y=y)
     entry = Entry(root, width=35)
     entry.place(x=x, y=y+20)
     entry.insert(0, value)
-    entries.append(entry)  
+    entries.append(entry)
 
 # Buttons
-Button(root, text='UPDATE', font=('Arial', 14, 'bold'), command=update_info).place(x=83, y=690)
-Button(root, text='CANCEL', font=('Arial', 14, 'bold'), command=cancel).place(x=800, y=690)
+Button(text='UPDATE', bg="#34495E", fg="black", font=('Arial', 14, 'bold'), command=update_profile).place(x=83, y=690)
+Button(text='CANCEL', bg="#E74C3C", fg="black", font=('Arial', 14, 'bold'), command=cancel).place(x=800, y=690)
 
 root.mainloop()

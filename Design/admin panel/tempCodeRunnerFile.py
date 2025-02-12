@@ -1,0 +1,1 @@
+bg="#E74C3C", fg="black"
