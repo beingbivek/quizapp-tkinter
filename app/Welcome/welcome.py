@@ -31,7 +31,7 @@ try:
     # Courses-Categories table
     c.execute("""
     CREATE TABLE IF NOT EXISTS categories (
-        category_id INT PRIMARY KEY AUTO_INCREMENT,
+        category_id INTEGER PRIMARY KEY AUTOINCREMENT,
         category_name VARCHAR(100) NOT NULL,
         course_id INT,
         FOREIGN KEY (course_id) REFERENCES course(course_id)
@@ -69,11 +69,11 @@ try:
     conn.commit()
 
 except sqlite3.Error as e:
-        print(f"An error occurred: {e}")
+    print(f"An error occurred: {e}")
 
 finally:
-        # Close the connection
-        conn.close()
+    # Close the connection
+    conn.close()
 
 
 # Colors
