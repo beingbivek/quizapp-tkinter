@@ -1,5 +1,80 @@
 from tkinter import *
 import subprocess
+import sqlite3
+
+try:
+    # Database creation
+    conn = sqlite3.connect('quiz.db')
+    c = conn.cursor()
+
+    # User table
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        fullname TEXT NOT NULL,
+        email TEXT NOT NULL UNIQUE,
+        username TEXT NOT NULL UNIQUE,
+        contact TEXT,
+        address TEXT,
+        password TEXT NOT NULL
+    )
+    """)
+
+    # Courses table
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS courses (
+        course_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        coursename TEXT NOT NULL
+    )
+    """)
+
+    # Courses-Categories table
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS categories (
+        category_id INT PRIMARY KEY AUTO_INCREMENT,
+        category_name VARCHAR(100) NOT NULL,
+        course_id INT,
+        FOREIGN KEY (course_id) REFERENCES course(course_id)
+    )
+    """)
+
+    # Mocktest table
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS mocktests (
+                mocktest_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                mocktest_name TEXT NOT NULL,
+                course_id INTEGER,
+                category_id INTEGER,
+                no_of_questions INTEGER,
+                FOREIGN KEY (course_id) REFERENCES courses (course_id),
+                FOREIGN KEY (category_id) REFERENCES categories (category_id)
+            )
+            """)
+
+    # Create the questions table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS questions (
+            question_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            course_id INTEGER,
+            category_id INTEGER,
+            question TEXT NOT NULL,
+            correct_ans TEXT NOT NULL,
+            incorrect_ans TEXT NOT NULL,
+            FOREIGN KEY (course_id) REFERENCES courses (course_id),
+            FOREIGN KEY (category_id) REFERENCES categories (category_id)
+        )
+        ''')
+    
+    # commit database
+    conn.commit()
+
+except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+
+finally:
+        # Close the connection
+        conn.close()
+
 
 # Colors
 bgcolor = "#ffffff"  # Light gray

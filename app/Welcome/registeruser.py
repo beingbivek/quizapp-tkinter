@@ -2,23 +2,6 @@ from tkinter import *
 import sqlite3
 import pybase64
 
-# Database connect
-conn = sqlite3.connect('quiz.db')
-c = conn.cursor()
-c.execute("""
-CREATE TABLE IF NOT EXISTS users (
-    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    fullname TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    username TEXT NOT NULL UNIQUE,
-    contact TEXT,
-    address TEXT,
-    password TEXT NOT NULL
-)
-""")
-# close database
-conn.commit()
-conn.close()
 
 # Add user in db
 def submit():
