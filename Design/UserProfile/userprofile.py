@@ -1,40 +1,76 @@
 from tkinter import *
 from tkinter import messagebox
 import sqlite3
+import re  # For password validation using regular expressions
 
-# File to store user profile data
-PROFILE_FILE = "user_profile.txt"
+# Database file path
+DATABASE_FILE = r'C:\Project\quizapp-tkinter\quiz.db'
 
 def load_profile():
-    """Load user profile data from a text file."""
+    """Load user profile data from the database."""
     try:
-        conn = sqlite3.connect('C:\Project\quizapp-tkinter\quiz.db')
+        conn = sqlite3.connect(DATABASE_FILE)
         c = conn.cursor()
         c.execute('SELECT * FROM users')
         users = c.fetchall()
-        print(users[0][1])
         conn.close()
-        return users
-        # with open(PROFILE_FILE, "r") as file:
-        #     # Read all lines from the file and strip newline characters
-        #     return [line.strip() for line in file.readlines()]
-    except FileNotFoundError:
-        # Return default data if the file doesn't exist
-        return ['Mukesh Babu Acharya', 'Babu.net', '9862148844', 'babu@gmail.com']
+        return users[0]  # Return the first user's data (assuming there's only one user for simplicity)
+    except sqlite3.Error as e:
+        messagebox.showerror("Database Error", f"An error occurred: {e}")
+        return ['Mukesh Babu Acharya', 'babu@gmail.com', 'Babu.net', '9862148844', '123 Main Street', 'password']
 
-def save_profile(data):
-    """Save user profile data to a text file."""
-    with open(PROFILE_FILE, "w") as file:
-        # Write each field to a new line in the file
-        for item in data:
-            file.write(item + "\n")
+def update_profile_in_db(user_id, fullname, email, username, contact, address, password):
+    """Update the user profile in the database."""
+    try:
+        conn = sqlite3.connect(DATABASE_FILE)
+        c = conn.cursor()
+        query = """
+        UPDATE users
+        SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, password = ?
+        WHERE user_id = ?
+        """
+        c.execute(query, (fullname, email, username, contact, address, password, user_id))
+        conn.commit()
+        conn.close()
+        messagebox.showinfo("Success", "Profile updated successfully!")
+    except sqlite3.Error as e:
+        messagebox.showerror("Database Error", f"An error occurred: {e}")
+
+def validate_password(password):
+    """Validate the password to ensure it meets the requirements."""
+    # Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 symbol
+    if not re.match(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*[\W_]).+$', password):
+        return False
+    return True
 
 def update_profile():
-    """Update the user profile and save it to the file."""
+    """Handle the update profile button click."""
     updated_values = [entry.get() for entry in entries]
-    users[:] = updated_values[:4]  # Only update the first four fields
-    save_profile(users)
-    messagebox.showinfo("Profile Updated", "Your profile has been updated successfully!")
+    fullname, username, contact, email, address, new_password, confirm_password = updated_values
+
+    # Check if the new password and confirm password match
+    if new_password != confirm_password:
+        messagebox.showerror("Error", "New password and confirm password do not match!")
+        return
+
+    # Validate the password
+    if not validate_password(new_password):
+        messagebox.showerror("Error", "Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 symbol!")
+        return
+
+    # Ask for confirmation
+    confirm = messagebox.askyesno("Confirm Update", "Are you sure you want to update your profile?")
+    if confirm:
+        # Update the profile in the database
+        update_profile_in_db(
+            user_id=users[0],  # Assuming the first column is user_id
+            fullname=fullname,
+            email=email,
+            username=username,
+            contact=contact,
+            address=address,
+            password=new_password
+        )
 
 def cancel():
     """Close the application."""
@@ -55,7 +91,7 @@ mainframe.place(x=0, y=0, width=1000, height=800)
 secframe = Frame(root, bd=2, relief='ridge')
 secframe.place(x=50, y=50, width=900, height=700)
 
-username = Label(root, text=users[0][3], font=('Arial', 14, 'bold')).place(x=445, y=255)
+username = Label(root, text=users[3], font=('Arial', 14, 'bold')).place(x=445, y=255)
 
 canvas = Canvas(root, width=200, height=200)
 canvas.place(x=420, y=55)
@@ -63,11 +99,11 @@ canvas.create_oval(50, 50, 150, 150)
 
 # Labels and Entries
 labels_entries = [
-    ("Name", 70, 320, users[0][1]),
-    ("User Name", 70, 400, users[0][3]),
-    ("Contact Number", 70, 480, users[0][4]),
-    ("Email", 70, 560, users[0][2]),
-    ("Address", 640, 480, users[0][5]),
+    ("Name", 70, 320, users[1]),
+    ("User Name", 70, 400, users[3]),
+    ("Contact Number", 70, 480, users[4]),
+    ("Email", 70, 560, users[2]),
+    ("Address", 640, 480, users[5]),
     ("New Password", 640, 320, ""),
     ("Confirm Password", 640, 400, "")
 ]
