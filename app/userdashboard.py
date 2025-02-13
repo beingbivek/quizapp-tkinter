@@ -20,6 +20,8 @@ from quizdefaults import *
 root.title("Quiz App - User Dashboard")
 root.configure(bg=MAINFRAME_COLOR)
 
+# Edit profile Functions - mukesh
+
 # Making close and minimize button manually
 def min():
     root.iconify()
