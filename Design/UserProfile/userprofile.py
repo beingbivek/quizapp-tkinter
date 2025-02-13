@@ -5,7 +5,7 @@ import re  # For password validation using regular expressions
 import pybase64
 
 # Database file path
-DATABASE_FILE = r'C:\Project\quizapp-tkinter\quiz.db'
+DATABASE_FILE = r'..\quizapp-tkinter\quiz.db'
 
 def submit():
     # password changed to base64 encrypt
@@ -13,7 +13,7 @@ def submit():
     secret = secret.encode('ascii')
     secret = pybase64.b64encode(secret)
     secret = secret.decode('ascii')
-    
+    return secret
     # To decrypt
     '''
     secret = password.get() # put the password variable
@@ -30,6 +30,7 @@ def load_profile():
         c.execute('SELECT * FROM users')
         users = c.fetchall()
         conn.close()
+                
         return users[0]  # Return the first user's data (assuming there's only one user for simplicity)
     except sqlite3.Error as e:
         messagebox.showerror("Database Error", f"An error occurred: {e}")

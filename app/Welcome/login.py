@@ -2,6 +2,25 @@ from tkinter import *
 from tkinter import messagebox
 import subprocess
 
+'''
+# c.execute('SELECT user_id,user_name,password FROM users')
+        users = c.fetchall()
+        conn.close()
+        # for up in users:
+        #     if username.get() == up[1]:
+                secret = up[2] # put the password variable
+                secret = secret.encode('ascii')
+                secret = pybase64.b64decode(secret)
+                secret = secret.decode('ascii')
+        #         if pass.get() == secret:
+        #             root.destroy()
+        #             runpy.run_path('userdashboard.py')
+        #         else:
+        #             messagebox.
+        #     else:
+        #         messagebox
+'''
+
 # Colors (matched with Admin panel)
 bgcolor = "#ffffff"  # Light gray
 header_color = "#003366"  # Deep blue

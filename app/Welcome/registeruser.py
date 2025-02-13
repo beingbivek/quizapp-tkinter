@@ -11,7 +11,7 @@ def submit():
     secret = pybase64.b64encode(secret)
     secret = secret.decode('ascii')
     
-    # To decrypt
+    # To decrypt/decode password to original password
     '''
     secret = password.get() # put the password variable
     secret = secret.encode('ascii')

@@ -6,6 +6,7 @@ from PIL import ImageTk, Image
 import runpy
 import sqlite3
 
+# Admin Window
 root = Tk()
 root.configure(bg="white")
 root.attributes("-fullscreen", True)
@@ -19,6 +20,7 @@ root.title("Quiz App - Admin Dashboard")
 from quizdefaults import *
 
 root.configure(bg=MAINFRAME_COLOR)
+
 # making close and minimize button manually
 def min():
     root.iconify()
@@ -68,7 +70,7 @@ def openbutton(btn_text):
     # Set the clicked button color
     buttons_dict[btn_text].configure(bg=HIGHLIGHT_COLOR)
 
-    if btn_text == "Dashboard":
+    if btn_text == buttons[0]:
         # Main Dashboard
         header = Label(main_frame, text="Dashboard", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
@@ -105,22 +107,33 @@ def openbutton(btn_text):
 
         tree.pack()
 
-    elif btn_text == "Users":
-        header = Label(main_frame, text="Users", font=header_font, bg=MAINFRAME_COLOR)
+    # user - admin section
+
+    elif btn_text == buttons[1]:
+        header = Label(main_frame, text=buttons[1], font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
 
         stats_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
         stats_frame.pack()
 
+    # Courses - admin section
+    elif btn_text == buttons[2]:
         pass
-    elif btn_text == "Courses":
+
+    # Leaderboard - admin section
+    elif btn_text == buttons[3]:
         pass
-    elif btn_text == "LeaderBoard":
+
+    # Mocktest - admin section - aayush
+    elif btn_text == buttons[4]:
+        conn = sqlite3.connect(DATABASE_FILE)
+        c = conn.cursor()
         pass
-    elif btn_text == "Mock Test":
+
+    # Question - admin section
+    elif btn_text == buttons[5]:
         pass
-    elif btn_text == "Questions":
-        pass
+
     else:
         label = Label(main_frame, text=btn_text, font=("Arial", 20, "bold"), bg=MAINFRAME_COLOR)
         label.pack(expand=True)
@@ -135,11 +148,10 @@ profile_frame.pack(pady=20)
 profile_icon = Label(profile_frame, text="🧑", font=("Arial", 40), bg=SIDEBAR_COLOR, fg=FG_COLOR)
 profile_icon.pack()
 
-profile_name = Label(profile_frame, text="Aayush Bohara", font=label_font, bg=SIDEBAR_COLOR, fg=FG_COLOR)
+profile_name = Label(profile_frame, text="Admin", font=label_font, bg=SIDEBAR_COLOR, fg=FG_COLOR)
 profile_name.pack()
 
-edit_profile_btn = Button(profile_frame, text="Edit Profile", bg=PROFILE_COLOR, fg=FG_COLOR, relief=FLAT, width=15)
-edit_profile_btn.pack(pady=5)
+
 
 # Sidebar buttons
 buttons = ["Dashboard", "Users", "Courses", "LeaderBoard", "Mock Test", "Questions"]
@@ -156,6 +168,6 @@ main_frame = Frame(root, bg=MAINFRAME_COLOR)
 main_frame.pack(expand=True, fill=BOTH)
 
 # Initialize with Dashboard
-openbutton("Dashboard")
+openbutton(buttons[0])
 
 root.mainloop()

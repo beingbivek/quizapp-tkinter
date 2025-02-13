@@ -20,11 +20,6 @@ from quizdefaults import *
 root.title("Quiz App - User Dashboard")
 root.configure(bg=MAINFRAME_COLOR)
 
-# Defaults Fonts
-button_font = font.Font(size=14)
-label_font = ("Arial", 12, "bold")
-header_font = ("Arial", 16, "bold")
-
 # Making close and minimize button manually
 def min():
     root.iconify()
@@ -76,6 +71,10 @@ score_label.pack()
 # Store button references
 buttons = {}
 
+# Submit Question of the day
+def submitqotd():
+    pass
+
 # Sidebar Button Function
 def openbutton(btn_text):
     # Clear the main content area
@@ -89,6 +88,7 @@ def openbutton(btn_text):
     # Set the clicked button color
     buttons[btn_text].configure(bg=HIGHLIGHT_COLOR)
 
+    # Main Dashboard Code
     if btn_text == "Dashboard":
         # Question of the Day
         qotd_label = Label(main_content, text="Question of the day!", font=header_font, bg=MAINFRAME_COLOR)
@@ -106,6 +106,8 @@ def openbutton(btn_text):
 
         for opt in options:
             Radiobutton(main_content, text=opt, variable=selected_option, value=opt, bg=MAINFRAME_COLOR).pack(anchor='w')
+
+        btn_submitqotd = Button(main_content, text='Submit',bg=BUTTON_COLOR,command=submitqotd).pack(anchor='w')
 
         # Progress Table
         progress_label = Label(main_content, text="Your Progress", font=("Arial", 14, "bold"), bg=MAINFRAME_COLOR)
@@ -159,6 +161,7 @@ sidebar_button("Dashboard", bg_color=HIGHLIGHT_COLOR)
 sidebar_button("Courses")
 sidebar_button("LeaderBoard")
 sidebar_button("Mock Test")
+sidebar_button("Profile")
 sidebar_button("About US")
 
 # Logout Button
