@@ -46,7 +46,7 @@ def update_profile_in_db(user_id, fullname, email, username, contact, address, p
         SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, password = ?
         WHERE user_id = ?
         """
-        c.execute(query, (fullname, email, username, contact, address, password, user_id))
+        c.execute(query, (fullname, email, username, contact, address, submit(), user_id))
         conn.commit()
         conn.close()
         messagebox.showinfo("Success", "Profile updated successfully!")
