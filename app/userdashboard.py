@@ -78,7 +78,7 @@ def submitqotd():
 # Sidebar Button Function
 def openbutton(btn_text):
     # Clear the main content area
-    for widget in main_content.winfo_children():
+    for widget in main_frame.winfo_children():
         widget.destroy()
     
     # Reset all button colors
@@ -91,13 +91,13 @@ def openbutton(btn_text):
     # Main Dashboard Code
     if btn_text == "Dashboard":
         # Question of the Day
-        qotd_label = Label(main_content, text="Question of the day!", font=header_font, bg=MAINFRAME_COLOR)
+        qotd_label = Label(main_frame, text="Question of the day!", font=header_font, bg=MAINFRAME_COLOR)
         qotd_label.pack(anchor='w')
 
-        topic_label = Label(main_content, text="Topic: Loksewa/Animal", font=label_font, bg=MAINFRAME_COLOR)
+        topic_label = Label(main_frame, text="Topic: Loksewa/Animal", font=label_font, bg=MAINFRAME_COLOR)
         topic_label.pack(anchor='w')
 
-        question_label = Label(main_content, text="Q. How fast can a Cheetah run?", font=("Arial", 12), bg=MAINFRAME_COLOR)
+        question_label = Label(main_frame, text="Q. How fast can a Cheetah run?", font=("Arial", 12), bg=MAINFRAME_COLOR)
         question_label.pack(anchor='w')
 
         options = ["80 kmph", "90 Kmph", "100 Kmph", "120 Kmph"]
@@ -105,16 +105,16 @@ def openbutton(btn_text):
         selected_option.set(None)
 
         for opt in options:
-            Radiobutton(main_content, text=opt, variable=selected_option, value=opt, bg=MAINFRAME_COLOR).pack(anchor='w')
+            Radiobutton(main_frame, text=opt, variable=selected_option, value=opt, bg=MAINFRAME_COLOR).pack(anchor='w')
 
-        btn_submitqotd = Button(main_content, text='Submit',bg=BUTTON_COLOR,command=submitqotd).pack(anchor='w')
+        btn_submitqotd = Button(main_frame, text='Submit',bg=BUTTON_COLOR,command=submitqotd).pack(anchor='w')
 
         # Progress Table
-        progress_label = Label(main_content, text="Your Progress", font=("Arial", 14, "bold"), bg=MAINFRAME_COLOR)
+        progress_label = Label(main_frame, text="Your Progress", font=("Arial", 14, "bold"), bg=MAINFRAME_COLOR)
         progress_label.pack(anchor='w', pady=10)
 
         columns = ("SN", "Courses", "Tackled", "Correct", "Incorrect")
-        progress_table = ttk.Treeview(main_content, columns=columns, show='headings', height=4)
+        progress_table = ttk.Treeview(main_frame, columns=columns, show='headings', height=4)
 
         for col in columns:
             progress_table.heading(col, text=col)
@@ -126,11 +126,11 @@ def openbutton(btn_text):
         progress_table.pack()
 
         # Mock Test Results Table
-        mock_label = Label(main_content, text="Previous Mock Test Results", font=("Arial", 14, "bold"), bg=MAINFRAME_COLOR)
+        mock_label = Label(main_frame, text="Previous Mock Test Results", font=("Arial", 14, "bold"), bg=MAINFRAME_COLOR)
         mock_label.pack(anchor='w', pady=10)
 
         mock_columns = ("SN", "Mock TestID", "Datetime", "Course", "Result")
-        mock_table = ttk.Treeview(main_content, columns=mock_columns, show='headings', height=4)
+        mock_table = ttk.Treeview(main_frame, columns=mock_columns, show='headings', height=4)
 
         for col in mock_columns:
             mock_table.heading(col, text=col)
@@ -145,8 +145,12 @@ def openbutton(btn_text):
             mock_table.insert('', END, values=row)
         mock_table.pack()
 
+    # Edit profile - user section - mukesh
+    elif btn_text == "Profile":
+        pass
+
     else:
-        label = Label(main_content, text=btn_text, font=("Arial", 20, "bold"), bg=MAINFRAME_COLOR)
+        label = Label(main_frame, text=btn_text, font=("Arial", 20, "bold"), bg=MAINFRAME_COLOR)
         label.pack(expand=True)
 
 # Sidebar Buttons
@@ -169,8 +173,8 @@ logout_btn = Button(sidebar, text="Logout", bg=LOGOUT_COLOR, fg=FG_COLOR, font=(
 logout_btn.pack(side='bottom', pady=20)
 
 # Main Content Frame
-main_content = Frame(root, bg=MAINFRAME_COLOR, padx=20, pady=20)
-main_content.pack(expand=True, fill='both')
+main_frame = Frame(root, bg=MAINFRAME_COLOR, padx=20, pady=20)
+main_frame.pack(expand=True, fill='both')
 
 # Initialize with Dashboard
 openbutton("Dashboard")
