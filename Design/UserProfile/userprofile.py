@@ -2,10 +2,26 @@ from tkinter import *
 from tkinter import messagebox
 import sqlite3
 import re  # For password validation using regular expressions
+import pybase64
 
 # Database file path
 DATABASE_FILE = r'C:\Project\quizapp-tkinter\quiz.db'
 
+def submit():
+    # password changed to base64 encrypt
+    secret = validate_password.get()
+    secret = secret.encode('ascii')
+    secret = pybase64.b64encode(secret)
+    secret = secret.decode('ascii')
+    
+    # To decrypt
+    '''
+    secret = password.get() # put the password variable
+    secret = secret.encode('ascii')
+    secret = pybase64.b64decode(secret)
+    secret = secret.decode('ascii') # this is the final password
+    '''
+    
 def load_profile():
     """Load user profile data from the database."""
     try:
