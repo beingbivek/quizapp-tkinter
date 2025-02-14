@@ -2,117 +2,118 @@ from tkinter import *
 import subprocess
 import sqlite3
 
-import sqlite3
+def create_database():
 
-try:
-    # Database creation
-    conn = sqlite3.connect(r'../quizapp-tkinter/quiz.db')
-    c = conn.cursor()
 
-    # User table
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        fullname TEXT NOT NULL,
-        email TEXT NOT NULL UNIQUE,
-        username TEXT NOT NULL UNIQUE,
-        contact TEXT,
-        address TEXT,
-        password TEXT NOT NULL
-    )
-    """)
+    try:
+        # Database creation
+        conn = sqlite3.connect(QD.DATABASE_FILE)
+        c = conn.cursor()
 
-    # Courses table
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS courses (
-        course_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        coursename TEXT NOT NULL
-    )
-    """)
+        # User table
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            fullname TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            username TEXT NOT NULL UNIQUE,
+            contact TEXT,
+            address TEXT,
+            password TEXT NOT NULL
+        )
+        """)
 
-    # Courses-Categories table
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS categories (
-        category_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        category_name VARCHAR(100) NOT NULL,
-        course_id INT,
-        FOREIGN KEY (course_id) REFERENCES courses(course_id)
-    )
-    """)
+        # Courses table
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS courses (
+            course_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            coursename TEXT NOT NULL
+        )
+        """)
 
-    # Mocktest table
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS mocktests (
-        mocktest_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        mocktest_name TEXT NOT NULL,
-        fullmark INTEGER NOT NULL,
-        passmark INTEGER NOT NULL
-    )
-    """)
+        # Courses-Categories table
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS categories (
+            category_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            category_name VARCHAR(100) NOT NULL,
+            course_id INT,
+            FOREIGN KEY (course_id) REFERENCES courses(course_id)
+        )
+        """)
 
-    # Questions table
-    c.execute('''
-    CREATE TABLE IF NOT EXISTS questions (
-        question_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        course_id INTEGER,
-        category_id INTEGER,
-        question TEXT NOT NULL,
-        correct_ans TEXT NOT NULL,
-        incorrect_ans TEXT NOT NULL,
-        FOREIGN KEY (course_id) REFERENCES courses (course_id),
-        FOREIGN KEY (category_id) REFERENCES categories (category_id)
-    )
-    ''')
+        # Mocktest table
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS mocktests (
+            mocktest_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            mocktest_name TEXT NOT NULL,
+            fullmark INTEGER NOT NULL,
+            passmark INTEGER NOT NULL
+        )
+        """)
 
-    # Mockquestions table
-    c.execute('''
-    CREATE TABLE IF NOT EXISTS mockquestions (
-        mockquestion_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        mocktest_id INTEGER NOT NULL,
-        course_id INTEGER NOT NULL,
-        category_id INTEGER NOT NULL,
-        no_of_questions INTEGER NOT NULL,
-        FOREIGN KEY (mocktest_id) REFERENCES mocktests (mocktest_id),
-        FOREIGN KEY (course_id) REFERENCES courses (course_id),
-        FOREIGN KEY (category_id) REFERENCES categories (category_id)
-    )
-    ''')
+        # Questions table
+        c.execute('''
+        CREATE TABLE IF NOT EXISTS questions (
+            question_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            course_id INTEGER,
+            category_id INTEGER,
+            question TEXT NOT NULL,
+            correct_ans TEXT NOT NULL,
+            incorrect_ans TEXT NOT NULL,
+            FOREIGN KEY (course_id) REFERENCES courses (course_id),
+            FOREIGN KEY (category_id) REFERENCES categories (category_id)
+        )
+        ''')
 
-    # Leaderboard table
-    # c.execute('''
-    # CREATE TABLE IF NOT EXISTS leaderboard (
-    #     lb_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    #     user_id INTEGER NOT NULL,
-    #     course_id INTEGER NOT NULL,
-    #     score INTEGER NOT NULL,
-    #     scoredtime DATETIME,
-    #     FOREIGN KEY (user_id) REFERENCES users (user_id),
-    #     FOREIGN KEY (course_id) REFERENCES courses (course_id)
-    # )
-    # ''')
+        # Mockquestions table
+        c.execute('''
+        CREATE TABLE IF NOT EXISTS mockquestions (
+            mockquestion_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            mocktest_id INTEGER NOT NULL,
+            course_id INTEGER NOT NULL,
+            category_id INTEGER NOT NULL,
+            no_of_questions INTEGER NOT NULL,
+            FOREIGN KEY (mocktest_id) REFERENCES mocktests (mocktest_id),
+            FOREIGN KEY (course_id) REFERENCES courses (course_id),
+            FOREIGN KEY (category_id) REFERENCES categories (category_id)
+        )
+        ''')
 
-    # Mocktest results table
-    c.execute('''
-    CREATE TABLE IF NOT EXISTS mocktestresults (
-        result_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        mocktest_id INTEGER NOT NULL,
-        user_id INTEGER NOT NULL,
-        result INTEGER NOT NULL,
-        resulttime DATETIME,
-        FOREIGN KEY (user_id) REFERENCES users (user_id),
-        FOREIGN KEY (mocktest_id) REFERENCES mocktests (mocktest_id)
-    )
-    ''')
+        # Leaderboard table
+        # c.execute('''
+        # CREATE TABLE IF NOT EXISTS leaderboard (
+        #     lb_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        #     user_id INTEGER NOT NULL,
+        #     course_id INTEGER NOT NULL,
+        #     score INTEGER NOT NULL,
+        #     scoredtime DATETIME,
+        #     FOREIGN KEY (user_id) REFERENCES users (user_id),
+        #     FOREIGN KEY (course_id) REFERENCES courses (course_id)
+        # )
+        # ''')
 
-    # Commit database
-    conn.commit()
+        # Mocktest results table
+        c.execute('''
+        CREATE TABLE IF NOT EXISTS mocktestresults (
+            result_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            mocktest_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            result INTEGER NOT NULL,
+            resulttime DATETIME,
+            FOREIGN KEY (user_id) REFERENCES users (user_id),
+            FOREIGN KEY (mocktest_id) REFERENCES mocktests (mocktest_id)
+        )
+        ''')
 
-except sqlite3.Error as e:
-    print(f"An error occurred: {e}")
+        # Commit database
+        conn.commit()
 
-finally:
-    # Close the connection
-    conn.close()
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+
+    finally:
+        # Close the connection
+        conn.close()
 
 
 
@@ -126,6 +127,10 @@ tablecolor= '#00509e'
 a = Tk()
 a.title("Quiz App")
 a.attributes('-fullscreen', True)
+
+import quizdefaults as QD
+
+create_database()
 
 def open_registration():
     a.destroy()
