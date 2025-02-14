@@ -78,7 +78,7 @@ try:
     )
     ''')
 
-    # Leaderboard table (if you want to include it, uncomment this section)
+    # Leaderboard table
     # c.execute('''
     # CREATE TABLE IF NOT EXISTS leaderboard (
     #     lb_id INTEGER PRIMARY KEY AUTOINCREMENT,
