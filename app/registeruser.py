@@ -20,7 +20,7 @@ def submit():
     '''
 
     # connect to db
-    conn = sqlite3.connect('quiz.db')
+    conn = sqlite3.connect(DATABASE_FILE)
     c = conn.cursor()
     c.execute('''
     INSERT INTO users (fullname, email, username, contact, address, password)
@@ -39,6 +39,8 @@ def submit():
 root = Tk()
 root.geometry('400x400')
 root.title('Admin Dashboard')
+
+from quizdefaults import DATABASE_FILE
 
 full_name = Entry(root, width=80)
 full_name.grid(row = 0 , column= 0,padx=20)

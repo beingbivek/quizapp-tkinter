@@ -5,6 +5,7 @@ import tkinter.font as font
 from PIL import ImageTk, Image
 import runpy
 import sqlite3
+from random import *
 
 # User window
 root = Tk()
@@ -149,7 +150,7 @@ def openbutton(btn_text):
 
     # Edit profile - user section - mukesh
     elif btn_text == "Profile":
-        
+
         pass
 
     else:

@@ -2,9 +2,11 @@ from tkinter import *
 import subprocess
 import sqlite3
 
+import sqlite3
+
 try:
     # Database creation
-    conn = sqlite3.connect('quiz.db')
+    conn = sqlite3.connect(r'../quizapp-tkinter/quiz.db')
     c = conn.cursor()
 
     # User table
@@ -34,38 +36,75 @@ try:
         category_id INTEGER PRIMARY KEY AUTOINCREMENT,
         category_name VARCHAR(100) NOT NULL,
         course_id INT,
-        FOREIGN KEY (course_id) REFERENCES course(course_id)
+        FOREIGN KEY (course_id) REFERENCES courses(course_id)
     )
     """)
 
     # Mocktest table
     c.execute("""
-        CREATE TABLE IF NOT EXISTS mocktests (
-                mocktest_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                mocktest_name TEXT NOT NULL,
-                course_id INTEGER,
-                category_id INTEGER,
-                no_of_questions INTEGER,
-                FOREIGN KEY (course_id) REFERENCES courses (course_id),
-                FOREIGN KEY (category_id) REFERENCES categories (category_id)
-            )
-            """)
+    CREATE TABLE IF NOT EXISTS mocktests (
+        mocktest_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        mocktest_name TEXT NOT NULL,
+        fullmark INTEGER NOT NULL,
+        passmark INTEGER NOT NULL
+    )
+    """)
 
-    # Create the questions table
+    # Questions table
     c.execute('''
-        CREATE TABLE IF NOT EXISTS questions (
-            question_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            course_id INTEGER,
-            category_id INTEGER,
-            question TEXT NOT NULL,
-            correct_ans TEXT NOT NULL,
-            incorrect_ans TEXT NOT NULL,
-            FOREIGN KEY (course_id) REFERENCES courses (course_id),
-            FOREIGN KEY (category_id) REFERENCES categories (category_id)
-        )
-        ''')
-    
-    # commit database
+    CREATE TABLE IF NOT EXISTS questions (
+        question_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        course_id INTEGER,
+        category_id INTEGER,
+        question TEXT NOT NULL,
+        correct_ans TEXT NOT NULL,
+        incorrect_ans TEXT NOT NULL,
+        FOREIGN KEY (course_id) REFERENCES courses (course_id),
+        FOREIGN KEY (category_id) REFERENCES categories (category_id)
+    )
+    ''')
+
+    # Mockquestions table
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS mockquestions (
+        mockquestion_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        mocktest_id INTEGER NOT NULL,
+        course_id INTEGER NOT NULL,
+        category_id INTEGER NOT NULL,
+        no_of_questions INTEGER NOT NULL,
+        FOREIGN KEY (mocktest_id) REFERENCES mocktests (mocktest_id),
+        FOREIGN KEY (course_id) REFERENCES courses (course_id),
+        FOREIGN KEY (category_id) REFERENCES categories (category_id)
+    )
+    ''')
+
+    # Leaderboard table (if you want to include it, uncomment this section)
+    # c.execute('''
+    # CREATE TABLE IF NOT EXISTS leaderboard (
+    #     lb_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    #     user_id INTEGER NOT NULL,
+    #     course_id INTEGER NOT NULL,
+    #     score INTEGER NOT NULL,
+    #     scoredtime DATETIME,
+    #     FOREIGN KEY (user_id) REFERENCES users (user_id),
+    #     FOREIGN KEY (course_id) REFERENCES courses (course_id)
+    # )
+    # ''')
+
+    # Mocktest results table
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS mocktestresults (
+        result_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        mocktest_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        result INTEGER NOT NULL,
+        resulttime DATETIME,
+        FOREIGN KEY (user_id) REFERENCES users (user_id),
+        FOREIGN KEY (mocktest_id) REFERENCES mocktests (mocktest_id)
+    )
+    ''')
+
+    # Commit database
     conn.commit()
 
 except sqlite3.Error as e:
@@ -74,6 +113,7 @@ except sqlite3.Error as e:
 finally:
     # Close the connection
     conn.close()
+
 
 
 # Colors
