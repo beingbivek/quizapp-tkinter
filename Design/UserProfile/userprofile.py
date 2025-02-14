@@ -36,7 +36,7 @@ def load_profile():
         messagebox.showerror("Database Error", f"An error occurred: {e}")
         return ['Mukesh Babu Acharya', 'babu@gmail.com', 'Babu.net', '9862148844', '123 Main Street', 'password']
 
-def update_profile_in_db(user_id, fullname, email, username, contact, address, password):
+def update_profile_in_db(user_id, fullname, email, username, contact, address, password=None):
     """Update the user profile in the database."""
     try:
         conn = sqlite3.connect(DATABASE_FILE)
@@ -56,7 +56,7 @@ def update_profile_in_db(user_id, fullname, email, username, contact, address, p
 def validate_password(password):
     """Validate the password to ensure it meets the requirements."""
     # Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 symbol
-    if not re.match(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*[\W_]).+$', password):
+    if not re.match(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*[\W_]).+$', password,):
         return False
     return True
 
@@ -65,15 +65,23 @@ def update_profile():
     updated_values = [entry.get() for entry in entries]
     fullname, username, contact, email, address, new_password, confirm_password = updated_values
 
-    # Check if the new password and confirm password match
-    if new_password != confirm_password:
-        messagebox.showerror("Error", "New password and confirm password do not match!")
-        return
+    # Check if the password fields are not empty
+    if new_password or confirm_password:
+        # If password fields are not empty, validate the password
+        if new_password != confirm_password:
+            messagebox.showerror("Error", "New password and confirm password do not match!")
+            return
 
-    # Validate the password
-    if not validate_password(new_password):
-        messagebox.showerror("Error", "Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 symbol!")
-        return
+        if not validate_password(new_password):
+            messagebox.showerror("Error", "Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 symbol!")
+            return
+
+        # Encrypt the password using base64
+        password = new_password.encode('ascii')
+        password = pybase64.b64encode(password).decode('ascii')
+    else:
+        # If password fields are empty, set password to None (do not update password)
+        password = None
 
     # Ask for confirmation
     confirm = messagebox.askyesno("Confirm Update", "Are you sure you want to update your profile?")
@@ -86,7 +94,7 @@ def update_profile():
             username=username,
             contact=contact,
             address=address,
-            password=new_password
+            password=password
         )
 
 def cancel():
@@ -101,6 +109,7 @@ root = Tk()
 root.title("User Profile")
 root.geometry("1000x800")
 
+
 # Frames
 mainframe = Frame(root, bd=2, relief="ridge")
 mainframe.place(x=0, y=0, width=1000, height=800)
@@ -108,11 +117,12 @@ mainframe.place(x=0, y=0, width=1000, height=800)
 secframe = Frame(root, bd=2, relief='ridge')
 secframe.place(x=50, y=50, width=900, height=700)
 
-username = Label(root, text=users[3], font=('Arial', 14, 'bold')).place(x=445, y=255)
+username = Label(root, text=users[3], font=('Arial', 14, 'bold')).place(x=462, y=255)
 
 canvas = Canvas(root, width=200, height=200)
 canvas.place(x=420, y=55)
 canvas.create_oval(50, 50, 150, 150)
+
 
 # Labels and Entries
 labels_entries = [
@@ -121,14 +131,18 @@ labels_entries = [
     ("Contact Number", 70, 480, users[4]),
     ("Email", 70, 560, users[2]),
     ("Address", 640, 480, users[5]),
-    ("New Password", 640, 320, ""),
+    ("New Password", 640, 320, "",),
     ("Confirm Password", 640, 400, "")
 ]
+
 
 entries = []
 for text, x, y, value in labels_entries:
     Label(root, text=text).place(x=x, y=y)
-    entry = Entry(root, width=35)
+    if text in ["New Password", "Confirm Password"]:
+        entry = Entry(root, width=35, show="*")  # Mask the password fields
+    else:
+        entry = Entry(root, width=35)
     entry.place(x=x, y=y+20)
     entry.insert(0, value)
     entries.append(entry)
