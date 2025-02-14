@@ -19,3 +19,6 @@ label_font = ("Arial", 12, "bold")
 header_font = ("Arial", 16, "bold")
 
 labelstyle = ("Helvatica", 14)
+
+# Defaults lists
+defcourses = ['CEE','Driving','IOE','Loksewa']

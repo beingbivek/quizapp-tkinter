@@ -116,9 +116,95 @@ def openbutton(btn_text):
         stats_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
         stats_frame.pack()
 
-    # Courses - admin section
+    # Courses - admin section - bivek
     elif btn_text == buttons[2]:
-        pass
+
+        def on_entry_click(event):
+            """Function to remove placeholder text when the entry is clicked."""
+            if search_entry.get() == 'Search...':
+                search_entry.delete(0, "end")  # delete all the text in the entry
+                search_entry.insert(0, '')  # Insert blank for user input
+                search_entry.config(fg='black')
+
+        def on_focusout(event):
+            """Function to add placeholder text if the entry is empty when focus is lost."""
+            if search_entry.get() == '':
+                search_entry.insert(0, 'Search...')
+                search_entry.config(fg='grey')
+
+        def search_courses():
+            query = f'SELECT * FROM courses WHERE coursename LIKE ?'
+            # query = f'SELECT * FROM courses'
+            search_term = f'%{search_entry.get()}%'
+            # c.execute(query)
+            c.execute(query, (search_term,))
+            results = c.fetchall()
+            print(results)
+            update_table(results)
+
+        def update_table(results):
+            for row in table.get_children():
+                table.delete(row)
+            for row in results:
+                table.insert('', 'end', values=row)
+
+        # Database Connection
+        conn = sqlite3.connect(DATABASE_FILE)
+        c = conn.cursor()
+
+        # demo courses creation or insertion
+        c.execute('SELECT * FROM courses')
+        cou = c.fetchall()
+        if not cou:
+            for cn in defcourses:
+                c.execute('INSERT INTO courses (coursename) VALUES (?)', (cn,))
+            conn.commit()
+    
+
+        header = Label(main_frame, text="Courses", font=("Arial", 24), bg='lightblue')
+        header.pack(pady=10)
+
+        # Rectangle Course Data Frame
+        stats_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
+        stats_frame.pack()
+        stat_box = Frame(stats_frame, bg=FG_COLOR, width=120, height=60)
+        stat_box.pack_propagate(False)
+        stat_box.pack(side=LEFT, padx=10, pady=10)
+
+        # How many courses
+        c.execute('SELECT * FROM courses')
+        courses = c.fetchall()
+
+        stat_label = Label(stat_box, text=len(courses), font=("Arial", 14, "bold"), fg='black', bg='lightgrey')
+        stat_label.pack()
+        stat_desc = Label(stat_box, text='Total Courses', font=("Arial", 10), fg='black', bg='lightgrey')
+        stat_desc.pack()
+
+        # Search Frame
+        search_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
+        search_frame.pack()
+
+        search_entry = Entry(search_frame, font=("Arial", 10))
+        search_entry.insert(0, 'Search...')  # Add the placeholder text
+        search_entry.bind('<FocusIn>', on_entry_click)
+        search_entry.bind('<FocusOut>', on_focusout)
+        search_entry.config(fg='grey')
+        search_entry.grid(row=0, column=0)
+
+        search_btn = Button(search_frame, text='Search', command=search_courses)
+        search_btn.grid(row=0, column=1, padx=10)
+
+        # Table to display search results
+        table_frame = Frame(main_frame)
+        table_frame.pack(pady=10)
+
+        columns = ('course_id', 'coursename')
+        table = ttk.Treeview(table_frame, columns=columns, show='headings')
+        table.heading('course_id', text='Course ID')
+        table.heading('coursename', text='Course Name')
+        table.pack()
+
+
 
     # Leaderboard - admin section
     elif btn_text == buttons[3]:
