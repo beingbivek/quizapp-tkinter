@@ -120,17 +120,19 @@ def openbutton(btn_text):
     elif btn_text == buttons[2]:
 
         def on_entry_click(event):
-            """Function to remove placeholder text when the entry is clicked."""
+            # Function to remove placeholder text when the entry is clicked.
             if search_entry.get() == 'Search...':
                 search_entry.delete(0, "end")  # delete all the text in the entry
                 search_entry.insert(0, '')  # Insert blank for user input
                 search_entry.config(fg='black')
 
         def on_focusout(event):
-            """Function to add placeholder text if the entry is empty when focus is lost."""
+            # Function to add placeholder text if the entry is empty when focus is lost.
             if search_entry.get() == '':
                 search_entry.insert(0, 'Search...')
                 search_entry.config(fg='grey')
+                # display all courses after the search bar is empty
+                update_table(courses)
 
         def search_courses():
             query = f'SELECT * FROM courses WHERE coursename LIKE ?'
@@ -139,7 +141,9 @@ def openbutton(btn_text):
             # c.execute(query)
             c.execute(query, (search_term,))
             results = c.fetchall()
-            print(results)
+            # print(results)
+            
+            # show the search result
             update_table(results)
 
         def update_table(results):
@@ -161,23 +165,24 @@ def openbutton(btn_text):
             conn.commit()
     
 
-        header = Label(main_frame, text="Courses", font=("Arial", 24), bg='lightblue')
+        header = Label(main_frame, text="Courses", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
 
-        # Rectangle Course Data Frame
+        # Rectangle courses no. frame
+
         stats_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
         stats_frame.pack()
-        stat_box = Frame(stats_frame, bg=FG_COLOR, width=120, height=60)
+        stat_box = Frame(stats_frame, bg=BUTTON_COLOR, width=120, height=60)
         stat_box.pack_propagate(False)
         stat_box.pack(side=LEFT, padx=10, pady=10)
 
         # How many courses
         c.execute('SELECT * FROM courses')
         courses = c.fetchall()
-
-        stat_label = Label(stat_box, text=len(courses), font=("Arial", 14, "bold"), fg='black', bg='lightgrey')
+            
+        stat_label = Label(stat_box, text=len(courses), font=("Arial", 14, "bold"), fg=FG_COLOR, bg=BUTTON_COLOR)
         stat_label.pack()
-        stat_desc = Label(stat_box, text='Total Courses', font=("Arial", 10), fg='black', bg='lightgrey')
+        stat_desc = Label(stat_box, text='Total Courses', font=("Arial", 10), fg=FG_COLOR, bg=BUTTON_COLOR)
         stat_desc.pack()
 
         # Search Frame
@@ -203,6 +208,9 @@ def openbutton(btn_text):
         table.heading('course_id', text='Course ID')
         table.heading('coursename', text='Course Name')
         table.pack()
+
+        # To display all courses at first
+        update_table(courses)
 
 
 
