@@ -5,9 +5,11 @@ import tkinter.font as font
 from PIL import ImageTk, Image
 import runpy
 import sqlite3
+from tkinter import simpledialog
+import tkinter as tk
 
 # Admin Window
-root = Tk()
+root = tk.Tk()
 root.configure(bg="white")
 root.attributes("-fullscreen", True)
 
@@ -428,9 +430,155 @@ def openbutton(btn_text):
 
     # Mocktest - admin section - aayush
     elif btn_text == buttons[4]:
-        conn = sqlite3.connect(DATABASE_FILE)
-        c = conn.cursor()
-        pass
+               
+                
+                
+
+                    
+        
+        
+
+        def setup_database():
+            conn = sqlite3.connect("quiz.db")
+            cursor = conn.cursor()
+
+            # Create mocktests table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS mocktests (
+                    mocktest_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    mocktest_name TEXT NOT NULL,
+                    fullmark INTEGER NOT NULL,
+                    passmark INTEGER NOT NULL
+                )
+            ''')
+
+            # Create courses table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS courses (
+                    course_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    course_name TEXT NOT NULL
+                )
+            ''')
+
+            # Create categories table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS categories (
+                    category_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    category_name TEXT NOT NULL
+                )
+            ''')
+
+            # Create mockquestions table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS mockquestions (
+                    mockquestion_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    mocktest_id INTEGER NOT NULL,
+                    course_id INTEGER NOT NULL,
+                    category_id INTEGER NOT NULL,
+                    no_of_questions INTEGER NOT NULL,
+                    FOREIGN KEY (mocktest_id) REFERENCES mocktests (mocktest_id),
+                    FOREIGN KEY (course_id) REFERENCES courses (course_id),
+                    FOREIGN KEY (category_id) REFERENCES categories (category_id)
+                )
+            ''')
+
+            conn.commit()
+            conn.close()
+
+        def fetch_mock_tests():
+            conn = sqlite3.connect("quiz.db")
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM mocktests")
+            tests = cursor.fetchall()
+            conn.close()
+            return tests
+
+        def fetch_courses():
+            conn = sqlite3.connect("quiz.db")
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM courses")
+            courses = cursor.fetchall()
+            conn.close()
+            return courses
+
+        def fetch_categories():
+            conn = sqlite3.connect("quiz.db")
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM categories")
+            categories = cursor.fetchall()
+            conn.close()
+            return categories
+
+        def add_mock_test():
+            mock_test_name = simpledialog.askstring("Add Mock Test", "Enter Mock Test Name:")
+            fullmark = simpledialog.askinteger("Add Mock Test", "Enter Full Marks:")
+            passmark = simpledialog.askinteger("Add Mock Test", "Enter Pass Marks:")
+            
+            if not mock_test_name or fullmark is None or passmark is None:
+                return
+            
+            try:
+                conn = sqlite3.connect("quiz.db")
+                cursor = conn.cursor()
+                cursor.execute("INSERT INTO mocktests (mocktest_name, fullmark, passmark) VALUES (?, ?, ?)", 
+                            (mock_test_name, fullmark, passmark))
+                conn.commit()
+                conn.close()
+                update_mock_test_table()
+            except sqlite3.IntegrityError:
+                messagebox.showerror("Error", "Mock test with this name already exists.")
+
+        def add_mock_question():
+            mock_test_id = simpledialog.askinteger("Add Mock Question", "Enter Mock Test ID:")
+            course_id = simpledialog.askinteger("Add Mock Question", "Enter Course ID:")
+            category_id = simpledialog.askinteger("Add Mock Question", "Enter Category ID:")
+            no_of_questions = simpledialog.askinteger("Add Mock Question", "Enter Number of Questions:")
+            
+            if mock_test_id is None or course_id is None or category_id is None or no_of_questions is None:
+                return
+            
+            try:
+                conn = sqlite3.connect("quiz.db")
+                cursor = conn.cursor()
+                cursor.execute("INSERT INTO mockquestions (mocktest_id, course_id, category_id, no_of_questions) VALUES (?, ?, ?, ?)", 
+                            (mock_test_id, course_id, category_id, no_of_questions))
+                conn.commit()
+                conn.close()
+                messagebox.showinfo("Success", "Mock question added successfully.")
+            except sqlite3.IntegrityError:
+                messagebox.showerror("Error", "Invalid Mock Test, Course, or Category ID.")
+
+        def update_mock_test_table():
+            for row in mock_test_table.get_children():
+                mock_test_table.delete(row)
+            for test in fetch_mock_tests():
+                mock_test_table.insert("", "end", values=(test[0], test[1], test[2], test[3]))
+
+       
+        setup_database()
+
+        # Create UI elements
+        mock_test_table = ttk.Treeview(main_frame, columns=("ID", "Mock Test Name", "Full Mark", "Pass Mark"), show="headings")
+        mock_test_table.heading("ID", text="ID")
+        mock_test_table.heading("Mock Test Name", text="Mock Test Name")
+        mock_test_table.heading("Full Mark", text="Full Mark")
+        mock_test_table.heading("Pass Mark", text="Pass Mark")
+        mock_test_table.pack(fill=tk.BOTH, expand=True)
+
+        # Buttons to add mock tests and mock questions
+        btn_frame = tk.Frame(root)
+        btn_frame.pack(pady=10)
+
+        add_test_btn = tk.Button(btn_frame, text="Add Mock Test", command=add_mock_test)
+        add_test_btn.pack(side=tk.LEFT, padx=10)
+
+        add_question_btn = tk.Button(btn_frame, text="Add Mock Question", command=add_mock_question)
+        add_question_btn.pack(side=tk.LEFT, padx=10)
+
+        update_mock_test_table()
+       
+
+
 
     # Question - admin section
     elif btn_text == buttons[5]:
