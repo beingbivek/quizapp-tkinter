@@ -62,8 +62,10 @@ def create_database():
             incorrect_ans TEXT NOT NULL,
             FOREIGN KEY (course_id) REFERENCES courses (course_id),
             FOREIGN KEY (category_id) REFERENCES categories (category_id)
+
+            
         )
-        ''')
+        ''')#FOREIGN KEY (category_id) REFERENCES categories (category_id)
 
         # Mockquestions table
         c.execute('''

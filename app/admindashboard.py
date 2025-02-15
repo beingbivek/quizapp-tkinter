@@ -491,6 +491,7 @@ def openbutton(btn_text):
             conn.commit()
             conn.close()
 
+        #takes data from mock table
         def fetch_mock_tests():
             conn = sqlite3.connect("quiz.db")
             cursor = conn.cursor()
@@ -498,7 +499,17 @@ def openbutton(btn_text):
             tests = cursor.fetchall()
             conn.close()
             return tests
-
+        
+        #takes data from mockquestions table
+        def fetch_questions():
+           conn = sqlite3.connect("quiz.db")
+           cursor = conn.cursor()
+           cursor.execute("SELECT * FROM mockquestions")
+           questions = cursor.fetchall()
+           conn.close()
+           return questions
+        
+        #takes data from corses
         def fetch_courses():
             conn = sqlite3.connect("quiz.db")
             cursor = conn.cursor()
@@ -507,6 +518,7 @@ def openbutton(btn_text):
             conn.close()
             return courses
 
+        #takes data from categories
         def fetch_categories():
             conn = sqlite3.connect("quiz.db")
             cursor = conn.cursor()
@@ -514,46 +526,118 @@ def openbutton(btn_text):
             categories = cursor.fetchall()
             conn.close()
             return categories
-
+        
+        def delete_mock_test(mock_test_id):
+            conn = sqlite3.connect("quiz.db")
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM mocktests WHERE id = ?", (mock_test_id,))
+            cursor.execute("DELETE FROM mockquestions WHERE mock_test_id = ?", (mock_test_id,))  # Delete related questions
+            conn.commit()
+            conn.close()
+            update_mock_test_table()
+            update_questions_table()
+        
+        #updates question table everytime we make changes
+        def update_questions_table():
+           for row in questions_table.get_children():
+                questions_table.delete(row)
+           for question in fetch_questions():
+                mocktest_name = next((test[1] for test in fetch_mock_tests() if test[0] == question[1]), None)
+                course_name = next((test[1] for test in fetch_courses() if test[0] == question[2]), None)
+                questions_table.insert("", "end", values=(question[0], mocktest_name, course_name, question[3], question[4]))
+        
+        #Function to add mocktest name, full marks, passmarks
         def add_mock_test():
-            mock_test_name = simpledialog.askstring("Add Mock Test", "Enter Mock Test Name:")
-            fullmark = simpledialog.askinteger("Add Mock Test", "Enter Full Marks:")
-            passmark = simpledialog.askinteger("Add Mock Test", "Enter Pass Marks:")
+            add_mocktest = tk.Toplevel(root)
+            add_mocktest.title("Add Questions To Mock Test")
+            add_mocktest.geometry("500x400")
+    
             
-            if not mock_test_name or fullmark is None or passmark is None:
-                return
+           
             
-            try:
-                conn = sqlite3.connect("quiz.db")
-                cursor = conn.cursor()
-                cursor.execute("INSERT INTO mocktests (mocktest_name, fullmark, passmark) VALUES (?, ?, ?)", 
-                            (mock_test_name, fullmark, passmark))
-                conn.commit()
-                conn.close()
-                update_mock_test_table()
-            except sqlite3.IntegrityError:
-                messagebox.showerror("Error", "Mock test with this name already exists.")
+            
+            
+            tk.Label(add_mocktest, text="Enter Mock Test Name:").pack()
+            e1 = Entry(add_mocktest, width=35)
+            e1.pack()
+            tk.Label(add_mocktest, text="Enter Full Marks:").pack()
+            e2 = Entry(add_mocktest, width=35)
+            e2.pack()
+            tk.Label(add_mocktest, text="Enter Pass Marks:").pack()
+            e3 = Entry(add_mocktest, width=35)
+            e3.pack()
 
+            #saves the input taken from admin 
+            def save_mock():
+                if not e1 or not e2 or not e3:
+                  return
+            
+                try:
+                  conn = sqlite3.connect("quiz.db")
+                  cursor = conn.cursor()
+                  cursor.execute("INSERT INTO mocktests (mocktest_name, fullmark, passmark) VALUES (?, ?, ?)", 
+                            (e1.get(), e2.get(), e3.get()))
+                  conn.commit()
+                  conn.close()
+                  update_mock_test_table()
+                  messagebox.showinfo("Success", "Test added successfully!")
+                except sqlite3.IntegrityError:
+                                messagebox.showerror("Error", "Mock test with this name already exists.")
+                    
+            
+            tk.Button(add_mocktest, text="Save", command=save_mock).pack()
+        
+        #function to add questions to specific test, corse, category
         def add_mock_question():
-            mock_test_id = simpledialog.askinteger("Add Mock Question", "Enter Mock Test ID:")
-            course_id = simpledialog.askinteger("Add Mock Question", "Enter Course ID:")
-            category_id = simpledialog.askinteger("Add Mock Question", "Enter Category ID:")
-            no_of_questions = simpledialog.askinteger("Add Mock Question", "Enter Number of Questions:")
-            
-            if mock_test_id is None or course_id is None or category_id is None or no_of_questions is None:
-                return
-            
-            try:
+             add_question_window = tk.Toplevel(root)
+             add_question_window.title("Add Questions To Mock Test")
+             add_question_window.geometry("500x400")
+    
+             tk.Label(add_question_window, text="Mock Test Name:").pack()
+             test_names = [test[1] for test in fetch_mock_tests()]
+             mock_test_combo = ttk.Combobox(add_question_window, values=test_names)
+             mock_test_combo.pack()
+                
+             tk.Label(add_question_window, text="Courses:").pack()
+             course_names = [test[1] for test in fetch_courses()]
+             courses_combo = ttk.Combobox(add_question_window, values= course_names)
+             courses_combo.pack()
+                
+             #tk.Label(add_question_window, text="Categories:").pack()
+             #categories_combo = ttk.Combobox(add_question_window, values=["Physics", "Botany"])
+             #categories_combo.pack()
+                
+             tk.Label(add_question_window, text="No of Questions:").pack()
+             questions_entry = tk.Entry(add_question_window)
+             questions_entry.pack()
+    
+             def save_question():
+                selected_test = mock_test_combo.get()
+                course = courses_combo.get()
+                #category = categories_combo.get()
+                num_questions = questions_entry.get()
+                
+                if not (selected_test and course and category and num_questions.isdigit()):
+                    messagebox.showerror("Error", "Please fill all fields correctly.")
+                    return
+                
+                mock_test_id = next((test[0] for test in fetch_mock_tests() if test[1] == selected_test), None)
+                course_id = next((test[0] for test in fetch_courses() if test[1] == selected_test), None)
+               # category_id = next((test[0] for test in categories_combo if test[1] == selected_test), None)
+                
                 conn = sqlite3.connect("quiz.db")
                 cursor = conn.cursor()
-                cursor.execute("INSERT INTO mockquestions (mocktest_id, course_id, category_id, no_of_questions) VALUES (?, ?, ?, ?)", 
-                            (mock_test_id, course_id, category_id, no_of_questions))
+                cursor.execute("INSERT INTO mockquestions (mock_test-name, course-name, category, num_questions) VALUES (?, ?, ?, ?)",
+                            (mock_test_id, course_id, #category_id,
+                              num_questions))
                 conn.commit()
                 conn.close()
-                messagebox.showinfo("Success", "Mock question added successfully.")
-            except sqlite3.IntegrityError:
-                messagebox.showerror("Error", "Invalid Mock Test, Course, or Category ID.")
-
+                update_questions_table()
+                messagebox.showinfo("Success", "Question added successfully!")
+        
+             tk.Button(add_question_window, text="Save", command=save_question).pack()
+    
+        # Updates the mock test table with every change
         def update_mock_test_table():
             for row in mock_test_table.get_children():
                 mock_test_table.delete(row)
@@ -562,7 +646,8 @@ def openbutton(btn_text):
 
        
         setup_database()
-
+        
+        #main frame for table
         mocktable_frame = Frame(main_frame)
         mocktable_frame.pack(pady=10)
 
@@ -585,7 +670,19 @@ def openbutton(btn_text):
         add_question_btn = Button(btn_frame, text="Add Mock Question", command=add_mock_question, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
         add_question_btn.pack(side=LEFT, padx=10)
 
+        delete_btn = Button(btn_frame, text="Delete", command=delete_mock_test, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
+        delete_btn.pack(side=LEFT, padx=10)
+        
+
+        #question table
+        questions_table = ttk.Treeview(main_frame, columns=("ID", "Mock Test-Name", "Course-Name", "Category", "Questions"), show="headings")
+        for col in ["ID", "Mock Test-Name", "Course-Name", "Category", "Questions"]:
+               questions_table.heading(col, text=col)
+        questions_table.pack()
+
+
         update_mock_test_table()
+        update_questions_table()
        
 
 
