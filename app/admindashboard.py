@@ -9,7 +9,7 @@ from tkinter import simpledialog
 import tkinter as tk
 
 # Admin Window
-root = tk.Tk()
+root = Tk()
 root.configure(bg="white")
 root.attributes("-fullscreen", True)
 
@@ -430,6 +430,12 @@ def openbutton(btn_text):
 
     # Mocktest - admin section - aayush
     elif btn_text == buttons[4]:
+
+
+        #header section
+        header = Label(main_frame, text="Mock Test", font=header_font, bg=MAINFRAME_COLOR)
+        header.pack(pady=10)
+
                
                 
                 
@@ -557,23 +563,27 @@ def openbutton(btn_text):
        
         setup_database()
 
+        mocktable_frame = Frame(main_frame)
+        mocktable_frame.pack(pady=10)
+
+
         # Create UI elements
-        mock_test_table = ttk.Treeview(main_frame, columns=("ID", "Mock Test Name", "Full Mark", "Pass Mark"), show="headings")
+        mock_test_table = ttk.Treeview(mocktable_frame, columns=("ID", "Mock Test Name", "Full Mark", "Pass Mark"), show="headings")
         mock_test_table.heading("ID", text="ID")
         mock_test_table.heading("Mock Test Name", text="Mock Test Name")
         mock_test_table.heading("Full Mark", text="Full Mark")
         mock_test_table.heading("Pass Mark", text="Pass Mark")
-        mock_test_table.pack(fill=tk.BOTH, expand=True)
+        mock_test_table.pack(fill=BOTH, expand=True)
 
         # Buttons to add mock tests and mock questions
-        btn_frame = tk.Frame(root)
+        btn_frame = Frame(main_frame, bg = MAINFRAME_COLOR)
         btn_frame.pack(pady=10)
 
-        add_test_btn = tk.Button(btn_frame, text="Add Mock Test", command=add_mock_test)
-        add_test_btn.pack(side=tk.LEFT, padx=10)
+        add_test_btn = Button(btn_frame, text="Add Mock Test", command=add_mock_test, bg= BUTTON_COLOR, font= button_font , fg= FG_COLOR )
+        add_test_btn.pack(side=LEFT, padx=10)
 
-        add_question_btn = tk.Button(btn_frame, text="Add Mock Question", command=add_mock_question)
-        add_question_btn.pack(side=tk.LEFT, padx=10)
+        add_question_btn = Button(btn_frame, text="Add Mock Question", command=add_mock_question, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
+        add_question_btn.pack(side=LEFT, padx=10)
 
         update_mock_test_table()
        
