@@ -527,16 +527,41 @@ def openbutton(btn_text):
             conn.close()
             return categories
         
-        def delete_mock_test(mock_test_id):
+        def delete_question(question_id):
             conn = sqlite3.connect("quiz.db")
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM mocktests WHERE id = ?", (mock_test_id,))
-            cursor.execute("DELETE FROM mockquestions WHERE mock_test_id = ?", (mock_test_id,))  # Delete related questions
+            cursor.execute("DELETE FROM mockquestions WHERE mockquestion_id = ?", (question_id,))
+            conn.commit()
+            conn.close()
+            update_questions_table()
+
+
+        def delete_selected_question():
+            selected_item = questions_table.selection()
+            if not selected_item:
+                messagebox.showwarning("Warning", "Please select a question to delete.")
+                return
+            question_id = questions_table.item(selected_item)["values"][0]
+            delete_question(question_id)
+            messagebox.showinfo("Success", "Question deleted successfully!")
+                
+        def delete_mock_test():
+            selected_item = mock_test_table.selection()
+            if not selected_item:
+                messagebox.showwarning("Warning", "Please select a mock test to delete.")
+                return
+            mock_test_id = mock_test_table.item(selected_item)["values"][0]
+            
+            conn = sqlite3.connect("quiz.db")
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM mocktests WHERE mocktest_id = ?", (mock_test_id,))
+            cursor.execute("DELETE FROM mockquestions WHERE mocktest_id = ?", (mock_test_id,))  # Delete related questions
             conn.commit()
             conn.close()
             update_mock_test_table()
             update_questions_table()
-        
+            messagebox.showinfo("Success", "Mock test deleted successfully!")
+
         #updates question table everytime we make changes
         def update_questions_table():
            for row in questions_table.get_children():
@@ -569,14 +594,20 @@ def openbutton(btn_text):
 
             #saves the input taken from admin 
             def save_mock():
-                if not e1 or not e2 or not e3:
-                  return
+                mocktest_name = e1.get().strip()  # Get the value and strip whitespace
+                full_marks = e2.get().strip()      # Get the value and strip whitespace
+                pass_marks = e3.get().strip()       # Get the value and strip whitespace
+        
+        # Check if any field is empty
+                if not mocktest_name or not full_marks or not pass_marks:
+                   messagebox.showwarning("Warning", "Please fill in all fields.")
+                   return
             
                 try:
                   conn = sqlite3.connect("quiz.db")
                   cursor = conn.cursor()
                   cursor.execute("INSERT INTO mocktests (mocktest_name, fullmark, passmark) VALUES (?, ?, ?)", 
-                            (e1.get(), e2.get(), e3.get()))
+                            (mocktest_name,full_marks,pass_marks))
                   conn.commit()
                   conn.close()
                   update_mock_test_table()
@@ -679,6 +710,10 @@ def openbutton(btn_text):
         for col in ["ID", "Mock Test-Name", "Course-Name", "Category", "Questions"]:
                questions_table.heading(col, text=col)
         questions_table.pack()
+
+        delete_btn = Button(btn_frame, text="Delete QNs", command=delete_selected_question, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
+        delete_btn.pack(side=LEFT, padx=10)
+        
 
 
         update_mock_test_table()
