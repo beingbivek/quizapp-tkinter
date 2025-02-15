@@ -22,3 +22,6 @@ labelstyle = ("Helvatica", 14)
 
 # Defaults lists
 defcourses = ['CEE','Driving','IOE','Loksewa']
+
+# Images file path
+ICON_PATH = r'..\quizapp-tkinter\images\icon\quizicon.ico'

@@ -72,8 +72,8 @@ def openbutton(btn_text):
     # Set the clicked button color
     buttons_dict[btn_text].configure(bg=HIGHLIGHT_COLOR)
 
+    # Main Dashboard - bivek
     if btn_text == buttons[0]:
-        # Main Dashboard
         header = Label(main_frame, text="Dashboard", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
 
@@ -362,17 +362,72 @@ def openbutton(btn_text):
             for row in results:
                 table.insert('', 'end', values=row)
 
+
+        def add_course():
+
+            def save_course():
+                try:
+                    c.execute('SELECT coursename FROM courses')
+                    all_courses = c.fetchall()
+                    for course in all_courses:
+                        if course[0].lower() == course_name_entry.get().lower():
+                            messagebox.showerror(title='Course Name Repeated',message='Course Name is being repeated so use another name.')
+                            add_course()
+                            break
+                    else:
+                        c.execute('INSERT INTO courses (coursename) VALUES (?)', (course_name_entry.get(),))
+                        conn.commit()
+                        c.execute('SELECT * FROM courses')
+                        update_table(c.fetchall())
+                        messagebox.showinfo(title='Success',message='Course successfully created.')
+                except Exception as e:
+                    print(e)
+
+            def cancel_course():
+                add_course_window.destroy()
+
+            add_course_window = Toplevel(main_frame)
+            add_course_window.title('Add Course')
+            add_course_window.geometry('400x300')
+
+            add_course_window.resizable(False, False)  # Prevent window resizing
+            add_course_window.wm_attributes("-toolwindow", 1) # Disable max and min button
+
+            add_course_frame = Frame(add_course_window,padx=10,pady=10,border=2,borderwidth=2)
+            add_course_frame.pack()
+            
+            # Frame for the first row
+            row1 = Frame(add_course_window, padx=10, pady=10, border=2, borderwidth=2)
+            row1.pack(fill='x')
+
+            course_name_label = Label(row1, text='Course Name', font=("Arial", 14))
+            course_name_label.pack(side='left', pady=5, padx=5)
+
+            course_name_entry = Entry(row1, font=("Arial", 12))
+            course_name_entry.pack(side='right', padx=5)
+
+            # Frame for the second row
+            row2 = Frame(add_course_window, padx=10, pady=10, border=2, borderwidth=2)
+            row2.pack(fill='x')
+
+            save_course_btn = Button(row2, text='Save', command=save_course, font=("Arial", 12), fg='white', bg='blue')
+            save_course_btn.pack(side='left', padx=5, pady=5)
+
+            close_course_btn = Button(row2, text='Cancel', command=cancel_course, font=("Arial", 12), fg='white', bg='red')
+            close_course_btn.pack(side='right', padx=5, pady=5)
+
+
         # Database Connection
         conn = sqlite3.connect(DATABASE_FILE)
         c = conn.cursor()
 
         # demo courses creation or insertion
-        c.execute('SELECT * FROM courses')
-        cou = c.fetchall()
-        if not cou:
-            for cn in defcourses:
-                c.execute('INSERT INTO courses (coursename) VALUES (?)', (cn,))
-            conn.commit()
+        # c.execute('SELECT * FROM courses')
+        # cou = c.fetchall()
+        # if not cou:
+        #     for cn in defcourses:
+        #         c.execute('INSERT INTO courses (coursename) VALUES (?)', (cn,))
+        #     conn.commit()
     
 
         header = Label(main_frame, text="Courses", font=header_font, bg=MAINFRAME_COLOR)
@@ -396,27 +451,35 @@ def openbutton(btn_text):
         stat_desc.pack()
 
         # Search Frame
-        search_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
-        search_frame.pack()
+        course_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
+        course_frame.pack()
 
-        search_entry = Entry(search_frame, font=("Arial", 10))
+        search_frame = Frame(course_frame,bg=MAINFRAME_COLOR)
+
+        search_entry = Entry(search_frame, font=button_font)
         search_entry.insert(0, 'Search...')  # Add the placeholder text
         search_entry.bind('<FocusIn>', on_entry_click)
         search_entry.bind('<FocusOut>', on_focusout)
         search_entry.config(fg='grey')
-        search_entry.grid(row=0, column=0)
+        search_entry.pack(side='left')
 
-        search_btn = Button(search_frame, text='Search', command=search_courses)
-        search_btn.grid(row=0, column=1, padx=10)
+        search_btn = Button(search_frame, text='Search', command=search_courses, bg= BUTTON_COLOR, fg=FG_COLOR,font=button_font)
+        search_btn.pack(side='right',padx=10)
+
+        search_frame.pack(side='left',padx=screen_width/6)
+
+        add_course_btn = Button(course_frame, text='Add Course', bg=BUTTON_COLOR, fg=FG_COLOR, font=button_font, command=add_course)
+        add_course_btn.pack(side='right',padx=screen_width/6)
 
         # Table to display search results
         table_frame = Frame(main_frame)
         table_frame.pack(pady=10)
 
-        columns = ('course_id', 'coursename')
+        columns = ('course_id', 'coursename','actions')
         table = ttk.Treeview(table_frame, columns=columns, show='headings')
         table.heading('course_id', text='Course ID')
         table.heading('coursename', text='Course Name')
+        table.heading('actions', text='Actions')
         table.pack()
 
         # To display all courses at first
