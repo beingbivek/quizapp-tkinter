@@ -329,56 +329,56 @@ def openbutton(btn_text):
     # Courses - admin section - bivek
     elif btn_text == buttons[2]:
 
+        # Courses Functions
+
         def on_entry_click(event):
             # Function to remove placeholder text when the entry is clicked.
-            if search_entry.get() == 'Search...':
-                search_entry.delete(0, "end")  # delete all the text in the entry
-                search_entry.insert(0, '')  # Insert blank for user input
-                search_entry.config(fg='black')
+            if search_course_entry.get() == 'Search...':
+                search_course_entry.delete(0, "end")  # delete all the text in the entry
+                search_course_entry.insert(0, '')  # Insert blank for user input
+                search_course_entry.config(fg='black')
 
         def on_focusout(event):
             # Function to add placeholder text if the entry is empty when focus is lost.
-            if search_entry.get() == '':
-                search_entry.insert(0, 'Search...')
-                search_entry.config(fg='grey')
+            if search_course_entry.get() == '':
+                search_course_entry.insert(0, 'Search...')
+                search_course_entry.config(fg='grey')
                 # display all courses after the search bar is empty
-                update_table(courses)
+                update_course_table(get_courses())
 
         def search_courses():
             query = f'SELECT * FROM courses WHERE coursename LIKE ?'
             # query = f'SELECT * FROM courses'
-            search_term = f'%{search_entry.get()}%'
+            search_term = f'%{search_course_entry.get()}%'
             # c.execute(query)
             c.execute(query, (search_term,))
             results = c.fetchall()
             # print(results)
             
             # show the search result
-            update_table(results)
+            update_course_table(results)
 
-        def update_table(results):
-            for row in table.get_children():
-                table.delete(row)
+        def update_course_table(results):
+            for row in course_table.get_children():
+                course_table.delete(row)
             for row in results:
-                table.insert('', 'end', values=row)
+                course_table.insert('', 'end', values=row)
 
 
         def add_course():
 
             def save_course():
                 try:
-                    c.execute('SELECT coursename FROM courses')
-                    all_courses = c.fetchall()
+                    all_courses = get_courses()
                     for course in all_courses:
-                        if course[0].lower() == course_name_entry.get().lower():
+                        if course[1].lower() == course_name_entry.get().lower():
                             messagebox.showerror(title='Course Name Repeated',message='Course Name is being repeated so use another name.')
                             add_course()
                             break
                     else:
                         c.execute('INSERT INTO courses (coursename) VALUES (?)', (course_name_entry.get(),))
                         conn.commit()
-                        c.execute('SELECT * FROM courses')
-                        update_table(c.fetchall())
+                        update_course_table(get_courses())
                         messagebox.showinfo(title='Success',message='Course successfully created.')
                 except Exception as e:
                     print(e)
@@ -433,6 +433,8 @@ def openbutton(btn_text):
         header = Label(main_frame, text="Courses", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
 
+        # Courses Section
+
         # Rectangle courses no. frame
 
         stats_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
@@ -442,19 +444,68 @@ def openbutton(btn_text):
         stat_box.pack(side=LEFT, padx=10, pady=10)
 
         # How many courses
-        c.execute('SELECT * FROM courses')
-        courses = c.fetchall()
+        def get_courses():
+            c.execute('SELECT * FROM courses')
+            return c.fetchall()
             
-        stat_label = Label(stat_box, text=len(courses), font=("Arial", 14, "bold"), fg=FG_COLOR, bg=BUTTON_COLOR)
+        stat_label = Label(stat_box, text=len(get_courses()), font=("Arial", 14, "bold"), fg=FG_COLOR, bg=BUTTON_COLOR)
         stat_label.pack()
         stat_desc = Label(stat_box, text='Total Courses', font=("Arial", 10), fg=FG_COLOR, bg=BUTTON_COLOR)
         stat_desc.pack()
 
-        # Search Frame
+        # Search Frame for courses
         course_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
         course_frame.pack()
 
-        search_frame = Frame(course_frame,bg=MAINFRAME_COLOR)
+        search_course_frame = Frame(course_frame,bg=MAINFRAME_COLOR)
+
+        search_course_entry = Entry(search_course_frame, font=button_font)
+        search_course_entry.insert(0, 'Search...')  # Add the placeholder text
+        search_course_entry.bind('<FocusIn>', on_entry_click)
+        search_course_entry.bind('<FocusOut>', on_focusout)
+        search_course_entry.config(fg='grey')
+        search_course_entry.pack(side='left')
+
+        search_course_btn = Button(search_frame, text='Search', command=search_courses, bg= BUTTON_COLOR, fg=FG_COLOR,font=button_font)
+        search_course_btn.pack(side='right',padx=10)
+
+        search_course_frame.pack(side='left',padx=screen_width/6)
+
+        add_course_btn = Button(course_frame, text='Add Course', bg=BUTTON_COLOR, fg=FG_COLOR, font=button_font, command=add_course)
+        add_course_btn.pack(side='right',padx=screen_width/6)
+
+        # Table to display search results for courses
+        course_table_frame = Frame(main_frame)
+        course_table_frame.pack(pady=10)
+
+        columns = ('course_id', 'coursename','actions')
+        course_table = ttk.Treeview(course_table_frame, columns=columns, show='headings')
+        course_table.heading('course_id', text='Course ID')
+        course_table.heading('coursename', text='Course Name')
+        course_table.heading('actions', text='Actions')
+        course_table.pack()
+
+        # To display all courses at first
+        update_course_table(get_courses())
+
+        # Categories section
+
+        # How many categories
+        def getcategories():
+            c.execute('SELECT * FROM categories')
+            categories = c.fetchall()
+            courses = get_courses()
+
+            for category in categories:
+                pass
+
+            return categories
+
+        # Search Frame for courses
+        category_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
+        category_frame.pack()
+
+        search_frame = Frame(category_frame,bg=MAINFRAME_COLOR)
 
         search_entry = Entry(search_frame, font=button_font)
         search_entry.insert(0, 'Search...')  # Add the placeholder text
@@ -471,19 +522,23 @@ def openbutton(btn_text):
         add_course_btn = Button(course_frame, text='Add Course', bg=BUTTON_COLOR, fg=FG_COLOR, font=button_font, command=add_course)
         add_course_btn.pack(side='right',padx=screen_width/6)
 
-        # Table to display search results
-        table_frame = Frame(main_frame)
-        table_frame.pack(pady=10)
+        # Table to display search results for courses
+        course_table_frame = Frame(main_frame)
+        course_table_frame.pack(pady=10)
 
         columns = ('course_id', 'coursename','actions')
-        table = ttk.Treeview(table_frame, columns=columns, show='headings')
-        table.heading('course_id', text='Course ID')
-        table.heading('coursename', text='Course Name')
-        table.heading('actions', text='Actions')
-        table.pack()
+        course_table = ttk.Treeview(course_table_frame, columns=columns, show='headings')
+        course_table.heading('course_id', text='Course ID')
+        course_table.heading('coursename', text='Course Name')
+        course_table.heading('actions', text='Actions')
+        course_table.pack()
 
         # To display all courses at first
-        update_table(courses)
+        update_course_table(courses)
+
+        # Close DB Connection
+        conn.commit()
+        conn.close()
 
 
 
