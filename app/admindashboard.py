@@ -466,7 +466,7 @@ def openbutton(btn_text):
         search_course_entry.config(fg='grey')
         search_course_entry.pack(side='left')
 
-        search_course_btn = Button(search_frame, text='Search', command=search_courses, bg= BUTTON_COLOR, fg=FG_COLOR,font=button_font)
+        search_course_btn = Button(search_course_frame, text='Search', command=search_courses, bg= BUTTON_COLOR, fg=FG_COLOR,font=button_font)
         search_course_btn.pack(side='right',padx=10)
 
         search_course_frame.pack(side='left',padx=screen_width/6)
@@ -488,16 +488,81 @@ def openbutton(btn_text):
         # To display all courses at first
         update_course_table(get_courses())
 
+
         # Categories section
 
-        # How many categories
-        def getcategories():
+        # Categories Functions
+
+        def add_category():
+
+            def save_category():
+                try:
+                    all_courses = get_courses()
+                    for course in all_courses:
+                        if course[1].lower() == course_name_entry.get().lower():
+                            messagebox.showerror(title='Course Name Repeated',message='Course Name is being repeated so use another name.')
+                            add_course()
+                            break
+                    else:
+                        c.execute('INSERT INTO courses (coursename) VALUES (?)', (course_name_entry.get(),))
+                        conn.commit()
+                        update_course_table(get_courses())
+                        messagebox.showinfo(title='Success',message='Course successfully created.')
+                except Exception as e:
+                    print(e)
+
+            def cancel_category():
+                add_category_window.destroy()
+
+            add_category_window = Toplevel(main_frame)
+            add_category_window.title('Add Course')
+            add_category_window.geometry('400x300')
+
+            add_category_window.resizable(False, False)  # Prevent window resizing
+            add_category_window.wm_attributes("-toolwindow", 1) # Disable max and min button
+
+            add_course_frame = Frame(add_category_window,padx=10,pady=10,border=2,borderwidth=2)
+            add_course_frame.pack()
+            
+            # Frame for the first row
+            row1 = Frame(add_category_window, padx=10, pady=10, border=2, borderwidth=2)
+            row1.pack(fill='x')
+
+            course_name_label = Label(row1, text='Course Name', font=("Arial", 14))
+            course_name_label.pack(side='left', pady=5, padx=5)
+
+            course_name_entry = Entry(row1, font=("Arial", 12))
+            course_name_entry.pack(side='right', padx=5)
+
+            # Frame for the second row
+            row2 = Frame(add_category_window, padx=10, pady=10, border=2, borderwidth=2)
+            row2.pack(fill='x')
+
+            save_course_btn = Button(row2, text='Save', command=save_category, font=("Arial", 12), fg='white', bg='blue')
+            save_course_btn.pack(side='left', padx=5, pady=5)
+
+            close_course_btn = Button(row2, text='Cancel', command=cancel_category, font=("Arial", 12), fg='white', bg='red')
+            close_course_btn.pack(side='right', padx=5, pady=5)
+
+        def update_category_table(results):
+            for row in category_table.get_children():
+                category_table.delete(row)
+            for row in results:
+                category_table.insert('', 'end', values=row)
+
+        # All categories data with coursename
+        def get_categories():
             c.execute('SELECT * FROM categories')
             categories = c.fetchall()
             courses = get_courses()
 
             for category in categories:
-                pass
+                for course in courses:
+                    if str(category[2]) == str(course[0]):
+                        category[2] = course[1]
+                        break
+            
+            # print(categories)
 
             return categories
 
@@ -505,36 +570,36 @@ def openbutton(btn_text):
         category_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
         category_frame.pack()
 
-        search_frame = Frame(category_frame,bg=MAINFRAME_COLOR)
+        search_category_frame = Frame(category_frame,bg=MAINFRAME_COLOR)
+        search_category_frame.pack(side='left',padx=screen_width/6)
 
-        search_entry = Entry(search_frame, font=button_font)
-        search_entry.insert(0, 'Search...')  # Add the placeholder text
-        search_entry.bind('<FocusIn>', on_entry_click)
-        search_entry.bind('<FocusOut>', on_focusout)
-        search_entry.config(fg='grey')
-        search_entry.pack(side='left')
+        search_category_entry = Entry(search_category_frame, font=button_font)
+        search_category_entry.insert(0, 'Search...')  # Add the placeholder text
+        search_category_entry.bind('<FocusIn>', on_entry_click)
+        search_category_entry.bind('<FocusOut>', on_focusout)
+        search_category_entry.config(fg='grey')
+        search_category_entry.pack(side='left')
 
-        search_btn = Button(search_frame, text='Search', command=search_courses, bg= BUTTON_COLOR, fg=FG_COLOR,font=button_font)
-        search_btn.pack(side='right',padx=10)
+        search_category_btn = Button(search_category_frame, text='Search', command=search_courses, bg= BUTTON_COLOR, fg=FG_COLOR,font=button_font)
+        search_category_btn.pack(side='right',padx=10)
 
-        search_frame.pack(side='left',padx=screen_width/6)
-
-        add_course_btn = Button(course_frame, text='Add Course', bg=BUTTON_COLOR, fg=FG_COLOR, font=button_font, command=add_course)
-        add_course_btn.pack(side='right',padx=screen_width/6)
+        add_category_btn = Button(category_frame, text='Add Category', bg=BUTTON_COLOR, fg=FG_COLOR, font=button_font, command=add_category)
+        add_category_btn.pack(side='right',padx=screen_width/6)
 
         # Table to display search results for courses
-        course_table_frame = Frame(main_frame)
-        course_table_frame.pack(pady=10)
+        category_table_frame = Frame(main_frame)
+        category_table_frame.pack(pady=10)
 
-        columns = ('course_id', 'coursename','actions')
-        course_table = ttk.Treeview(course_table_frame, columns=columns, show='headings')
-        course_table.heading('course_id', text='Course ID')
-        course_table.heading('coursename', text='Course Name')
-        course_table.heading('actions', text='Actions')
-        course_table.pack()
+        columns = ('category_id', 'categoryname','coursename','actions')
+        category_table = ttk.Treeview(category_table_frame, columns=columns, show='headings')
+        category_table.heading('category_id', text='Category ID')
+        category_table.heading('categoryname', text='Category Name')
+        category_table.heading('coursename', text='Course Name')
+        category_table.heading('actions', text='Actions')
+        category_table.pack()
 
         # To display all courses at first
-        update_course_table(courses)
+        update_category_table(get_categories())
 
         # Close DB Connection
         conn.commit()
