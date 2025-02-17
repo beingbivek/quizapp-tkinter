@@ -634,9 +634,10 @@ def openbutton(btn_text):
              courses_combo = ttk.Combobox(add_question_window, values= course_names)
              courses_combo.pack()
                 
-             #tk.Label(add_question_window, text="Categories:").pack()
-             #categories_combo = ttk.Combobox(add_question_window, values=["Physics", "Botany"])
-             #categories_combo.pack()
+             tk.Label(add_question_window, text="Categories:").pack()
+             categorye_names = [test[1] for test in fetch_categories()]
+             categories_combo = ttk.Combobox(add_question_window, values=categorye_names)
+             categories_combo.pack()
                 
              tk.Label(add_question_window, text="No of Questions:").pack()
              questions_entry = tk.Entry(add_question_window)
@@ -654,12 +655,12 @@ def openbutton(btn_text):
                 
                 mock_test_id = next((test[0] for test in fetch_mock_tests() if test[1] == selected_test), None)
                 course_id = next((test[0] for test in fetch_courses() if test[1] == selected_test), None)
-               # category_id = next((test[0] for test in categories_combo if test[1] == selected_test), None)
+                category_id = next((test[0] for test in fetch_categories if test[1] == selected_test), None)
                 
                 conn = sqlite3.connect("quiz.db")
                 cursor = conn.cursor()
                 cursor.execute("INSERT INTO mockquestions (mock_test-name, course-name, category, num_questions) VALUES (?, ?, ?, ?)",
-                            (mock_test_id, course_id, #category_id,
+                            (mock_test_id, course_id, category_id,
                               num_questions))
                 conn.commit()
                 conn.close()
