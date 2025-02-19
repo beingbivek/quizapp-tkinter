@@ -315,16 +315,38 @@ def openbutton(btn_text):
             window.destroy()
 
         def delete_user():
+            global rows  # Declare rows as global
+
+            # Get the selected item from the treeview
             selected_item = tree.selection()
+            
+            # If no item is selected, show a warning and return
             if not selected_item:
                 messagebox.showwarning("No Selection", "Please select a user to delete.")
                 return
 
+            # Confirm deletion with the user
             if messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this user?"):
+                # Get the values of the selected item
                 selected_user = tree.item(selected_item, "values")
-                global rows
+                print(f"Selected User: {selected_user}")  # Debugging: Print the selected user
+
+                # Update the global rows list by excluding the selected user
                 rows = [row for row in rows if row[0] != selected_user[0]]
+                print(f"Updated Rows: {rows}")  # Debugging: Print the updated rows list
+
+                # Remove the selected item from the treeview
                 tree.delete(selected_item)
+
+                # Refresh the treeview with the updated rows
+                for row in tree.get_children():
+                    tree.delete(row)
+                
+                for row in rows:
+                    tree.insert("", "end", values=row)
+
+                # Update the treeview height
+                tree.configure(height=len(rows))
 
     # Courses - admin section - bivek
     elif btn_text == buttons[2]:
