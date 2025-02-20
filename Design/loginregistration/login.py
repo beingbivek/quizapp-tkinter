@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 import subprocess
+import sqlite3
 
 # Colors (matched with Admin panel)
 bgcolor = "#ffffff"  # Light gray
@@ -37,21 +38,33 @@ def login():
         messagebox.showerror("Error", "All fields are required")
         return
 
-    if "@" in username_or_email:
-        if "@" not in username_or_email or "." not in username_or_email:
-            messagebox.showerror("Error", "Invalid email address")
-            return
-    else:
-        if len(username_or_email) < 3:
-            messagebox.showerror("Error", "Username must be at least 3 characters long")
-            return
+    try:
+        # Connect to the database
+        conn = sqlite3.connect('quiz.db')  # Replace with your actual database name
+        c = conn.cursor()
 
-    if len(password) < 6:
-        messagebox.showerror("Error", "Password must be at least 6 characters long")
-        return
+        # Check if the username or email exists in the database
+        c.execute("""
+            SELECT * FROM users 
+            WHERE username = ? OR email = ?
+        """, (username_or_email, username_or_email))
+        user = c.fetchone()
 
-    user_info = f"Username/Email: {username_or_email}\nPassword: {'*' * len(password)}"
-    messagebox.showinfo("Login Successful", f"Welcome!\n\n{user_info}")
+        if user:
+            # Check if the password matches
+            if user[6] == password:  # Assuming password is the 7th column in the table
+                messagebox.showinfo("Success", "Login successful!")
+                a.destroy()
+                subprocess.Popen(["python", "userdashboard.py"])
+                
+            else:
+                messagebox.showerror("Error", "Incorrect password")
+        else:
+            messagebox.showerror("Error", "Username or email not found")
+
+        conn.close()
+    except Exception as e:
+        messagebox.showerror("Error", f"An error occurred: {e}")
 
 a = Tk()
 a.title("Login")

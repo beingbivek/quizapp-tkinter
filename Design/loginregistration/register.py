@@ -44,7 +44,8 @@ def register_user():
         conn.commit()
         conn.close()
         messagebox.showinfo("Success", "Registration successful!")
-        open_login()  # Redirect to login page after successful registration
+        a.destroy()
+        subprocess.Popen(["python", "userdashboard.py"])
     except sqlite3.IntegrityError:
         messagebox.showerror("Error", "Username or email already exists")
     except Exception as e:
