@@ -90,8 +90,8 @@ def adjust_frames(event=None):
     frame.place(x=x_main + 200, y=y_main + 140, width=300, height=250)
     infotopframe.place(x=x_main + 200, y=y_main + 140, width=300, height=20)
     backframe.place(x=x_main + 450, y=y_main + 140, width=50, height=20)
-    register_button.place(x=button_x, y=30)
-    login_button.place(x=button_x + 100, y=30)
+    register_button.place(x=button_x, y=50)
+    login_button.place(x=button_x + 100, y=50)
 
 a.bind("<Configure>", adjust_frames)
 
@@ -104,7 +104,7 @@ Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg=hea
 
 welcomeframe = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
 welcomeframe.place(x=150, y=70, width=400, height=60)
-Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 30, "bold"), bg=tablecolor, fg='white').pack(pady=10, padx=10)
+Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 25, "bold"), bg=tablecolor, fg='white').pack(pady=10, padx=10)
 
 frame = Frame(a, bd=2, relief="ridge", padx=20, pady=20, bg=bgcolor)
 frame.place(x=200, y=140, width=300, height=250)

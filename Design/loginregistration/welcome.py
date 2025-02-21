@@ -72,7 +72,7 @@ Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg=hea
 # Welcome frame
 welcomeframe = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
 welcomeframe.place(x=150, y=70, width=400, height=60)
-Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 30, "bold"), bg=tablecolor, fg="white").pack(pady=10, padx=10)
+Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 25, "bold"), bg=tablecolor, fg="white").pack(pady=10, padx=10)
 
 # Welcome message frame
 frame = Frame(a, bd=2, relief="ridge", padx=20, pady=20, bg=bgcolor)
@@ -87,7 +87,7 @@ IOE (Institute of Engineering)
 
 Whether you're preparing for competitive exams or brushing up your knowledge,
 Quiz App is here to help you succeed. Start your journey today!
-''', font=("Arial", 13), bg=bgcolor,fg='black').place(x=-10, y=0)
+''', font=("Arial", 11), bg=bgcolor,fg='black').place(x=-10, y=-10)
 
 # Buttons
 Button(frame, text="Register", command=open_registration, highlightbackground='white').place(x=0, y=190)

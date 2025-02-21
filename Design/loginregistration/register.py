@@ -84,7 +84,7 @@ Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg='#0
 
 welcomeframe = Frame(register, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
 welcomeframe.place(x=150, y=70, width=400, height=60)
-Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 30, "bold"), bg=tablecolor).pack(pady=10, padx=10)
+Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 25, "bold"), bg=tablecolor).pack(pady=10, padx=10)
 
 frame = Frame(register, bd=2, relief="ridge", padx=20, pady=20, bg=bgcolor)
 frame.place(x=100, y=140, width=500, height=250)

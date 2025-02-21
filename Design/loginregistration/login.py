@@ -98,7 +98,7 @@ Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg=hea
 
 welcomeframe = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
 welcomeframe.place(x=150, y=70, width=400, height=60)
-Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 30, "bold"), bg=tablecolor, fg='white').pack(pady=10, padx=10)
+Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 25, "bold"), bg=tablecolor, fg='white').pack(pady=10, padx=10)
 
 frame = Frame(user_login, bd=2, relief="ridge", padx=20, pady=20, bg=bgcolor)
 frame.place(x=200, y=140, width=300, height=250)
