@@ -518,11 +518,14 @@ def openbutton(btn_text):
             conn.close()
             return courses
 
-        #takes data from categories
-        def fetch_categories():
+       # Modify fetch_categories to filter by course_id
+        def fetch_categories(course_id=None):
             conn = sqlite3.connect("quiz.db")
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM categories")
+            if course_id:
+                cursor.execute("SELECT * FROM categories WHERE course_id = ?", (course_id,))
+            else:
+                cursor.execute("SELECT * FROM categories")
             categories = cursor.fetchall()
             conn.close()
             return categories
@@ -635,9 +638,20 @@ def openbutton(btn_text):
              courses_combo.pack()
                 
              tk.Label(add_question_window, text="Categories:").pack()
-             categorye_names = [test[1] for test in fetch_categories()]
-             categories_combo = ttk.Combobox(add_question_window, values=categorye_names)
+             
+             categories_combo = ttk.Combobox(add_question_window)
              categories_combo.pack()
+
+              # Update categories based on selected course
+             def update_categories(event):
+                selected_course_name = courses_combo.get()
+                course_id = next((course[0] for course in fetch_courses() if course[1] == selected_course_name), None)
+                if course_id:
+                    category_names = [category[1] for category in fetch_categories(course_id)]
+                    categories_combo['values'] = category_names
+                    categories_combo.set('')  # Clear the current selection
+
+             courses_combo.bind("<<ComboboxSelected>>", update_categories)  # Bind the event
                 
              tk.Label(add_question_window, text="No of Questions:").pack()
              questions_entry = tk.Entry(add_question_window)
@@ -654,12 +668,21 @@ def openbutton(btn_text):
                     return
                 
                 mock_test_id = next((test[0] for test in fetch_mock_tests() if test[1] == selected_test), None)
-                course_id = next((test[0] for test in fetch_courses() if test[1] == selected_test), None)
-                category_id = next((test[0] for test in fetch_categories if test[1] == selected_test), None)
+                course_id = next((test[0] for test in fetch_courses() if test[1] == course), None)
+                category_id = next((cat[0] for cat in fetch_categories(course_id) if cat[1] == category), None)
+
+                 # Debugging statements
+                print(f"Mock Test ID: {mock_test_id}, Course ID: {course_id}, Category ID: {category_id}, No of Questions: {num_questions}")
+
+                # Check if IDs are retrieved correctly
+                if not all([mock_test_id, course_id, category_id]):
+                    messagebox.showerror("Error", "Could not find the selected IDs. Please check your selections.")
+                    return
+
                 
                 conn = sqlite3.connect("quiz.db")
                 cursor = conn.cursor()
-                cursor.execute("INSERT INTO mockquestions (mock_test-name, course-name, category, num_questions) VALUES (?, ?, ?, ?)",
+                cursor.execute("INSERT INTO mockquestions (mocktest_id, course_id, category_id, no_of_questions) VALUES (?, ?, ?, ?)",
                             (mock_test_id, course_id, category_id,
                               num_questions))
                 conn.commit()
