@@ -359,6 +359,7 @@ def openbutton(btn_text):
             update_course_table(results)
 
         def update_course_table(results):
+            stat_label.config(text=len(get_courses()))
             for row in course_table.get_children():
                 course_table.delete(row)
             for row in results:
@@ -478,22 +479,113 @@ def openbutton(btn_text):
         course_table_frame = Frame(main_frame)
         course_table_frame.pack(pady=10)
 
-        columns = ('course_id', 'coursename','actions')
-        course_table = ttk.Treeview(course_table_frame, columns=columns, show='headings')
-        course_table.heading('course_id', text='Course ID', anchor="center")
-        course_table.heading('coursename', text='Course Name', anchor="center")
-        course_table.heading('actions', text='Actions', anchor="center")
+        columns = ('course_id', 'coursename')
+        course_table = ttk.Treeview(course_table_frame, columns=columns, show='headings',height=5)
+        course_table.heading('course_id', text='Course ID')
+        course_table.heading('coursename', text='Course Name')
+        # course_table.heading('actions', text='Actions')
 
         # Configure columns with center alignment
         course_table.column('course_id', anchor='center')
         course_table.column('coursename', anchor='center')
-        course_table.column('actions', anchor='center')
+        # course_table.column('actions', anchor='center')
+
+        # Create vertical scrollbar and link it to the Treeview
+        course_v_scrollbar = ttk.Scrollbar(course_table_frame, orient='vertical', command=course_table.yview)
+        course_v_scrollbar.pack(side='right', fill='y')
+        course_table.configure(yscrollcommand=course_v_scrollbar.set)
 
         
         course_table.pack()
 
+
         # To display all courses at first
         update_course_table(get_courses())
+
+        # EDIT / DELETE Buttons for Courses
+        
+        # When course table clicked
+
+        def on_course_select(event):
+            selected_item = course_table.focus()
+            item_data = course_table.item(selected_item)
+            print("Selected item data:", item_data)
+        
+        course_table.bind('<<TreeviewSelect>>', on_course_select)
+
+        def edit_course_record():
+            def save_edit_course():
+                try:
+                    c.execute('UPDATE courses SET coursename = ? WHERE course_id = ?', (course_name_entry.get(), item_data["values"][0]))
+                    conn.commit()
+                    update_course_table(get_courses())
+                    edit_course_window.destroy()
+                    messagebox.showinfo(title='Success',message='Course Edited successfully.')
+                except Exception as e:
+                    messagebox.showerror(title='Error in Editing Course',message='Edit Course Error: ' + str(e))
+
+            def cancel_edit_course():
+                edit_course_window.destroy()
+
+
+            selected_item = course_table.focus()
+            item_data = course_table.item(selected_item)
+            if selected_item:
+                # print("Edit item:", item_data['values'][0])
+                edit_course_window = Toplevel(main_frame)
+                edit_course_window.title('Add Course')
+                edit_course_window.geometry('400x300')
+
+                edit_course_window.resizable(False, False)  # Prevent window resizing
+                edit_course_window.wm_attributes("-toolwindow", 1) # Disable max and min button
+
+                edit_course_frame = Frame(edit_course_window,padx=10,pady=10,border=2,borderwidth=2)
+                edit_course_frame.pack()
+
+                # Frame for the first row
+                edit_course_row1 = Frame(edit_course_window, padx=10, pady=10, border=2, borderwidth=2)
+                edit_course_row1.pack(fill='x')
+
+                course_name_label = Label(edit_course_row1, text='Course Name', font=("Arial", 14))
+                course_name_label.pack(side='left', pady=5, padx=5)
+
+                course_name_entry = Entry(edit_course_row1, font=("Arial", 12))
+                course_name_entry.pack(side='right', padx=5)
+                course_name_entry.insert(0, item_data["values"][1])
+
+                # Frame for the second row
+                edit_course_row2 = Frame(edit_course_window, padx=10, pady=10, border=2, borderwidth=2)
+                edit_course_row2.pack(fill='x')
+
+                save_course_btn = Button(edit_course_row2, text='Save', command=save_edit_course, font=("Arial", 12), fg='white', bg='blue')
+                save_course_btn.pack(side='left', padx=5, pady=5)
+
+                close_course_btn = Button(edit_course_row2, text='Cancel', command=cancel_edit_course, font=("Arial", 12), fg='white', bg='red')
+                close_course_btn.pack(side='right', padx=5, pady=5)
+            pass
+
+        def delete_course_record():
+            selected_item = course_table.focus()
+            item_data = course_table.item(selected_item)
+
+            if selected_item:
+                confirm = messagebox.askokcancel("Confirm Delete", f"Are you sure you want to delete {item_data['values'][1]}?")
+                if confirm:
+                    c.execute('DELETE FROM courses WHERE course_id = ?', (item_data["values"][0],))
+                    conn.commit()
+                    update_course_table(get_courses())
+                
+
+        course_action_frame = Frame(main_frame,bg=MAINFRAME_COLOR)
+        course_action_frame.pack()
+
+        Label(course_action_frame,text='Select a Record to be Edited or Deleted.',font=label_font,bg=MAINFRAME_COLOR).pack()
+
+        edit_button = Button(course_action_frame, text="Edit",font=button_font, bg=BUTTON_COLOR, fg=FG_COLOR, relief=FLAT,command=edit_course_record)
+        edit_button.pack(side=LEFT, padx=10, pady=10)
+
+        delete_button = Button(course_action_frame, text="Delete", bg=LOGOUT_COLOR, fg=FG_COLOR, relief=FLAT,font=button_font,command=delete_course_record)
+        delete_button.pack(side=RIGHT, padx=10, pady=10)
 
 
         # Categories section
@@ -504,13 +596,42 @@ def openbutton(btn_text):
 
             def save_category():
                 try:
-                    c.execute('INSERT INTO categories (category_name, course_id) VALUES (?,?)', (category_name_entry.get(),0))
+                    # print(next((course for course in get_courses() if course[1] == selected_course.get()),None))
+                    c.execute('INSERT INTO categories (category_name, course_id) VALUES (?,?)', (category_name_entry.get(),next((course[0] for course in get_courses() if course[1] == selected_course.get()),None)))
                     conn.commit()
                     add_category_window.destroy()
                     update_category_table(get_categories())
                     messagebox.showinfo(title='Success',message='Course successfully created.')
                 except Exception as e:
-                    print(e)
+                    messagebox.showerror(title='Error in Adding Categories',message='Save Category Error: ' + str(e))
+                # try:
+                    
+                #     # Fetch the course tuple based on the selected course name
+                #     selected_course_tuple = next((course for course in get_courses() if course[1] == selected_course.get()), None)
+                    
+                #     # Print the selected course tuple for debugging
+                #     print(f"Selected course tuple: {selected_course_tuple}")
+
+                #     # Ensure the course tuple is found and extract the course_id
+                #     if selected_course_tuple:
+                #         course_id = selected_course_tuple[0]
+                        
+                #         # Print the course_id for debugging
+                #         print(f"Course ID: {course_id}")
+                        
+                #         # Execute the INSERT statement
+                #         c.execute('INSERT INTO categories (category_name, course_id) VALUES (?, ?)', (category_name_entry.get(), course_id))
+                #         conn.commit()
+                        
+                #         add_category_window.destroy()
+                #         update_category_table(get_categories())
+                #         messagebox.showinfo(title='Success', message='Category successfully created.')
+                #     else:
+                #         print('Error: Course not found.')
+                #         messagebox.showerror(title='Error', message='Selected course not found.')
+                # except Exception as e:
+                #     print('Save Category Error ' + str(e))
+                #     messagebox.showerror(title='Error', message='An error occurred while saving the category.')
 
             def cancel_category():
                 add_category_window.destroy()
@@ -545,7 +666,7 @@ def openbutton(btn_text):
             course_name_label = Label(category_row2, text='Select Course', font=("Arial", 14))
             course_name_label.pack(side='left', pady=5, padx=5)
 
-            selected_course = IntVar()
+            selected_course = StringVar()
             course_options = [course[1] for course in get_courses()]
             selected_course.set(course_options[0] if course_options[0] is not None else "No Course Added" )
 
@@ -570,17 +691,21 @@ def openbutton(btn_text):
 
         # All categories data with coursename
         def get_categories():
+            
             c.execute('SELECT * FROM categories')
             categories = c.fetchall()
+            categories = [list(category) for category in categories]
+            # print(categories)
             courses = get_courses()
+            # print(courses)
 
             for category in categories:
                 for course in courses:
-                    if str(category[2]) == str(course[0]):
+                    if category[2] == course[0]:
                         category[2] = course[1]
                         break
             
-            # print(categories)
+            print(categories)
 
             return categories
 
@@ -608,23 +733,62 @@ def openbutton(btn_text):
         category_table_frame = Frame(main_frame)
         category_table_frame.pack(pady=10)
 
-        columns = ('category_id', 'categoryname','coursename','actions')
-        category_table = ttk.Treeview(category_table_frame, columns=columns, show='headings')
+        columns = ('category_id', 'categoryname','coursename')
+        category_table = ttk.Treeview(category_table_frame, columns=columns, show='headings',height=5)
         category_table.heading('category_id', text='Category ID')
         category_table.heading('categoryname', text='Category Name')
         category_table.heading('coursename', text='Course Name')
-        category_table.heading('actions', text='Actions')
+        # category_table.heading('actions', text='Actions')
 
         # Configure columns with center alignment
         category_table.column('category_id', anchor='center')
         category_table.column('categoryname', anchor='center')
         category_table.column('coursename', anchor='center')
-        category_table.column('actions', anchor='center')
+        # category_table.column('actions', anchor='center')
+
+        # Create vertical scrollbar and link it to the Treeview
+        category_v_scrollbar = ttk.Scrollbar(category_table_frame, orient='vertical', command=category_table.yview)
+        category_v_scrollbar.pack(side='right', fill='y')
+        category_table.configure(yscrollcommand=category_v_scrollbar.set)
 
         category_table.pack()
 
+        # c.execute('UPDATE categories SET course_id = 1 WHERE category_id = 1')
+        # conn.commit()
+
         # To display all courses at first
         update_category_table(get_categories())
+
+        # Edit and Delete Button Functions
+
+
+        # On click in category record
+
+        def on_category_select(event):
+            selected_item = category_table.focus()
+            item_data = category_table.item(selected_item)
+            print("Selected item data:", item_data)
+
+        category_table.bind('<<TreeviewSelect>>', on_category_select)
+
+        def edit_category_record():
+            pass
+
+        def delete_category_record():
+            pass
+
+        # EDIT / DELETE Buttons for Courses
+
+        category_action_frame = Frame(main_frame,bg=MAINFRAME_COLOR)
+        category_action_frame.pack()
+
+        Label(category_action_frame,text='Select a Record to be Edited or Deleted.',font=label_font,bg=MAINFRAME_COLOR).pack()
+
+        edit_button = Button(category_action_frame, text="Edit",font=button_font, bg=BUTTON_COLOR, fg=FG_COLOR, relief=FLAT,command=edit_category_record)
+        edit_button.pack(side=LEFT, padx=10, pady=10)
+
+        delete_button = Button(category_action_frame, text="Delete", bg=LOGOUT_COLOR, fg=FG_COLOR, relief=FLAT,font=button_font,command=delete_category_record)
+        delete_button.pack(side=RIGHT, padx=10, pady=10)
 
         # Close DB Connection
         conn.commit()

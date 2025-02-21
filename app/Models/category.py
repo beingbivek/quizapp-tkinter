@@ -1,3 +1,2 @@
-class Category{
-    
-}
+class Category:
+    pass
