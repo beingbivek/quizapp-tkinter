@@ -509,7 +509,7 @@ def openbutton(btn_text):
         def on_course_select(event):
             selected_item = course_table.focus()
             item_data = course_table.item(selected_item)
-            print("Selected item data:", item_data)
+            return item_data
         
         course_table.bind('<<TreeviewSelect>>', on_course_select)
 
@@ -767,15 +767,85 @@ def openbutton(btn_text):
         def on_category_select(event):
             selected_item = category_table.focus()
             item_data = category_table.item(selected_item)
-            print("Selected item data:", item_data)
+            return item_data
 
         category_table.bind('<<TreeviewSelect>>', on_category_select)
 
         def edit_category_record():
+            def save_edit_category():
+                try:
+                    c.execute('UPDATE categories SET category_name = ?,course_id = ? WHERE category_id = ?', (category_name_entry.get(),next((course[0] for course in get_courses() if course[1] == selected_course.get()),None),item_data["values"][0]))
+                    conn.commit()
+                    update_category_table(get_categories())
+                    edit_category_window.destroy()
+                    messagebox.showinfo(title='Success',message='Category Edited successfully.')
+                except Exception as e:
+                    messagebox.showerror(title='Error in Editing Category',message='Edit Category Error: ' + str(e))
+
+            def cancel_edit_category():
+                edit_category_window.destroy()
+
+
+            selected_item = category_table.focus()
+            item_data = category_table.item(selected_item)
+            if selected_item:
+                # print("Edit item:", item_data['values'][0])
+                edit_category_window = Toplevel(main_frame)
+                edit_category_window.title('Add Course')
+                edit_category_window.geometry('400x300')
+
+                edit_category_window.resizable(False, False)  # Prevent window resizing
+                edit_category_window.wm_attributes("-toolwindow", 1) # Disable max and min button
+
+                edit_category_frame = Frame(edit_category_window,padx=10,pady=10,border=2,borderwidth=2)
+                edit_category_frame.pack()
+
+                # Frame for the first row
+                edit_category_row1 = Frame(edit_category_window, padx=10, pady=10, border=2, borderwidth=2)
+                edit_category_row1.pack(fill='x')
+
+                category_name_label = Label(edit_category_row1, text='Course Name', font=("Arial", 14))
+                category_name_label.pack(side='left', pady=5, padx=5)
+
+                category_name_entry = Entry(edit_category_row1, font=("Arial", 12))
+                category_name_entry.pack(side='right', padx=5)
+                category_name_entry.insert(0, item_data["values"][1])
+
+                # Frame for the second row
+                edit_category_row2 = Frame(edit_category_window, padx=10, pady=10, border=2, borderwidth=2)
+                edit_category_row2.pack(fill='x')
+
+                course_name_label = Label(edit_category_row2, text='Change Course', font=("Arial", 14))
+                course_name_label.pack(side='left', pady=5, padx=5)
+
+                selected_course = StringVar()
+                course_options = [course[1] for course in get_courses()]
+                selected_course.set(item_data["values"][2])
+
+                course_dropdown = OptionMenu(edit_category_row2, selected_course, *course_options)
+                course_dropdown.pack(side='right', padx=5)
+
+                # Frame for the buttons row
+                edit_category_button_row_frame = Frame(edit_category_window, padx=10, pady=10, border=2, borderwidth=2)
+                edit_category_button_row_frame.pack(fill='x')
+
+                save_category_btn = Button(edit_category_button_row_frame, text='Save', command=save_edit_category, font=("Arial", 12), fg='white', bg='blue')
+                save_category_btn.pack(side='left', padx=5, pady=5)
+
+                close_category_btn = Button(edit_category_button_row_frame, text='Cancel', command=cancel_edit_category, font=("Arial", 12), fg='white', bg='red')
+                close_category_btn.pack(side='right', padx=5, pady=5)
             pass
 
         def delete_category_record():
-            pass
+            selected_item = category_table.focus()
+            item_data = category_table.item(selected_item)
+
+            if selected_item:
+                confirm = messagebox.askokcancel("Confirm Delete", f"Are you sure you want to delete {item_data['values'][1]} from {item_data['values'][2]}?")
+                if confirm:
+                    c.execute('DELETE FROM categories WHERE category_id = ?', (item_data["values"][0],))
+                    conn.commit()
+                    update_category_table(get_categories())
 
         # EDIT / DELETE Buttons for Courses
 
