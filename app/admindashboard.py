@@ -111,10 +111,39 @@ def openbutton(btn_text):
 
     # user - admin section
 
+
+
+
+    # Modify the `elif btn_text == buttons[1]:` section
     elif btn_text == buttons[1]:
         # Clear the main frame
         for widget in main_frame.winfo_children():
             widget.destroy()
+
+        # Function to fetch users from the database
+        def fetch_users():
+            try:
+                conn = sqlite3.connect('quiz.db')  # Replace with your actual database name
+                c = conn.cursor()
+                c.execute("SELECT user_id, username, fullname, contact, email FROM users")
+                users = c.fetchall()
+                conn.close()
+                print("Fetched Users:", users)  # Debugging: Print fetched data
+                return users
+            except Exception as e:
+                messagebox.showerror("Error", f"An error occurred while fetching users: {e}")
+                return []
+
+        # Function to refresh the table with data from the database
+        def refresh_table():
+            global rows
+            rows = fetch_users()  # Fetch users from the database
+            print("Rows Data:", rows)  # Debugging: Print rows data
+            for row in tree.get_children():
+                tree.delete(row)  # Clear the existing rows in the table
+            for row in rows:
+                tree.insert("", "end", values=row)  # Insert fetched data into the table
+            tree.configure(height=len(rows))
 
         # Colors
         bgcolor = "#E0E0E0"
@@ -179,17 +208,10 @@ def openbutton(btn_text):
             tree.heading(col, text=col)
             tree.column(col, anchor=CENTER, width=150)
 
-        # Sample data
-        rows = [
-            ("1", "poplol2", "Ram Rai", "9876543210", "a@gmail.com"),
-            ("2", "user123", "John Doe", "1234567890", "john@example.com"),
-            ("3", "testuser", "Jane Doe", "0987654321", "jane@example.com")
-        ]
+        # Fetch and display users from the database
+        refresh_table()
 
-        for row in rows:
-            tree.insert("", "end", values=row)
-
-        tree.configure(height=len(rows))
+        # Ensure the Treeview is placed correctly
         tree.place(relx=0, rely=0, relwidth=1, relheight=1)
 
         # Action Buttons
@@ -198,155 +220,6 @@ def openbutton(btn_text):
 
         delete_button = Button(main_frame, text="Delete", bg=delete_color, fg="black", relief=FLAT, command=lambda: delete_user())
         delete_button.place(relx=0.15, rely=0.9, relwidth=0.1, relheight=0.05)
-
-        # Functions
-        def user_no_selected(selected_user_no):
-            for row in tree.get_children():
-                tree.delete(row)
-
-            num_rows = int(selected_user_no)
-            for i in range(min(num_rows, len(rows))):
-                tree.insert("", "end", values=rows[i])
-
-            tree.configure(height=num_rows)
-
-        def filter_info(filter_with):
-            for row in tree.get_children():
-                tree.delete(row)
-
-            if filter_with == "Username":
-                sorted_rows = sorted(rows, key=lambda x: x[1].lower())
-            elif filter_with == "SN":
-                sorted_rows = sorted(rows, key=lambda x: int(x[0]))
-            else:
-                sorted_rows = rows
-
-            for row in sorted_rows:
-                tree.insert("", "end", values=row)
-
-            tree.configure(height=len(sorted_rows))
-
-        def search_table():
-            search_term = search_entry.get().strip().lower()
-
-            for row in tree.get_children():
-                tree.delete(row)
-
-            filtered_rows = [row for row in rows if any(search_term in str(cell).lower() for cell in row)]
-
-            for row in filtered_rows:
-                tree.insert("", "end", values=row)
-
-            tree.configure(height=len(filtered_rows))
-
-        def register_user():
-            register_window = Toplevel(root)
-            register_window.title("Register User")
-            register_window.geometry("400x300")
-
-            Label(register_window, text="Username:").place(relx=0.1, rely=0.1)
-            username_entry = Entry(register_window)
-            username_entry.place(relx=0.3, rely=0.1)
-
-            Label(register_window, text="Name:").place(relx=0.1, rely=0.2)
-            name_entry = Entry(register_window)
-            name_entry.place(relx=0.3, rely=0.2)
-
-            Label(register_window, text="Contact:").place(relx=0.1, rely=0.3)
-            contact_entry = Entry(register_window)
-            contact_entry.place(relx=0.3, rely=0.3)
-
-            Label(register_window, text="Email:").place(relx=0.1, rely=0.4)
-            email_entry = Entry(register_window)
-            email_entry.place(relx=0.3, rely=0.4)
-
-            Button(register_window, text="Submit", command=lambda: submit_registration(
-                username_entry.get(), name_entry.get(), contact_entry.get(), email_entry.get(), register_window
-            )).place(relx=0.4, rely=0.6)
-
-        def submit_registration(username, name, contact, email, window):
-            new_user = (str(len(rows) + 1), username, name, contact, email)
-            rows.append(new_user)
-            tree.insert("", "end", values=new_user)
-            window.destroy()
-
-        def edit_user():
-            selected_item = tree.selection()
-            if not selected_item:
-                messagebox.showwarning("No Selection", "Please select a user to edit.")
-                return
-
-            selected_user = tree.item(selected_item, "values")
-            edit_window = Toplevel(root)
-            edit_window.title("Edit User")
-            edit_window.geometry("400x300")
-
-            Label(edit_window, text="Username:").place(relx=0.1, rely=0.1)
-            username_entry = Entry(edit_window)
-            username_entry.insert(0, selected_user[1])
-            username_entry.place(relx=0.3, rely=0.1)
-
-            Label(edit_window, text="Name:").place(relx=0.1, rely=0.2)
-            name_entry = Entry(edit_window)
-            name_entry.insert(0, selected_user[2])
-            name_entry.place(relx=0.3, rely=0.2)
-
-            Label(edit_window, text="Contact:").place(relx=0.1, rely=0.3)
-            contact_entry = Entry(edit_window)
-            contact_entry.insert(0, selected_user[3])
-            contact_entry.place(relx=0.3, rely=0.3)
-
-            Label(edit_window, text="Email:").place(relx=0.1, rely=0.4)
-            email_entry = Entry(edit_window)
-            email_entry.insert(0, selected_user[4])
-            email_entry.place(relx=0.3, rely=0.4)
-
-            Button(edit_window, text="Submit", command=lambda: submit_edit(
-                selected_item, username_entry.get(), name_entry.get(), contact_entry.get(), email_entry.get(), edit_window
-            )).place(relx=0.4, rely=0.6)
-
-        def submit_edit(selected_item, username, name, contact, email, window):
-            for i, row in enumerate(rows):
-                if row[0] == tree.item(selected_item, "values")[0]:
-                    rows[i] = (row[0], username, name, contact, email)
-                    break
-
-            tree.item(selected_item, values=(rows[i]))
-            window.destroy()
-
-        def delete_user():
-            global rows  # Declare rows as global
-
-            # Get the selected item from the treeview
-            selected_item = tree.selection()
-            
-            # If no item is selected, show a warning and return
-            if not selected_item:
-                messagebox.showwarning("No Selection", "Please select a user to delete.")
-                return
-
-            # Confirm deletion with the user
-            if messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this user?"):
-                # Get the values of the selected item
-                selected_user = tree.item(selected_item, "values")
-                print(f"Selected User: {selected_user}")  # Debugging: Print the selected user
-
-                # Update the global rows list by excluding the selected user
-                rows = [row for row in rows if row[0] != selected_user[0]]
-                print(f"Updated Rows: {rows}")  # Debugging: Print the updated rows list
-
-                # Remove the selected item from the treeview
-                tree.delete(selected_item)
-
-                # Refresh the treeview with the updated rows
-                for row in tree.get_children():
-                    tree.delete(row)
-                
-                for row in rows:
-                    tree.insert("", "end", values=row)
-
-                # Update the treeview height
-                tree.configure(height=len(rows))
 
     # Courses - admin section - bivek
     elif btn_text == buttons[2]:
