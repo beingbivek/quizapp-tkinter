@@ -149,7 +149,80 @@ def openbutton(btn_text):
         for row in mock_data:
             mock_table.insert('', END, values=row)
         mock_table.pack()
+        
+    #Leaderboard user section.    
+    elif btn_text == "LeaderBoard":
+        
+        def create_table(frame, data):
 
+            headers = ["SN", "Username", "Score"]
+            for col, header in enumerate(headers):
+                Label(frame, text=header, font=("Arial", 12, "bold"), bg="grey", width=10).grid(row=0, column=col, padx=1, pady=1)
+
+            for row_idx, row_data in enumerate(data):
+                for col_idx, value in enumerate(row_data):
+                    Label(frame, text=value, font=("Arial", 12), bg="white", width=10, relief="ridge").grid(row=row_idx + 1, column=col_idx, padx=1, pady=1)
+
+        header = Label(main_frame, text="Leaderboard", font=header_font, bg=MAINFRAME_COLOR)
+        header.pack(pady=10)
+        
+        data = {
+            "Loksewa": [
+                [1, "User1", "90"],
+                [2, "User2", "85"],
+                [3, "User3", "75"],
+                [4, "User4", "65"],
+                [5, "User5", "60"],
+                [6, "User6", "55"],
+            ],
+            "CEE": [
+                [1, "User5", "95"],
+                [2, "User6", "88"],
+                [3, "User7", "78"],
+                [4, "User8", "82"],
+                [5, "User5", "60"],
+                [6, "User6", "55"],
+            ],
+            "IOE": [
+                [1, "User9", "92"],
+                [2, "User10", "87"],
+                [3, "User11", "77"],
+                [4, "User12", "81"],
+                [5, "User5", "60"],
+                [6, "User6", "55"],
+            ],
+            "Driving": [
+                [1, "User13", "89"],
+                [2, "User14", "84"],
+                [3, "User15", "74"],
+                [4, "User16", "79"],
+                [5, "User5", "60"],
+                [6, "User6", "55"],
+            ],
+        }
+
+        table_frame1 = Frame(main_frame, bd=2)
+        table_frame1.place(x=40, y=135, width=390, height=250)
+        Label(main_frame, text="Loksewa", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=40, y=100)
+        create_table(table_frame1, data["Loksewa"])
+
+        table_frame2 = Frame(main_frame, bd=2)
+        table_frame2.place(x=550, y=135, width=390, height=250)
+        Label(main_frame, text="CEE", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=550, y=100)
+        create_table(table_frame2, data["CEE"])
+
+        table_frame3 = Frame(main_frame, bd=2)
+        table_frame3.place(x=40, y=525, width=390, height=250)
+        Label(main_frame, text="IOE", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=40, y=490)
+        create_table(table_frame3, data["IOE"])
+
+        table_frame4 = Frame(main_frame, bd=2)
+        table_frame4.place(x=550, y=525, width=390, height=250)
+        Label(main_frame, text="Driving", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=550, y=490)
+        create_table(table_frame4, data["Driving"])
+
+        pass
+    
     # Edit profile - user section - mukesh
     elif btn_text == "Profile":
         # Edit profile Functions - mukesh
@@ -182,17 +255,26 @@ def openbutton(btn_text):
                 messagebox.showerror("Database Error", f"An error occurred: {e}")
                 return ['Mukesh Babu Acharya', 'babu@gmail.com', 'Babu.net', '9862148844', '123 Main Street', 'password']
 
-        def update_profile_in_db(user_id, fullname, email, username, contact, address, password=None):
+        def update_profile_in_db(user_id, fullname, email, username, contact, address, password):
             """Update the user profile in the database."""
             try:
                 conn = sqlite3.connect(DATABASE_FILE)
                 c = conn.cursor()
-                query = """
-                UPDATE users
-                SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, password = ?
-                WHERE user_id = ?
-                """
-                c.execute(query, (fullname, email, username, contact, address, submit(), user_id))
+                if password != None:
+                    query = """
+                    UPDATE users
+                    SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, password = ?
+                    WHERE user_id = ?
+                    """
+                    c.execute(query, (fullname, email, username, contact, address, password, user_id))
+                else:
+                    query = """
+                    UPDATE users
+                    SET fullname = ?, email = ?, username = ?, contact = ?, address = ?
+                    WHERE user_id = ?
+                    """
+                    c.execute(query, (fullname, email, username, contact, address, user_id))    
+                
                 conn.commit()
                 conn.close()
                 messagebox.showinfo("Success", "Profile updated successfully!")
@@ -249,6 +331,7 @@ def openbutton(btn_text):
 
         # Load user profile data
         users = load_profile()
+        print(users)
         
         header = Label(main_frame, text="Profile", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
@@ -287,7 +370,7 @@ def openbutton(btn_text):
             entries.append(entry)
 
         # Buttons
-        Button(main_frame,text='UPDATE', bg="#34495E", fg="black", font=('Arial', 14, 'bold'), command=update_profile).place(x=screen_width/2.5, y=690)
+        Button(main_frame,text='UPDATE', bg=BUTTON_COLOR, fg=FG_COLOR, font=('Arial', 14, 'bold'), command=update_profile).place(x=screen_width/2.5, y=690)
 
         pass
     
