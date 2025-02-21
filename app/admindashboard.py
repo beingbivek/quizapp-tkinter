@@ -417,7 +417,7 @@ def openbutton(btn_text):
             close_course_btn.pack(side='right', padx=5, pady=5)
 
 
-        # Database Connection
+        # Database Connection Open
         conn = sqlite3.connect(DATABASE_FILE)
         c = conn.cursor()
 
@@ -480,9 +480,16 @@ def openbutton(btn_text):
 
         columns = ('course_id', 'coursename','actions')
         course_table = ttk.Treeview(course_table_frame, columns=columns, show='headings')
-        course_table.heading('course_id', text='Course ID')
-        course_table.heading('coursename', text='Course Name')
-        course_table.heading('actions', text='Actions')
+        course_table.heading('course_id', text='Course ID', anchor="center")
+        course_table.heading('coursename', text='Course Name', anchor="center")
+        course_table.heading('actions', text='Actions', anchor="center")
+
+        # Configure columns with center alignment
+        course_table.column('course_id', anchor='center')
+        course_table.column('coursename', anchor='center')
+        course_table.column('actions', anchor='center')
+
+        
         course_table.pack()
 
         # To display all courses at first
@@ -497,17 +504,11 @@ def openbutton(btn_text):
 
             def save_category():
                 try:
-                    all_courses = get_courses()
-                    for course in all_courses:
-                        if course[1].lower() == course_name_entry.get().lower():
-                            messagebox.showerror(title='Course Name Repeated',message='Course Name is being repeated so use another name.')
-                            add_course()
-                            break
-                    else:
-                        c.execute('INSERT INTO courses (coursename) VALUES (?)', (course_name_entry.get(),))
-                        conn.commit()
-                        update_course_table(get_courses())
-                        messagebox.showinfo(title='Success',message='Course successfully created.')
+                    c.execute('INSERT INTO categories (category_name, course_id) VALUES (?,?)', (category_name_entry.get(),0))
+                    conn.commit()
+                    add_category_window.destroy()
+                    update_category_table(get_categories())
+                    messagebox.showinfo(title='Success',message='Course successfully created.')
                 except Exception as e:
                     print(e)
 
@@ -515,34 +516,51 @@ def openbutton(btn_text):
                 add_category_window.destroy()
 
             add_category_window = Toplevel(main_frame)
-            add_category_window.title('Add Course')
+            add_category_window.title('Add Category')
             add_category_window.geometry('400x300')
 
             add_category_window.resizable(False, False)  # Prevent window resizing
             add_category_window.wm_attributes("-toolwindow", 1) # Disable max and min button
 
-            add_course_frame = Frame(add_category_window,padx=10,pady=10,border=2,borderwidth=2)
-            add_course_frame.pack()
+            # conn = sqlite3.connect(DATABASE_FILE)
+            # c = conn.cursor()
+
+            add_category_frame = Frame(add_category_window,padx=10,pady=10,border=2,borderwidth=2)
+            add_category_frame.pack()
             
             # Frame for the first row
-            row1 = Frame(add_category_window, padx=10, pady=10, border=2, borderwidth=2)
-            row1.pack(fill='x')
+            category_row1 = Frame(add_category_window, padx=10, pady=10, border=2, borderwidth=2)
+            category_row1.pack(fill='x')
 
-            course_name_label = Label(row1, text='Course Name', font=("Arial", 14))
-            course_name_label.pack(side='left', pady=5, padx=5)
+            category_name_label = Label(category_row1, text='Category Name', font=("Arial", 14))
+            category_name_label.pack(side='left', pady=5, padx=5)
 
-            course_name_entry = Entry(row1, font=("Arial", 12))
-            course_name_entry.pack(side='right', padx=5)
+            category_name_entry = Entry(category_row1, font=("Arial", 12))
+            category_name_entry.pack(side='right', padx=5)
 
             # Frame for the second row
-            row2 = Frame(add_category_window, padx=10, pady=10, border=2, borderwidth=2)
-            row2.pack(fill='x')
+            category_row2 = Frame(add_category_window, padx=10, pady=10, border=2, borderwidth=2)
+            category_row2.pack(fill='x')
 
-            save_course_btn = Button(row2, text='Save', command=save_category, font=("Arial", 12), fg='white', bg='blue')
-            save_course_btn.pack(side='left', padx=5, pady=5)
+            course_name_label = Label(category_row2, text='Select Course', font=("Arial", 14))
+            course_name_label.pack(side='left', pady=5, padx=5)
 
-            close_course_btn = Button(row2, text='Cancel', command=cancel_category, font=("Arial", 12), fg='white', bg='red')
-            close_course_btn.pack(side='right', padx=5, pady=5)
+            selected_course = IntVar()
+            course_options = [course[1] for course in get_courses()]
+            selected_course.set(course_options[0] if course_options[0] is not None else "No Course Added" )
+
+            course_dropdown = OptionMenu(category_row2, selected_course, *course_options)
+            course_dropdown.pack(side='right', padx=5)
+
+            # Frame for the buttons row
+            category_button_row_frame = Frame(add_category_window, padx=10, pady=10, border=2, borderwidth=2)
+            category_button_row_frame.pack(fill='x')
+
+            save_category_btn = Button(category_button_row_frame, text='Save', command=save_category, font=("Arial", 12), fg='white', bg='blue')
+            save_category_btn.pack(side='left', padx=5, pady=5)
+
+            close_category_btn = Button(category_button_row_frame, text='Cancel', command=cancel_category, font=("Arial", 12), fg='white', bg='red')
+            close_category_btn.pack(side='right', padx=5, pady=5)
 
         def update_category_table(results):
             for row in category_table.get_children():
@@ -596,6 +614,13 @@ def openbutton(btn_text):
         category_table.heading('categoryname', text='Category Name')
         category_table.heading('coursename', text='Course Name')
         category_table.heading('actions', text='Actions')
+
+        # Configure columns with center alignment
+        category_table.column('category_id', anchor='center')
+        category_table.column('categoryname', anchor='center')
+        category_table.column('coursename', anchor='center')
+        category_table.column('actions', anchor='center')
+
         category_table.pack()
 
         # To display all courses at first
@@ -603,7 +628,7 @@ def openbutton(btn_text):
 
         # Close DB Connection
         conn.commit()
-        conn.close()
+        # conn.close()
 
 
 
