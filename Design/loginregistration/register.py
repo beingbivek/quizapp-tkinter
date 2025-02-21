@@ -70,8 +70,8 @@ def adjust_frames(event=None):
     frame.place(x=x_main, y=y_main, width=500, height=250)
     infotopframe.place(x=x_main, y=y_main, width=500, height=20)
     backframe.place(x=x_main + 450, y=y_main, width=50, height=20)
-    register_button.place(x=button_x, y=30)
-    login_button.place(x=button_x + 100, y=30)
+    register_button.place(x=button_x, y=50)
+    login_button.place(x=button_x + 100, y=50)
 
 register.bind("<Configure>", adjust_frames)
 
