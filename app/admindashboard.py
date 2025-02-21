@@ -7,6 +7,7 @@ import runpy
 import sqlite3
 from tkinter import simpledialog
 import tkinter as tk
+from tkcalendar import DateEntry  # Import DateEntry for date selection
 
 # Admin Window
 root = Tk()
@@ -426,6 +427,86 @@ def openbutton(btn_text):
 
     # Leaderboard - admin section
     elif btn_text == buttons[3]:
+        def search():
+            query = search_entry.get()
+            if query:
+                messagebox.showinfo("Search", f"You searched for: {query}")
+            else:
+                messagebox.showwarning("Search", "Please enter a search term.")
+
+        def course_selected(selected_course):
+            messagebox.showinfo("Course Selected", f"You selected: {selected_course}")
+            populate_table(selected_course)
+
+        def populate_table(selected_course):
+            # Clear the previous data in Treeview
+            for item in table.get_children():
+                table.delete(item)
+
+            # Sample table data
+            data = [
+                [1, selected_course, "User1", "90"],
+                [2, selected_course, "User2", "85"],
+                [3, selected_course, "User3", "75"],
+                [4, selected_course, "User4", "80"],
+            ]
+
+            # Insert new data into the table
+            for row in data:
+                table.insert("", "end", values=row)
+                
+        header = Label(main_frame, text="Leaderboard", font=header_font, bg=MAINFRAME_COLOR)
+        header.pack(pady=10)
+                
+            # Search Section
+        searchfr = Frame(main_frame, bd=2, relief="ridge", bg="lightgrey")
+        searchfr.place(x=420, y=200, width=305, height=50)
+        search_entry = Entry(searchfr, width=15, font=("Arial", 14))
+        search_entry.place(x=90, y=8)
+        search_button = Button(searchfr, text="Search", font=("Arial", 12), command=search)
+        search_button.place(x=5, y=4)
+
+        # Course Selection
+        course_frame = Frame(main_frame, bd=2, relief="ridge", bg="lightgrey")
+        course_frame.place(x=420, y=300, width=305, height=50)
+        courses = ["Loksewa", "CEE", "IOE", "Driving"]
+        selected_course = StringVar(value="Choose course")
+        course_menu = OptionMenu(course_frame, selected_course, *courses, command=course_selected)
+        course_menu.config(font=("Arial", 12), width=20)
+        course_menu.place(x=15, y=4)
+
+        # Date Selection
+        Label(main_frame, text="From:", font=('Arial', 14),bg=PROFILE_COLOR).place(x=1125, y=200)
+        date_from = DateEntry(main_frame, width=15, font=('Arial', 14), background='darkblue', foreground='white', borderwidth=2)
+        date_from.place(x=1200, y=200)
+
+        Label(main_frame, text="To:", font=('Arial', 14),bg=PROFILE_COLOR).place(x=1125, y=250)
+        date_to = DateEntry(main_frame, width=15, font=('Arial', 14), background='darkblue', foreground='white', borderwidth=2)
+        date_to.place(x=1200, y=250)
+
+        # Table Frame (Treeview)
+        table_frame = Frame(main_frame, bd=2, relief="ridge")
+        table_frame.place(x=550, y=500, width=700, height=250)
+
+        # Creating Treeview table
+        columns = ("SN", "Course", "Username", "Score")
+        table = ttk.Treeview(table_frame, columns=columns, show="headings")
+
+        # Defining column headings
+        for col in columns:
+            table.heading(col, text=col)
+            table.column(col, anchor="center", width=150)
+
+        # Adding Scrollbars
+        scroll_y = Scrollbar(table_frame, orient=VERTICAL, command=table.yview)
+        scroll_y.pack(side=RIGHT, fill=Y)
+        table.configure(yscrollcommand=scroll_y.set)
+
+        # Placing the table
+        table.pack(expand=True, fill=BOTH)
+
+        populate_table("Loksewa")  # Default table population
+        
         pass
 
     # Mocktest - admin section - aayush

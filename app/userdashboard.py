@@ -202,23 +202,23 @@ def openbutton(btn_text):
         }
 
         table_frame1 = Frame(main_frame, bd=2)
-        table_frame1.place(x=40, y=135, width=390, height=250)
-        Label(main_frame, text="Loksewa", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=40, y=100)
+        table_frame1.place(x=400, y=135, width=390, height=250)
+        Label(main_frame, text="Loksewa", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=400, y=100)
         create_table(table_frame1, data["Loksewa"])
 
         table_frame2 = Frame(main_frame, bd=2)
-        table_frame2.place(x=550, y=135, width=390, height=250)
-        Label(main_frame, text="CEE", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=550, y=100)
+        table_frame2.place(x=900, y=135, width=390, height=250)
+        Label(main_frame, text="CEE", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=900, y=100)
         create_table(table_frame2, data["CEE"])
 
         table_frame3 = Frame(main_frame, bd=2)
-        table_frame3.place(x=40, y=525, width=390, height=250)
-        Label(main_frame, text="IOE", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=40, y=490)
+        table_frame3.place(x=400, y=525, width=390, height=250)
+        Label(main_frame, text="IOE", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=400, y=490)
         create_table(table_frame3, data["IOE"])
 
         table_frame4 = Frame(main_frame, bd=2)
-        table_frame4.place(x=550, y=525, width=390, height=250)
-        Label(main_frame, text="Driving", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=550, y=490)
+        table_frame4.place(x=900, y=525, width=390, height=250)
+        Label(main_frame, text="Driving", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=900, y=490)
         create_table(table_frame4, data["Driving"])
 
         pass
