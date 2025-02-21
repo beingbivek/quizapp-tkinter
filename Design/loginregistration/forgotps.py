@@ -11,15 +11,15 @@ tablecolor= '#00509e'
 
 
 def back_to_welcome():
-    a.destroy()
+    forgotps.destroy()
     subprocess.Popen(["python", "welcome.py"])
 
 def open_login():
-    a.destroy()
+    forgotps.destroy()
     subprocess.Popen(["python", "login.py"])
 
 def open_registration():
-    a.destroy()
+    forgotps.destroy()
     subprocess.Popen(["python", "register.py"])
 
 def forgot_pw():
@@ -47,15 +47,15 @@ def forgot_pw():
     user_info = f"Username/Email: {username_or_email}\nNew Password: {'*' * len(newpassword)}"
     messagebox.showinfo("Success", f"Password updated successfully!\n\n{user_info}")
 
-a = Tk()
-a.title("Forgot Password")
-a.attributes('-fullscreen', True)
+forgotps = Tk()
+forgotps.title("Forgot Password")
+forgotps.attributes('-fullscreen', True)
 
 def adjust_frames(event=None):
-    a.update_idletasks()
+    forgotps.update_idletasks()
 
-    window_width = a.winfo_width()
-    window_height = a.winfo_height()
+    window_width = forgotps.winfo_width()
+    window_height = forgotps.winfo_height()
 
     if window_width > 700 or window_height > 400:
         x_main = (window_width - 700) // 2
@@ -74,20 +74,20 @@ def adjust_frames(event=None):
     register_button.place(x=button_x, y=30)
     login_button.place(x=button_x + 100, y=30)
 
-a.bind("<Configure>", adjust_frames)
+forgotps.bind("<Configure>", adjust_frames)
 
-framemain = Frame(a, bd=2, relief="ridge", padx=0, pady=0,bg=bgcolor)
+framemain = Frame(forgotps, bd=2, relief="ridge", padx=0, pady=0,bg=bgcolor)
 framemain.place(x=0, y=0, width=700, height=400)
 
-topframemain = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg='#003366')
+topframemain = Frame(forgotps, bd=2, relief="ridge", padx=0, pady=0, bg='#003366')
 topframemain.place(x=0, y=0, width=700, height=25)
 Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg='#003366').place(x=0, y=0)
 
-welcomeframe = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
+welcomeframe = Frame(forgotps, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
 welcomeframe.place(x=150, y=70, width=400, height=60)
 Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 30, "bold"), bg=tablecolor).pack(pady=10, padx=10)
 
-frame = Frame(a, bd=2, relief="ridge", padx=20, pady=20, bg=bgcolor)
+frame = Frame(forgotps, bd=2, relief="ridge", padx=20, pady=20, bg=bgcolor)
 frame.place(x=200, y=140, width=300, height=250)
 
 Label(frame, text="Email/Username:",bg='white',fg='black').place(x=5, y=0)
@@ -100,11 +100,11 @@ user_entry.place(x=5, y=70)
 
 Button(frame, text="Update", command=forgot_pw,highlightbackground='white').place(x=100, y=190)
 
-infotopframe = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg='#003366')
+infotopframe = Frame(forgotps, bd=2, relief="ridge", padx=0, pady=0, bg='#003366')
 infotopframe.place(x=200, y=140, width=300, height=20)
 Label(infotopframe, text="Forgot Password", font=("Arial", 10), padx=15, pady=-2, bg='#003366').place(x=0, y=0)
 
-backframe = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg='black')
+backframe = Frame(forgotps, bd=2, relief="ridge", padx=0, pady=0, bg='black')
 backframe.place(x=450, y=140, width=50, height=20)
 
 # Use Label as a button
@@ -127,4 +127,4 @@ login_button = Button(framemain, text="Login", command=open_login,highlightbackg
 login_button.place(x=600, y=30)
 
 adjust_frames()
-a.mainloop()
+forgotps.mainloop()

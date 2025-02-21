@@ -10,16 +10,16 @@ frame_bg = "#e6e6e6"  # Gray
 label_text_color = "#003366"  # Deep blue for text
 tablecolor = '#00509e'
 
-a = Tk()
-a.title("Register")
-a.attributes('-fullscreen', True)
+register = Tk()
+register.title("Register")
+register.attributes('-fullscreen', True)
 
 def back_to_welcome():
-    a.destroy()
+    register.destroy()
     subprocess.Popen(["python", "welcome.py"])
 
 def open_login():
-    a.destroy()
+    register.destroy()
     subprocess.Popen(["python", "login.py"])
 
 def register_user():
@@ -44,7 +44,7 @@ def register_user():
         conn.commit()
         conn.close()
         messagebox.showinfo("Success", "Registration successful!")
-        a.destroy()
+        register.destroy()
         subprocess.Popen(["python", "userdashboard.py"])
     except sqlite3.IntegrityError:
         messagebox.showerror("Error", "Username or email already exists")
@@ -52,9 +52,9 @@ def register_user():
         messagebox.showerror("Error", f"An error occurred: {e}")
 
 def adjust_frames(event=None):
-    a.update_idletasks()
-    window_width = a.winfo_width()
-    window_height = a.winfo_height()
+    register.update_idletasks()
+    window_width = register.winfo_width()
+    window_height = register.winfo_height()
 
     if window_width > 700 or window_height > 400:
         x_main = (window_width - 500) // 2
@@ -73,20 +73,20 @@ def adjust_frames(event=None):
     register_button.place(x=button_x, y=30)
     login_button.place(x=button_x + 100, y=30)
 
-a.bind("<Configure>", adjust_frames)
+register.bind("<Configure>", adjust_frames)
 
-framemain = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg=bgcolor)
+framemain = Frame(register, bd=2, relief="ridge", padx=0, pady=0, bg=bgcolor)
 framemain.place(x=0, y=0, width=700, height=400)
 
-topframemain = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg='#003366')
+topframemain = Frame(register, bd=2, relief="ridge", padx=0, pady=0, bg='#003366')
 topframemain.place(x=0, y=0, width=700, height=25)
 Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg='#003366').place(x=0, y=0)
 
-welcomeframe = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
+welcomeframe = Frame(register, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
 welcomeframe.place(x=150, y=70, width=400, height=60)
 Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 30, "bold"), bg=tablecolor).pack(pady=10, padx=10)
 
-frame = Frame(a, bd=2, relief="ridge", padx=20, pady=20, bg=bgcolor)
+frame = Frame(register, bd=2, relief="ridge", padx=20, pady=20, bg=bgcolor)
 frame.place(x=100, y=140, width=500, height=250)
 
 Label(frame, text="Name:", bg='white', fg='black').place(x=5, y=0)
@@ -115,24 +115,15 @@ confirm_pass_entry.place(x=250, y=70)
 
 Button(frame, text="Register", command=register_user, highlightbackground='white').place(x=200, y=190)
 
-infotopframe = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg='#003366')
+infotopframe = Frame(register, bd=2, relief="ridge", padx=0, pady=0, bg='#003366')
 infotopframe.place(x=100, y=140, width=500, height=20)
 Label(infotopframe, text="Register", font=("Arial", 10), padx=15, pady=-2, bg='#003366').place(x=0, y=0)
 
-backframe = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg='black')
+backframe = Frame(register, bd=2, relief="ridge", padx=0, pady=0, bg='black')
 backframe.place(x=450, y=140, width=50, height=20)
 
-# Use Label as a button
-back_label = Label(
-    backframe,
-    text="Back",
-    bg="black",
-    fg="white",
-    font=("Arial", 10),
-)
+back_label = Label(backframe, text="Back", bg="black", fg="white", font=("Arial", 10))
 back_label.place(x=0, y=-1)
-
-# Bind a click event to the label
 back_label.bind("<Button-1>", lambda e: back_to_welcome())
 
 register_button = Button(framemain, text="Register", command=register_user, highlightbackground='white')
@@ -142,4 +133,4 @@ login_button = Button(framemain, text="Login", command=open_login, highlightback
 login_button.place(x=600, y=30)
 
 adjust_frames()
-a.mainloop()
+register.mainloop()

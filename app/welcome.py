@@ -3,8 +3,6 @@ import subprocess
 import sqlite3
 
 def create_database():
-
-
     try:
         # Database creation
         conn = sqlite3.connect(QD.DATABASE_FILE)
@@ -79,19 +77,6 @@ def create_database():
         )
         ''')
 
-        # Leaderboard table
-        # c.execute('''
-        # CREATE TABLE IF NOT EXISTS leaderboard (
-        #     lb_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        #     user_id INTEGER NOT NULL,
-        #     course_id INTEGER NOT NULL,
-        #     score INTEGER NOT NULL,
-        #     scoredtime DATETIME,
-        #     FOREIGN KEY (user_id) REFERENCES users (user_id),
-        #     FOREIGN KEY (course_id) REFERENCES courses (course_id)
-        # )
-        # ''')
-
         # Mocktest results table
         c.execute('''
         CREATE TABLE IF NOT EXISTS mocktestresults (
@@ -115,8 +100,6 @@ def create_database():
         # Close the connection
         conn.close()
 
-
-
 # Colors
 bgcolor = "#ffffff"  # Light gray
 header_color = "#003366"  # Deep blue
@@ -124,28 +107,28 @@ frame_bg = "#e6e6e6"  # Gray
 label_text_color = "#003366"  # Deep blue for text
 tablecolor= '#00509e'
 
-a = Tk()
-a.title("Quiz App")
-a.attributes('-fullscreen', True)
+welcome = Tk()
+welcome.title("Quiz App")
+welcome.attributes('-fullscreen', True)
 
 import quizdefaults as QD
 
 create_database()
 
 def open_registration():
-    a.destroy()
+    welcome.destroy()
     subprocess.Popen(["python", "register.py"])
 
 def open_login():
-    a.destroy()
+    welcome.destroy()
     subprocess.Popen(["python", "login.py"])
 
 # Function to center frames dynamically
 def center_frames(event=None):
-    a.update_idletasks()
+    welcome.update_idletasks()
     
-    window_width = a.winfo_width()
-    window_height = a.winfo_height()
+    window_width = welcome.winfo_width()
+    window_height = welcome.winfo_height()
     
     frame_width = 700
     frame_height = 400
@@ -181,21 +164,21 @@ def center_frames(event=None):
     login_button.place(x=button_x + 100, y=30)
 
 # Main frame
-framemain = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg=bgcolor)
+framemain = Frame(welcome, bd=2, relief="ridge", padx=0, pady=0, bg=bgcolor)
 framemain.place(x=0, y=0, width=700, height=400)
 
 # Top frame with title
-topframemain = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
+topframemain = Frame(welcome, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
 topframemain.place(x=0, y=0, width=700, height=25)
 Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg=header_color, fg="white").place(x=0, y=0)
 
 # Welcome frame
-welcomeframe = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
+welcomeframe = Frame(welcome, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
 welcomeframe.place(x=150, y=70, width=400, height=60)
 Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 30, "bold"), bg=tablecolor, fg="white").pack(pady=10, padx=10)
 
 # Welcome message frame
-frame = Frame(a, bd=2, relief="ridge", padx=20, pady=20, bg=bgcolor)
+frame = Frame(welcome, bd=2, relief="ridge", padx=20, pady=20, bg=bgcolor)
 Label(frame, text='''
 Get ready to explore a world of knowledge and sharpen your skills with ease. 
 Our app offers a variety of tests and practice questions tailored for:
@@ -221,9 +204,9 @@ login_button = Button(framemain, text="Login", command=open_login,highlightbackg
 login_button.place(x=600, y=30)
 
 # Bind the resize event to reposition elements dynamically
-a.bind("<Configure>", center_frames)
+welcome.bind("<Configure>", center_frames)
 
 # Call the function initially to center elements at startup
 center_frames()
 
-a.mainloop()
+welcome.mainloop()

@@ -11,23 +11,23 @@ label_text_color = "#003366"  # Deep blue for text
 tablecolor = '#00509e'
 
 def back_to_welcome():
-    a.destroy()
+    user_login.destroy()
     subprocess.Popen(["python", "welcome.py"])
 
 def open_login():
-    a.destroy()
+    user_login.destroy()
     subprocess.Popen(["python", "login.py"])
 
 def open_registration():
-    a.destroy()
+    user_login.destroy()
     subprocess.Popen(["python", "register.py"])
 
 def go_to_forgot():
-    a.destroy()
+    user_login.destroy()
     subprocess.Popen(["python", "forgotps.py"])
 
 def open_admin_login():
-    a.destroy()
+    user_login.destroy()
     subprocess.Popen(["python", "admin.py"])
 
 def login():
@@ -54,7 +54,7 @@ def login():
             # Check if the password matches
             if user[6] == password:  # Assuming password is the 7th column in the table
                 messagebox.showinfo("Success", "Login successful!")
-                a.destroy()
+                user_login.destroy()
                 subprocess.Popen(["python", "userdashboard.py"])
                 
             else:
@@ -66,14 +66,14 @@ def login():
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred: {e}")
 
-a = Tk()
-a.title("Login")
-a.attributes('-fullscreen', True)
+user_login = Tk()
+user_login.title("Login")
+user_login.attributes('-fullscreen', True)
 
 def adjust_frames(event=None):
-    a.update_idletasks()
-    window_width = a.winfo_width()
-    window_height = a.winfo_height()
+    user_login.update_idletasks()
+    window_width = user_login.winfo_width()
+    window_height = user_login.winfo_height()
     x_main = (window_width - 700) // 2
     y_main = (window_height - 400) // 2
     button_x = window_width - 200
@@ -87,20 +87,20 @@ def adjust_frames(event=None):
     register_button.place(x=button_x, y=30)
     login_button.place(x=button_x + 100, y=30)
 
-a.bind("<Configure>", adjust_frames)
+user_login.bind("<Configure>", adjust_frames)
 
-framemain = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg=bgcolor)
+framemain = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg=bgcolor)
 framemain.place(x=0, y=0, width=700, height=400)
 
-topframemain = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
+topframemain = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
 topframemain.place(x=0, y=0, width=700, height=25)
 Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg=header_color, fg='white').place(x=0, y=0)
 
-welcomeframe = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
+welcomeframe = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
 welcomeframe.place(x=150, y=70, width=400, height=60)
 Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 30, "bold"), bg=tablecolor, fg='white').pack(pady=10, padx=10)
 
-frame = Frame(a, bd=2, relief="ridge", padx=20, pady=20, bg=bgcolor)
+frame = Frame(user_login, bd=2, relief="ridge", padx=20, pady=20, bg=bgcolor)
 frame.place(x=200, y=140, width=300, height=250)
 
 Label(frame, text="Email/Username:", bg=bgcolor, fg=label_text_color).place(x=5, y=0)
@@ -115,11 +115,11 @@ Button(frame, text="Forgot Password", command=go_to_forgot, highlightbackground=
 Button(frame, text="Admin Login", command=open_admin_login, highlightbackground='white').place(x=156, y=150)
 Button(frame, text="Login", command=login, highlightbackground='white').place(x=100, y=190)
 
-infotopframe = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
+infotopframe = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
 infotopframe.place(x=200, y=140, width=300, height=20)
 Label(infotopframe, text="Login", font=("Arial", 10), padx=15, pady=-2, bg=header_color, fg='white').place(x=0, y=0)
 
-backframe = Frame(a, bd=2, relief="ridge", padx=0, pady=0, bg='black')
+backframe = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg='black')
 backframe.place(x=450, y=140, width=50, height=20)
 
 back_label = Label(backframe, text="Back", bg="black", fg="white", font=("Arial", 10))
@@ -133,4 +133,4 @@ login_button = Button(framemain, text="Login", command=open_login, highlightback
 login_button.place(x=600, y=30)
 
 adjust_frames()
-a.mainloop()
+user_login.mainloop()
