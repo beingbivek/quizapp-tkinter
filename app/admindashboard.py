@@ -80,17 +80,25 @@ def openbutton(btn_text):
         stats_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
         stats_frame.pack()
 
+        # Data from all tables
+        conn = sqlite3.connect(DATABASE_FILE)
+        c = conn.cursor()
+        c.execute('SELECT * FROM sqlite_sequence')
+        stat_data = c.fetchall()
+        conn.commit()
+        conn.close()
+
         # Stat data
-        stat_data = [("123", "Total Users"), ("4", "Total Courses"), ("123", "Total Subcategories"), ("123", "Total Questions")]
+        # stat_data = [("123", "Total Users"), ("4", "Total Courses"), ("123", "Total Subcategories"), ("123", "Total Questions")]
 
         for stat in stat_data:
             stat_box = Frame(stats_frame, bg=BUTTON_COLOR, width=120, height=60)
             stat_box.pack_propagate(False)
             stat_box.pack(side=LEFT, padx=10, pady=10)
             
-            stat_label = Label(stat_box, text=stat[0], font=("Arial", 14, "bold"), fg=FG_COLOR, bg=BUTTON_COLOR)
+            stat_label = Label(stat_box, text=stat[1], font=("Arial", 14, "bold"), fg=FG_COLOR, bg=BUTTON_COLOR)
             stat_label.pack()
-            stat_desc = Label(stat_box, text=stat[1], font=("Arial", 10), fg=FG_COLOR, bg=BUTTON_COLOR)
+            stat_desc = Label(stat_box, text=stat[0].upper(), font=("Arial", 10), fg=FG_COLOR, bg=BUTTON_COLOR)
             stat_desc.pack()
 
         # Table Data
