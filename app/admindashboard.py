@@ -646,7 +646,7 @@ def openbutton(btn_text):
              def save_question():
                 selected_test = mock_test_combo.get()
                 course = courses_combo.get()
-                #category = categories_combo.get()
+                category = categories_combo.get()
                 num_questions = questions_entry.get()
                 
                 if not (selected_test and course and category and num_questions.isdigit()):
