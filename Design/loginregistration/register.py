@@ -80,36 +80,36 @@ framemain.place(x=0, y=0, width=700, height=400)
 
 topframemain = Frame(register, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
 topframemain.place(x=0, y=0, width=700, height=25)
-Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0,fg='white').place(x=0, y=0)
+Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0,fg='white',bg=header_color).place(x=0, y=0)
 
 welcomeframe = Frame(register, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
 welcomeframe.place(x=150, y=70, width=400, height=60)
 Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 25, "bold"), bg=tablecolor,fg='white').pack(pady=10, padx=10)
 
-frame = Frame(register, bd=2, relief="ridge", padx=20, pady=20, bg='black')
+frame = Frame(register, bd=2, relief="ridge", padx=20, pady=20, bg='white')
 frame.place(x=100, y=140, width=500, height=250)
 
-Label(frame, text="Name:", bg=bgcolor, fg='white').place(x=5, y=0)
+Label(frame, text="Name:", bg='white', fg='black').place(x=5, y=0)
 name_entry = Entry(frame,bg='black',fg='white')
 name_entry.place(x=5, y=20)
 
-Label(frame, text="Username:", bg=bgcolor, fg='white').place(x=5, y=50)
+Label(frame, text="Username:", bg='white', fg='black').place(x=5, y=50)
 user_entry = Entry(frame,bg='black',fg='white')
 user_entry.place(x=5, y=70)
 
-Label(frame, text="Contact Number:", bg=bgcolor, fg='white').place(x=5, y=100)
+Label(frame, text="Contact Number:", bg='white', fg='black').place(x=5, y=100)
 contact_entry = Entry(frame,bg='black',fg='white')
 contact_entry.place(x=5, y=120)
 
-Label(frame, text="E-mail:", bg=bgcolor, fg='white').place(x=5, y=150)
+Label(frame, text="E-mail:", bg='white', fg='black').place(x=5, y=150)
 email_entry = Entry(frame,bg='black',fg='white')
 email_entry.place(x=5, y=170)
 
-Label(frame, text="Password:", bg=bgcolor, fg='white').place(x=250, y=0)
+Label(frame, text="Password:", bg='white', fg='black').place(x=250, y=0)
 pass_entry = Entry(frame, show="*",bg='black',fg='white')
 pass_entry.place(x=250, y=20)
 
-Label(frame, text="Confirm Password:", bg=bgcolor, fg='white').place(x=250, y=50)
+Label(frame, text="Confirm Password:", bg='white', fg='black').place(x=250, y=50)
 confirm_pass_entry = Entry(frame, show="*",bg='black',fg='white')
 confirm_pass_entry.place(x=250, y=70)
 
@@ -117,13 +117,13 @@ Button(frame, text="Register", command=register_user,fg='white',bg=button_color)
 
 infotopframe = Frame(register, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
 infotopframe.place(x=100, y=140, width=500, height=20)
-Label(infotopframe, text="Register", font=("Arial", 10), padx=15, pady=-2, fg='white').place(x=0, y=0)
+Label(infotopframe, text="Register", font=("Arial", 10), padx=15, pady=0, fg='white',bg=header_color).place(x=0, y=0)
 
 backframe = Frame(register, bd=2, relief="ridge", padx=0, pady=0, bg='black')
 backframe.place(x=450, y=140, width=50, height=20)
 
 back_label = Label(backframe, text="Back", bg="black", fg="white", font=("Arial", 10))
-back_label.place(x=0, y=-1)
+back_label.place(x=0, y=0)
 back_label.bind("<Button-1>", lambda e: back_to_welcome())
 
 register_button = Button(framemain, text="Register", command=register_user, fg='white',bg=button_color)
