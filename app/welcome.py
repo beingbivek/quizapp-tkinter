@@ -207,12 +207,12 @@ def max():
         welcome.destroy()
 
 btn2 = Button(topframemain, text="✕", command=max, width=4, bg=HEADER_COLOR, border=1, font=button_font)
-btn2.place(x=1125,y=-5)
+btn2.place(x=1230,y=-5)
 btn2.bind('<Enter>', on_enter)
 btn2.bind('<Leave>', on_leave)
 
 btn = Button(topframemain, text="-", command=min, width=4, bg=HEADER_COLOR, border=1, font=button_font)
-btn.place(x=1175,y=-5)
+btn.place(x=1180,y=-5)
 btn.bind('<Enter>', enter)
 btn.bind('<Leave>', leave)
 
