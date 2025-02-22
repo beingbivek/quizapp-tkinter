@@ -95,9 +95,9 @@ def openbutton(btn_text):
             stat_box.pack_propagate(False)
             stat_box.pack(side=LEFT, padx=10, pady=10)
             
-            stat_label = Label(stat_box, text=stat[0], font=("Arial", 14, "bold"), fg=FG_COLOR, bg=BUTTON_COLOR)
+            stat_label = Label(stat_box, text=stat[1], font=("Arial", 14, "bold"), fg=FG_COLOR, bg=BUTTON_COLOR)
             stat_label.pack()
-            stat_desc = Label(stat_box, text=stat[1], font=("Arial", 10), fg=FG_COLOR, bg=BUTTON_COLOR)
+            stat_desc = Label(stat_box, text=stat[0].upper(), font=("Arial", 10), fg=FG_COLOR, bg=BUTTON_COLOR)
             stat_desc.pack()
 
         # Table Data

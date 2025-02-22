@@ -424,7 +424,9 @@ def openbutton(btn_text):
 
     # Mock Test - user section - Bivek
     elif btn_text == "Mock Test":
-        
+        header = Label(main_frame, text="Mock Test", font=header_font, bg=MAINFRAME_COLOR)
+        header.pack(pady=10)
+
         pass
 
     else:
