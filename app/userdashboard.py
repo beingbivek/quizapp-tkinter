@@ -58,6 +58,16 @@ def leave(i):
 btn.bind('<Enter>', enter)
 btn.bind('<Leave>', leave)
 
+# Functions
+# How many courses
+def get_courses():
+    conn = sqlite3.connect(DATABASE_FILE)
+    c = conn.cursor()
+    c.execute('SELECT * FROM courses')
+    courses = c.fetchall()
+    conn.close()
+    return courses
+
 # Sidebar Frame
 sidebar = Frame(root, bg=SIDEBAR_COLOR, width=200, height=600)
 sidebar.pack(side='left', fill='y')
@@ -426,6 +436,10 @@ def openbutton(btn_text):
     elif btn_text == "Mock Test":
         header = Label(main_frame, text="Mock Test", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
+
+        
+        ttk.Combobox(main_frame,values=[coursename[1] for coursename in get_courses()]).pack()
+
 
         pass
 

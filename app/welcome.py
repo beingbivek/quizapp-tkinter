@@ -46,8 +46,9 @@ def create_database():
         CREATE TABLE IF NOT EXISTS mocktests (
             mocktest_id INTEGER PRIMARY KEY AUTOINCREMENT,
             mocktest_name TEXT NOT NULL,
+            mocktest_details TEXT,
             fullmark INTEGER NOT NULL,
-            passmark INTEGER NOT NULL
+            passmark INTEGER NOT NULL,
         )
         """)
 
@@ -98,9 +99,11 @@ def create_database():
             result_id INTEGER PRIMARY KEY AUTOINCREMENT,
             mocktest_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
+            course_id INTEGER NOT NULL,
             result INTEGER NOT NULL,
             resulttime DATETIME,
             FOREIGN KEY (user_id) REFERENCES users (user_id),
+            FOREIGN KEY (course_id) REFERENCES courses (course_id),
             FOREIGN KEY (mocktest_id) REFERENCES mocktests (mocktest_id)
         )
         ''')

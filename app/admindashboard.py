@@ -60,6 +60,38 @@ btn.bind('<Leave>', leave)
 # Store button references
 buttons_dict = {}
 
+# Functions
+# How many courses
+def get_courses():
+    conn = sqlite3.connect(DATABASE_FILE)
+    c = conn.cursor()
+    c.execute('SELECT * FROM courses')
+    courses = c.fetchall()
+    conn.close()
+    return courses
+
+# Modify get_categories to filter by course_id
+def get_categories(course_id=None):
+    conn = sqlite3.connect(DATABASE_FILE)
+    cursor = conn.cursor()
+    if course_id:
+        cursor.execute("SELECT * FROM categories WHERE course_id = ?", (course_id,))
+    else:
+        cursor.execute("SELECT * FROM categories")
+    categories = cursor.fetchall()
+    categories = [list(category) for category in categories]
+    # print(categories)
+    courses = get_courses()
+    # print(courses)
+
+    for category in categories:
+        for course in courses:
+            if category[2] == course[0]:
+                category[2] = course[1]
+                break
+    conn.close()
+    return categories
+
 # Sidebar button functions
 def openbutton(btn_text):
     # Clear the main frame
@@ -450,11 +482,6 @@ def openbutton(btn_text):
         stat_box = Frame(stats_frame, bg=BUTTON_COLOR, width=120, height=60)
         stat_box.pack_propagate(False)
         stat_box.pack(side=LEFT, padx=10, pady=10)
-
-        # How many courses
-        def get_courses():
-            c.execute('SELECT * FROM courses')
-            return c.fetchall()
             
         stat_label = Label(stat_box, text=len(get_courses()), font=("Arial", 14, "bold"), fg=FG_COLOR, bg=BUTTON_COLOR)
         stat_label.pack()
@@ -684,7 +711,7 @@ def openbutton(btn_text):
                         category[2] = course[1]
                         break
             
-            print(categories)
+            # print(categories)
 
             return categories
 
@@ -935,52 +962,52 @@ def openbutton(btn_text):
         header = Label(main_frame, text="Mock Test", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
 
-        def setup_database():
-            conn = sqlite3.connect("quiz.db")
-            cursor = conn.cursor()
+        # def setup_database():
+        #     conn = sqlite3.connect(DATABASE_FILE)
+        #     cursor = conn.cursor()
 
-            # Create mocktests table
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS mocktests (
-                    mocktest_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    mocktest_name TEXT NOT NULL,
-                    fullmark INTEGER NOT NULL,
-                    passmark INTEGER NOT NULL
-                )
-            ''')
+        #     # Create mocktests table
+        #     cursor.execute('''
+        #         CREATE TABLE IF NOT EXISTS mocktests (
+        #             mocktest_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        #             mocktest_name TEXT NOT NULL,
+        #             fullmark INTEGER NOT NULL,
+        #             passmark INTEGER NOT NULL
+        #         )
+        #     ''')
 
-            # Create courses table
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS courses (
-                    course_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    course_name TEXT NOT NULL
-                )
-            ''')
+        #     # Create courses table
+        #     cursor.execute('''
+        #         CREATE TABLE IF NOT EXISTS courses (
+        #             course_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        #             course_name TEXT NOT NULL
+        #         )
+        #     ''')
 
-            # Create categories table
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS categories (
-                    category_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    category_name TEXT NOT NULL
-                )
-            ''')
+        #     # Create categories table
+        #     cursor.execute('''
+        #         CREATE TABLE IF NOT EXISTS categories (
+        #             category_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        #             category_name TEXT NOT NULL
+        #         )
+        #     ''')
 
-            # Create mockquestions table
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS mockquestions (
-                    mockquestion_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    mocktest_id INTEGER NOT NULL,
-                    course_id INTEGER NOT NULL,
-                    category_id INTEGER NOT NULL,
-                    no_of_questions INTEGER NOT NULL,
-                    FOREIGN KEY (mocktest_id) REFERENCES mocktests (mocktest_id),
-                    FOREIGN KEY (course_id) REFERENCES courses (course_id),
-                    FOREIGN KEY (category_id) REFERENCES categories (category_id)
-                )
-            ''')
+        #     # Create mockquestions table
+        #     cursor.execute('''
+        #         CREATE TABLE IF NOT EXISTS mockquestions (
+        #             mockquestion_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        #             mocktest_id INTEGER NOT NULL,
+        #             course_id INTEGER NOT NULL,
+        #             category_id INTEGER NOT NULL,
+        #             no_of_questions INTEGER NOT NULL,
+        #             FOREIGN KEY (mocktest_id) REFERENCES mocktests (mocktest_id),
+        #             FOREIGN KEY (course_id) REFERENCES courses (course_id),
+        #             FOREIGN KEY (category_id) REFERENCES categories (category_id)
+        #         )
+        #     ''')
 
-            conn.commit()
-            conn.close()
+        #     conn.commit()
+        #     conn.close()
 
         #takes data from mock table
         def fetch_mock_tests():
@@ -999,28 +1026,7 @@ def openbutton(btn_text):
            questions = cursor.fetchall()
            conn.close()
            return questions
-        
-        #takes data from corses
-        def fetch_courses():
-            conn = sqlite3.connect(DATABASE_FILE)
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM courses")
-            courses = cursor.fetchall()
-            conn.close()
-            return courses
 
-       # Modify fetch_categories to filter by course_id
-        def fetch_categories(course_id=None):
-            conn = sqlite3.connect(DATABASE_FILE)
-            cursor = conn.cursor()
-            if course_id:
-                cursor.execute("SELECT * FROM categories WHERE course_id = ?", (course_id,))
-            else:
-                cursor.execute("SELECT * FROM categories")
-            categories = cursor.fetchall()
-            conn.close()
-            return categories
-        
         def delete_question(question_id):
             conn = sqlite3.connect(DATABASE_FILE)
             cursor = conn.cursor()
@@ -1058,12 +1064,15 @@ def openbutton(btn_text):
 
         #updates question table everytime we make changes
         def update_questions_table():
-           for row in questions_table.get_children():
+            for row in questions_table.get_children():
                 questions_table.delete(row)
-           for question in fetch_questions():
+            global get_categories
+            for question in fetch_questions():
                 mocktest_name = next((test[1] for test in fetch_mock_tests() if test[0] == question[1]), None)
-                course_name = next((test[1] for test in fetch_courses() if test[0] == question[2]), None)
-                questions_table.insert("", "end", values=(question[0], mocktest_name, course_name, question[3], question[4]))
+                course_name = next((test[1] for test in get_courses() if test[0] == question[2]), None)
+                category_name = next((test[1] for test in get_categories() if test[0] == question[3]), None)
+                # print(category_name)
+                questions_table.insert("", "end", values=(question[0], mocktest_name, course_name, category_name, question[4]))
         
         #Function to add mocktest name, full marks, passmarks
         def add_mock_test():
@@ -1119,7 +1128,7 @@ def openbutton(btn_text):
              mock_test_combo.pack()
                 
              Label(add_question_window, text="Courses:").pack()
-             course_names = [test[1] for test in fetch_courses()]
+             course_names = [test[1] for test in get_courses()]
              courses_combo = ttk.Combobox(add_question_window, values= course_names)
              courses_combo.pack()
                 
@@ -1131,9 +1140,9 @@ def openbutton(btn_text):
               # Update categories based on selected course
              def update_categories(event):
                 selected_course_name = courses_combo.get()
-                course_id = next((course[0] for course in fetch_courses() if course[1] == selected_course_name), None)
+                course_id = next((course[0] for course in get_courses() if course[1] == selected_course_name), None)
                 if course_id:
-                    category_names = [category[1] for category in fetch_categories(course_id)]
+                    category_names = [category[1] for category in get_categories(course_id)]
                     categories_combo['values'] = category_names
                     categories_combo.set('')  # Clear the current selection
 
@@ -1154,8 +1163,8 @@ def openbutton(btn_text):
                     return
                 
                 mock_test_id = next((test[0] for test in fetch_mock_tests() if test[1] == selected_test), None)
-                course_id = next((test[0] for test in fetch_courses() if test[1] == course), None)
-                category_id = next((cat[0] for cat in fetch_categories(course_id) if cat[1] == category), None)
+                course_id = next((test[0] for test in get_courses() if test[1] == course), None)
+                category_id = next((cat[0] for cat in get_categories(course_id) if cat[1] == category), None)
 
                  # Debugging statements
                 print(f"Mock Test ID: {mock_test_id}, Course ID: {course_id}, Category ID: {category_id}, No of Questions: {num_questions}")
@@ -1186,7 +1195,7 @@ def openbutton(btn_text):
                 mock_test_table.insert("", "end", values=(test[0], test[1], test[2], test[3]))
 
        
-        setup_database()
+        # setup_database()
         
         #main frame for table
         mocktable_frame = Frame(main_frame)
@@ -1231,8 +1240,13 @@ def openbutton(btn_text):
 
 
 
-    # Question - admin section
+    # Question - admin section - bivek
     elif btn_text == buttons[5]:
+
+        header = Label(main_frame, text="Question", font=header_font, bg=MAINFRAME_COLOR)
+        header.pack(pady=10)
+
+
         pass
 
     else:
