@@ -7,6 +7,7 @@ import runpy
 import sqlite3
 from tkinter import simpledialog
 import tkinter as tk
+from tkcalender import DateEntry
 
 # Admin Window
 root = Tk()
@@ -903,7 +904,7 @@ def openbutton(btn_text):
 
         #takes data from mock table
         def fetch_mock_tests():
-            conn = sqlite3.connect("quiz.db")
+            conn = sqlite3.connect(DATABASE_FILE)
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM mocktests")
             tests = cursor.fetchall()
@@ -912,7 +913,7 @@ def openbutton(btn_text):
         
         #takes data from mockquestions table
         def fetch_questions():
-           conn = sqlite3.connect("quiz.db")
+           conn = sqlite3.connect(DATABASE_FILE)
            cursor = conn.cursor()
            cursor.execute("SELECT * FROM mockquestions")
            questions = cursor.fetchall()
@@ -921,7 +922,7 @@ def openbutton(btn_text):
         
         #takes data from corses
         def fetch_courses():
-            conn = sqlite3.connect("quiz.db")
+            conn = sqlite3.connect(DATABASE_FILE)
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM courses")
             courses = cursor.fetchall()
@@ -930,7 +931,7 @@ def openbutton(btn_text):
 
        # Modify fetch_categories to filter by course_id
         def fetch_categories(course_id=None):
-            conn = sqlite3.connect("quiz.db")
+            conn = sqlite3.connect(DATABASE_FILE)
             cursor = conn.cursor()
             if course_id:
                 cursor.execute("SELECT * FROM categories WHERE course_id = ?", (course_id,))
@@ -941,7 +942,7 @@ def openbutton(btn_text):
             return categories
         
         def delete_question(question_id):
-            conn = sqlite3.connect("quiz.db")
+            conn = sqlite3.connect(DATABASE_FILE)
             cursor = conn.cursor()
             cursor.execute("DELETE FROM mockquestions WHERE mockquestion_id = ?", (question_id,))
             conn.commit()
@@ -965,7 +966,7 @@ def openbutton(btn_text):
                 return
             mock_test_id = mock_test_table.item(selected_item)["values"][0]
             
-            conn = sqlite3.connect("quiz.db")
+            conn = sqlite3.connect(DATABASE_FILE)
             cursor = conn.cursor()
             cursor.execute("DELETE FROM mocktests WHERE mocktest_id = ?", (mock_test_id,))
             cursor.execute("DELETE FROM mockquestions WHERE mocktest_id = ?", (mock_test_id,))  # Delete related questions
@@ -986,17 +987,17 @@ def openbutton(btn_text):
         
         #Function to add mocktest name, full marks, passmarks
         def add_mock_test():
-            add_mocktest = tk.Toplevel(root)
+            add_mocktest = Toplevel(main_frame)
             add_mocktest.title("Add Questions To Mock Test")
             add_mocktest.geometry("500x400")
 
-            tk.Label(add_mocktest, text="Enter Mock Test Name:").pack()
+            Label(add_mocktest, text="Enter Mock Test Name:").pack()
             e1 = Entry(add_mocktest, width=35)
             e1.pack()
-            tk.Label(add_mocktest, text="Enter Full Marks:").pack()
+            Label(add_mocktest, text="Enter Full Marks:").pack()
             e2 = Entry(add_mocktest, width=35)
             e2.pack()
-            tk.Label(add_mocktest, text="Enter Pass Marks:").pack()
+            Label(add_mocktest, text="Enter Pass Marks:").pack()
             e3 = Entry(add_mocktest, width=35)
             e3.pack()
 
@@ -1024,25 +1025,25 @@ def openbutton(btn_text):
                                 messagebox.showerror("Error", "Mock test with this name already exists.")
                     
             
-            tk.Button(add_mocktest, text="Save", command=save_mock).pack()
+            Button(add_mocktest, text="Save", command=save_mock).pack()
         
         #function to add questions to specific test, corse, category
         def add_mock_question():
-             add_question_window = tk.Toplevel(root)
+             add_question_window = Toplevel(main_frame)
              add_question_window.title("Add Questions To Mock Test")
              add_question_window.geometry("500x400")
     
-             tk.Label(add_question_window, text="Mock Test Name:").pack()
+             Label(add_question_window, text="Mock Test Name:").pack()
              test_names = [test[1] for test in fetch_mock_tests()]
              mock_test_combo = ttk.Combobox(add_question_window, values=test_names)
              mock_test_combo.pack()
                 
-             tk.Label(add_question_window, text="Courses:").pack()
+             Label(add_question_window, text="Courses:").pack()
              course_names = [test[1] for test in fetch_courses()]
              courses_combo = ttk.Combobox(add_question_window, values= course_names)
              courses_combo.pack()
                 
-             tk.Label(add_question_window, text="Categories:").pack()
+             Label(add_question_window, text="Categories:").pack()
              
              categories_combo = ttk.Combobox(add_question_window)
              categories_combo.pack()
@@ -1058,8 +1059,8 @@ def openbutton(btn_text):
 
              courses_combo.bind("<<ComboboxSelected>>", update_categories)  # Bind the event
                 
-             tk.Label(add_question_window, text="No of Questions:").pack()
-             questions_entry = tk.Entry(add_question_window)
+             Label(add_question_window, text="No of Questions:").pack()
+             questions_entry = Entry(add_question_window)
              questions_entry.pack()
     
              def save_question():
@@ -1095,7 +1096,7 @@ def openbutton(btn_text):
                 update_questions_table()
                 messagebox.showinfo("Success", "Question added successfully!")
         
-             tk.Button(add_question_window, text="Save", command=save_question).pack()
+             Button(add_question_window, text="Save", command=save_question).pack()
     
         # Updates the mock test table with every change
         def update_mock_test_table():
@@ -1135,7 +1136,7 @@ def openbutton(btn_text):
         
 
         #question table
-        questions_table = ttk.Treeview(main_frame, columns=("ID", "Mock Test-Name", "Course-Name", "Category", "Questions"), show="headings")
+        questions_table = tTreeview(main_frame, columns=("ID", "Mock Test-Name", "Course-Name", "Category", "Questions"), show="headings")
         for col in ["ID", "Mock Test-Name", "Course-Name", "Category", "Questions"]:
                questions_table.heading(col, text=col)
         questions_table.pack()
