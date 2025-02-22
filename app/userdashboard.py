@@ -176,7 +176,7 @@ def openbutton(btn_text):
         def check_answer():
             selected = selected_option.get()
             if selected == correct_answer:
-                btn_submitqotd.config(state=DISABLED, text="Correct!", bg="green")
+                btn_submitqotd.config(state=DISABLED, text="Correct!", bg="green",fg=FG_COLOR)
             else:
                 btn_submitqotd.config(text="Try Again", bg="red")
 
@@ -538,34 +538,54 @@ def openbutton(btn_text):
 
     # Mock Test - user section - Bivek
     elif btn_text == "Mock Test":
-        # start btn function
-        def start_mocktest():
-            if selected_mocktest.get().isprintable():
-                
+        # mocktest funcitons
+        def switch_frame(switchvalue):
+            switchvalue = not switchvalue
+            # Clear the mock test content area
+            for widget in mocktest_frame.winfo_children():
+                widget.destroy()
+            update_frame(switchvalue)
 
+        def update_frame(start_mock):
+            # start btn function
+            def start_mocktest():
+                if selected_mocktest.get().isprintable():
+                    switch_frame(start_mock)
+                else:
+                    messagebox.showwarning(title='Invalid Data',message='Invalid Selection in Mock Test.')
+            if start_mock:
+                heading_frame = Frame(mocktest_frame)
+                heading_frame.pack()
+
+                mocktestname_label = Label(heading_frame,text='test',font=label_font,bg=MAINFRAME_COLOR,)
                 pass
             else:
-                messagebox.showwarning(title='Blank Data',message='Blank Data in Mock Test.')
+                Label(mocktest_frame,text='Select a Mocktest and press start!',bg=MAINFRAME_COLOR,font=label_font).pack()
+
+                selected_mocktest = StringVar(mocktest_frame,value=get_mocktest()[0][1])
+
+                mocktest_combo = ttk.Combobox(mocktest_frame,values=[mocktestname[1] for mocktestname in get_mocktest()],textvariable=selected_mocktest,state='readonly')
+                mocktest_combo.pack()
+
+                mocktest_details = Label(mocktest_frame,font=button_font)
+                mocktest_details.pack(padx=10,pady=10)
+                mocktest_details.config(text=next((detail[2] for detail in get_mocktest() if detail[1] == selected_mocktest.get()),""))
+
+                start_button = Button(bg=BUTTON_COLOR,fg=FG_COLOR,text='Start',font=button_font,master=mocktest_frame,command=start_mocktest)
+                start_button.pack(padx=10,pady=10)
+
+
+        start_mock = False
 
         header = Label(main_frame, text="Mock Test", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
 
-        Label(main_frame,text='Select a Mocktest and press start!',bg=MAINFRAME_COLOR,font=label_font).pack()
+        mocktest_frame = Frame(main_frame,border=5,borderwidth=5,padx=10,pady=10)
+        mocktest_frame.pack()
 
-        selected_mocktest = StringVar(main_frame,value=get_mocktest()[0][1])
+        update_frame(start_mock)
 
-        mocktest_combo = ttk.Combobox(main_frame,values=[mocktestname[1] for mocktestname in get_mocktest()],textvariable=selected_mocktest)
-        mocktest_combo.pack()
-
-        mocktest_details = Label(main_frame,font=button_font)
-        mocktest_details.pack(padx=10,pady=10)
-        mocktest_details.config(text=next((detail[2] for detail in get_mocktest() if detail[1] == selected_mocktest.get()),""))
-
-        start_button = Button(bg=BUTTON_COLOR,fg=FG_COLOR,text='Start',font=button_font,master=main_frame,command=start_mocktest)
-        start_button.pack(padx=10,pady=10)
-
-
-        pass
+    
 
     else:
         label = Label(main_frame, text=btn_text, font=("Arial", 20, "bold"), bg=MAINFRAME_COLOR)

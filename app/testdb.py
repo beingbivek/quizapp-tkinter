@@ -55,7 +55,8 @@ CREATE TABLE IF NOT EXISTS mocktests (
     mocktest_name TEXT NOT NULL,
     mocktest_desc TEXT,
     fullmark INTEGER NOT NULL,
-    passmark INTEGER NOT NULL
+    passmark INTEGER NOT NULL,
+    fulltime INT NOT NULL
 )
 """)
 print('table made')
@@ -157,14 +158,14 @@ cursor.executemany(
 
 ### Insert 5 Mock Tests
 mocktests_data = [
-    ("Loksewa Test", "Loksewa Preparation Test", 100, 50),
-    ("CEE Test", "CEE Preparation Test", 100, 50),
-    ("IOE Test", "IOE Preparation Test", 100, 50),
-    ("Driving Test", "Driving License Preparation", 100, 50),
-    ("Medical Test", "Medical Entrance Test", 100, 50),
+    ("Loksewa Test", "Loksewa Preparation Test", 100, 50, 120),
+    ("CEE Test", "CEE Preparation Test", 100, 50, 120),
+    ("IOE Test", "IOE Preparation Test", 100, 50, 120),
+    ("Driving Test", "Driving License Preparation", 100, 50, 120),
+    ("Medical Test", "Medical Entrance Test", 100, 50, 120),
 ]
 cursor.executemany(
-    "INSERT INTO mocktests (mocktest_name, mocktest_desc, fullmark, passmark) VALUES (?, ?, ?, ?)", 
+    "INSERT INTO mocktests (mocktest_name, mocktest_desc, fullmark, passmark,fulltime) VALUES (?, ?, ?, ?, ?)",  
     mocktests_data
 )
 
