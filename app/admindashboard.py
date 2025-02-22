@@ -57,6 +57,14 @@ def leave(i):
 btn.bind('<Enter>', enter)
 btn.bind('<Leave>', leave)
 
+def get_courses():
+    conn = sqlite3.connect(DATABASE_FILE)
+    c = conn.cursor()
+    c.execute('SELECT * FROM courses')
+    courses = c.fetchall()
+    conn.close()
+    return courses
+
 # Store button references
 buttons_dict = {}
 
@@ -437,23 +445,123 @@ def openbutton(btn_text):
         def course_selected(selected_course):
             messagebox.showinfo("Course Selected", f"You selected: {selected_course}")
             populate_table(selected_course)
+            
+        # def get_mocktest_results(user_id=None,course_id=None):
+            
+        #     conn = sqlite3.connect(DATABASE_FILE)
+        #     c = conn.cursor()
+        #     if user_id:
+        #         query = """
+        #             SELECT * FROM mocktestresults WHERE user_id = ?
+        #         """
 
+        #         # Execute the query
+        #         c.execute(query, (user_id,))
+                
+        #     elif course_id:
+        #         query = """
+        #             SELECT * FROM mocktestresults WHERE course_id = ?
+        #         """
+
+        #         # Execute the query
+        #         c.execute(query, (course_id,))
+            
+        #     else:
+        #         c.execute('SELECT * FROM mocktestresults')
+            
+        def get_mocktest_results(user_id=None, course_id=None):
+            conn = sqlite3.connect(DATABASE_FILE)
+            c = conn.cursor()
+
+            query = """
+                SELECT user_id, course_id, SUM(result) as total_score 
+                FROM mocktestresults
+            """
+
+            # Applying filters dynamically
+            conditions = []
+            params = []
+
+            if user_id:
+                conditions.append("user_id = ?")
+                params.append(user_id)
+            if course_id:
+                conditions.append("course_id = ?")
+                params.append(course_id)
+
+            # Add WHERE clause if any conditions exist
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+
+            # Group by user and course
+            query += " GROUP BY user_id, course_id ORDER BY total_score DESC"
+
+            c.execute(query, tuple(params))
+            results = c.fetchall()
+
+            conn.close()
+            return results
+            
+            # if c.fetchall() == []:
+            #     # SQL Insert Query (Batch Insert)
+            #     query = """
+            #     INSERT INTO mocktestresults (mocktest_id, user_id, course_id, result, resulttime) 
+            #     VALUES (?, ?, ?, ?, ?)
+            #     """
+
+            #     # Data to insert (5 rows)
+            #     data = [
+            #         (101, 1, 201, 85, '2025-02-18 10:30:00'),
+            #         (102, 2, 202, 90, '2025-02-18 12:00:00'),
+            #         (103, 3, 203, 78, '2025-02-18 14:15:00'),
+            #         (104, 1, 201, 92, '2025-02-18 16:45:00'),
+            #         (105, 2, 202, 88, '2025-02-18 18:20:00')
+            #     ]
+
+            #     # Execute the query for multiple records
+            #     c.executemany(query, data)
+
+            #     # Commit and close
+            #     conn.commit()
+            # return c.fetchall()
+            
+            # pass
+        
+
+        # def populate_table(selected_course):
+        #     # Clear the previous data in Treeview
+        #     for item in table.get_children():
+        #         table.delete(item)
+
+        #     print(get_mocktest_results())
+        #     all_data = get_mocktest_results()
+        #     data = [[data[0],data[3],data[2],data[4]] for data in all_data]
+        #     # Sample table data
+        #     # data = [
+        #     #     [1, selected_course, "User1", "90"],
+        #     #     [2, selected_course, "User2", "85"],
+        #     #     [3, selected_course, "User3", "75"],
+        #     #     [4, selected_course, "User4", "80"],
+        #     # ]
+
+        #     # Insert new data into the table
+        #     for row in data:
+        #         table.insert("", "end", values=row)
+                
         def populate_table(selected_course):
             # Clear the previous data in Treeview
             for item in table.get_children():
                 table.delete(item)
 
-            # Sample table data
-            data = [
-                [1, selected_course, "User1", "90"],
-                [2, selected_course, "User2", "85"],
-                [3, selected_course, "User3", "75"],
-                [4, selected_course, "User4", "80"],
-            ]
+            print(get_mocktest_results())
+            all_data = get_mocktest_results()
+
+            # Transform data for display (Serial Number, Course, User ID, Total Score)
+            data = [[index + 1, data[1], f"User {data[0]}", data[2]] for index, data in enumerate(all_data)]
 
             # Insert new data into the table
             for row in data:
-                table.insert("", "end", values=row)
+                table.insert("", "end", values=row)        
                 
         header = Label(main_frame, text="Leaderboard", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
@@ -469,7 +577,7 @@ def openbutton(btn_text):
         # Course Selection
         course_frame = Frame(main_frame, bd=2, relief="ridge", bg="lightgrey")
         course_frame.place(x=420, y=300, width=305, height=50)
-        courses = ["Loksewa", "CEE", "IOE", "Driving"]
+        courses = ['All']+[coursename[1] for coursename in get_courses()]
         selected_course = StringVar(value="Choose course")
         course_menu = OptionMenu(course_frame, selected_course, *courses, command=course_selected)
         course_menu.config(font=("Arial", 12), width=20)
