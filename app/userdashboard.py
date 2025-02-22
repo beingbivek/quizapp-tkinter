@@ -6,6 +6,8 @@ from PIL import ImageTk, Image
 import runpy
 import sqlite3
 from random import *
+import pybase64
+import re #For password validation.
 
 # User window
 root = Tk()
@@ -148,8 +150,228 @@ def openbutton(btn_text):
             mock_table.insert('', END, values=row)
         mock_table.pack()
 
+        
+    #Leaderboard user section.    
+    elif btn_text == "LeaderBoard":
+        
+        def create_table(frame, data):
+
+            headers = ["SN", "Username", "Score"]
+            for col, header in enumerate(headers):
+                Label(frame, text=header, font=("Arial", 12, "bold"), bg="grey", width=10).grid(row=0, column=col, padx=1, pady=1)
+
+            for row_idx, row_data in enumerate(data):
+                for col_idx, value in enumerate(row_data):
+                    Label(frame, text=value, font=("Arial", 12), bg="white", width=10, relief="ridge").grid(row=row_idx + 1, column=col_idx, padx=1, pady=1)
+
+        header = Label(main_frame, text="Leaderboard", font=header_font, bg=MAINFRAME_COLOR)
+        header.pack(pady=10)
+        
+        data = {
+            "Loksewa": [
+                [1, "User1", "90"],
+                [2, "User2", "85"],
+                [3, "User3", "75"],
+                [4, "User4", "65"],
+                [5, "User5", "60"],
+                [6, "User6", "55"],
+            ],
+            "CEE": [
+                [1, "User5", "95"],
+                [2, "User6", "88"],
+                [3, "User7", "78"],
+                [4, "User8", "82"],
+                [5, "User5", "60"],
+                [6, "User6", "55"],
+            ],
+            "IOE": [
+                [1, "User9", "92"],
+                [2, "User10", "87"],
+                [3, "User11", "77"],
+                [4, "User12", "81"],
+                [5, "User5", "60"],
+                [6, "User6", "55"],
+            ],
+            "Driving": [
+                [1, "User13", "89"],
+                [2, "User14", "84"],
+                [3, "User15", "74"],
+                [4, "User16", "79"],
+                [5, "User5", "60"],
+                [6, "User6", "55"],
+            ],
+        }
+
+        table_frame1 = Frame(main_frame, bd=2)
+        table_frame1.place(x=400, y=135, width=390, height=250)
+        Label(main_frame, text="Loksewa", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=400, y=100)
+        create_table(table_frame1, data["Loksewa"])
+
+        table_frame2 = Frame(main_frame, bd=2)
+        table_frame2.place(x=900, y=135, width=390, height=250)
+        Label(main_frame, text="CEE", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=900, y=100)
+        create_table(table_frame2, data["CEE"])
+
+        table_frame3 = Frame(main_frame, bd=2)
+        table_frame3.place(x=400, y=525, width=390, height=250)
+        Label(main_frame, text="IOE", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=400, y=490)
+        create_table(table_frame3, data["IOE"])
+
+        table_frame4 = Frame(main_frame, bd=2)
+        table_frame4.place(x=900, y=525, width=390, height=250)
+        Label(main_frame, text="Driving", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=900, y=490)
+        create_table(table_frame4, data["Driving"])
+
+        pass
+    
     # Edit profile - user section - mukesh
     elif btn_text == "Profile":
+        # Edit profile Functions - mukesh
+        def submit():
+            # password changed to base64 encrypt
+            secret = validate_password.get()
+            secret = secret.encode('ascii')
+            secret = pybase64.b64encode(secret)
+            secret = secret.decode('ascii')
+            return secret
+            # To decrypt
+            '''
+            secret = password.get() # put the password variable
+            secret = secret.encode('ascii')
+            secret = pybase64.b64decode(secret)
+            secret = secret.decode('ascii') # this is the final password
+            '''
+            
+        def load_profile():
+            """Load user profile data from the database."""
+            try:
+                conn = sqlite3.connect(DATABASE_FILE)
+                c = conn.cursor()
+                c.execute('SELECT * FROM users')
+                users = c.fetchall()
+                conn.close()
+                        
+                return users[0]  # Return the first user's data (assuming there's only one user for simplicity)
+            except sqlite3.Error as e:
+                messagebox.showerror("Database Error", f"An error occurred: {e}")
+                return ['Mukesh Babu Acharya', 'babu@gmail.com', 'Babu.net', '9862148844', '123 Main Street', 'password']
+
+        def update_profile_in_db(user_id, fullname, email, username, contact, address, password):
+            """Update the user profile in the database."""
+            try:
+                conn = sqlite3.connect(DATABASE_FILE)
+                c = conn.cursor()
+                if password != None:
+                    query = """
+                    UPDATE users
+                    SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, password = ?
+                    WHERE user_id = ?
+                    """
+                    c.execute(query, (fullname, email, username, contact, address, password, user_id))
+                else:
+                    query = """
+                    UPDATE users
+                    SET fullname = ?, email = ?, username = ?, contact = ?, address = ?
+                    WHERE user_id = ?
+                    """
+                    c.execute(query, (fullname, email, username, contact, address, user_id))    
+                
+                conn.commit()
+                conn.close()
+                messagebox.showinfo("Success", "Profile updated successfully!")
+            except sqlite3.Error as e:
+                messagebox.showerror("Database Error", f"An error occurred: {e}")
+
+        def validate_password(password):
+            """Validate the password to ensure it meets the requirements."""
+            # Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 symbol
+            if not re.match(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*[\W_]).+$', password,):
+                return False
+            return True
+
+        def update_profile():
+            """Handle the update profile button click."""
+            updated_values = [entry.get() for entry in entries]
+            fullname, username, contact, email, address, new_password, confirm_password = updated_values
+
+            # Check if the password fields are not empty
+            if new_password or confirm_password:
+                # If password fields are not empty, validate the password
+                if new_password != confirm_password:
+                    messagebox.showerror("Error", "New password and confirm password do not match!")
+                    return
+
+                if not validate_password(new_password):
+                    messagebox.showerror("Error", "Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 symbol!")
+                    return
+
+                # Encrypt the password using base64
+                password = new_password.encode('ascii')
+                password = pybase64.b64encode(password).decode('ascii')
+            else:
+                # If password fields are empty, set password to None (do not update password)
+                password = None
+
+            # Ask for confirmation
+            confirm = messagebox.askyesno("Confirm Update", "Are you sure you want to update your profile?")
+            if confirm:
+                # Update the profile in the database
+                update_profile_in_db(
+                    user_id=users[0],  # Assuming the first column is user_id
+                    fullname=fullname,
+                    email=email,
+                    username=username,
+                    contact=contact,
+                    address=address,
+                    password=password
+                )
+
+        def cancel():
+            """Close the application."""
+            root.destroy()
+
+        # Load user profile data
+        users = load_profile()
+        print(users)
+        
+        header = Label(main_frame, text="Profile", font=header_font, bg=MAINFRAME_COLOR)
+        header.pack(pady=10)
+        
+        secframe = Frame(main_frame, bd=2, relief='ridge')
+        secframe.place(x=380, y=50, width=900, height=700)
+         
+        score = Label(main_frame, text='score:1500',font=('Arial',12)).place(x=780,y=225)
+        
+        profile = Label(main_frame, text='👦', font=('Arial',60)).place(x=775,y=110)
+       
+        username = Label(main_frame, text=users[3], font=('Arial', 14, 'bold')).place(x=770, y=255)
+
+
+        # Labels and Entries
+        labels_entries = [
+            ("Name", 425, 320, users[1]),
+            ("User Name", 425, 400, users[3]),
+            ("Contact Number", 425, 480, users[4]),
+            ("Email", 425, 560, users[2]),
+            ("Address", 950, 480, users[5]),
+            ("New Password", 950, 320, "",),
+            ("Confirm Password", 950, 400, "")
+        ]
+
+
+        entries = []
+        for text, x, y, value in labels_entries:
+            Label(main_frame, text=text).place(x=x, y=y)
+            if text in ["New Password", "Confirm Password"]:
+                entry = Entry(main_frame, width=35, show="*")  # Mask the password fields
+            else:
+                entry = Entry(main_frame, width=35)
+            entry.place(x=x, y=y+20)
+            entry.insert(0, value)
+            entries.append(entry)
+
+        # Buttons
+        Button(main_frame,text='UPDATE', bg=BUTTON_COLOR, fg=FG_COLOR, font=('Arial', 14, 'bold'), command=update_profile).place(x=screen_width/2.5, y=690)
 
         pass
 
