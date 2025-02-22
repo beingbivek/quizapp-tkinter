@@ -89,6 +89,14 @@ def get_categories(course_id=None):
     conn.close()
     return categories
 
+def get_mocktest():
+    conn = sqlite3.connect(DATABASE_FILE)
+    c = conn.cursor()
+    c.execute('SELECT * FROM mocktests')
+    mocktest = c.fetchall()
+    conn.close()
+    return mocktest
+
 # Sidebar Frame
 sidebar = Frame(root, bg=SIDEBAR_COLOR, width=200, height=600)
 sidebar.pack(side='left', fill='y')
@@ -530,11 +538,31 @@ def openbutton(btn_text):
 
     # Mock Test - user section - Bivek
     elif btn_text == "Mock Test":
+        # start btn function
+        def start_mocktest():
+            if selected_mocktest.get().isprintable():
+                
+
+                pass
+            else:
+                messagebox.showwarning(title='Blank Data',message='Blank Data in Mock Test.')
+
         header = Label(main_frame, text="Mock Test", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
 
-        
-        ttk.Combobox(main_frame,values=[coursename[1] for coursename in get_courses()]).pack()
+        Label(main_frame,text='Select a Mocktest and press start!',bg=MAINFRAME_COLOR,font=label_font).pack()
+
+        selected_mocktest = StringVar(main_frame,value=get_mocktest()[0][1])
+
+        mocktest_combo = ttk.Combobox(main_frame,values=[mocktestname[1] for mocktestname in get_mocktest()],textvariable=selected_mocktest)
+        mocktest_combo.pack()
+
+        mocktest_details = Label(main_frame,font=button_font)
+        mocktest_details.pack(padx=10,pady=10)
+        mocktest_details.config(text=next((detail[2] for detail in get_mocktest() if detail[1] == selected_mocktest.get()),""))
+
+        start_button = Button(bg=BUTTON_COLOR,fg=FG_COLOR,text='Start',font=button_font,master=main_frame,command=start_mocktest)
+        start_button.pack(padx=10,pady=10)
 
 
         pass
