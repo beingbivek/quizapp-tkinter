@@ -102,6 +102,7 @@ topframemain = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg=header
 topframemain.place(x=0, y=0, width=700, height=25)
 Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg=header_color, fg='white').place(x=0, y=0)
 
+# Making close and minimize button manually
 def min():
     user_login.iconify()
 
@@ -120,6 +121,20 @@ btn2 = Button(topframemain, text="✕", command=max, width=4, bg='white', border
 btn2.pack(anchor="ne")
 btn2.bind('<Enter>', on_enter)
 btn2.bind('<Leave>', on_leave)
+
+btn = Button(topframemain, text="-", command=min, width=4, bg='white', border=0, font='white')
+btn.pack(anchor="ne")
+btn.bind('<Enter>', on_enter)
+btn.bind('<Leave>', on_leave)
+
+def enter(i):
+    btn['background'] = "red"
+
+def leave(i):
+    btn['background'] = 'white'
+
+btn.bind('<Enter>', enter)
+btn.bind('<Leave>', leave)
 
 welcomeframe = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
 welcomeframe.place(x=150, y=70, width=400, height=60)
