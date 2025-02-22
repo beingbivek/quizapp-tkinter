@@ -102,6 +102,25 @@ topframemain = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg=header
 topframemain.place(x=0, y=0, width=700, height=25)
 Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg=header_color, fg='white').place(x=0, y=0)
 
+def min():
+    user_login.iconify()
+
+def on_enter(i):
+    btn2['background'] = "red"
+
+def on_leave(i):
+    btn2['background'] = 'white'
+
+def max():
+    msg_box = messagebox.askquestion('Exit Application', 'Are you sure you want to close the application?', icon='warning')
+    if msg_box == 'yes':
+        user_login.destroy()
+
+btn2 = Button(topframemain, text="✕", command=max, width=4, bg='white', border=0, font='white')
+btn2.pack(anchor="ne")
+btn2.bind('<Enter>', on_enter)
+btn2.bind('<Leave>', on_leave)
+
 welcomeframe = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
 welcomeframe.place(x=150, y=70, width=400, height=60)
 Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 25, "bold"), bg=tablecolor, fg='white').pack(pady=10, padx=10)
