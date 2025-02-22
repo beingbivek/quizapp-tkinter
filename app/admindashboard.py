@@ -80,9 +80,15 @@ def openbutton(btn_text):
         stats_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
         stats_frame.pack()
 
-        # Stat data
-        stat_data = [("123", "Total Users"), ("4", "Total Courses"), ("123", "Total Subcategories"), ("123", "Total Questions")]
+         # Data from all tables
+        conn = sqlite3.connect(DATABASE_FILE)
+        c = conn.cursor()
+        c.execute('SELECT * FROM sqlite_sequence')
+        stat_data = c.fetchall()
+        conn.commit()
+        conn.close()
 
+        # Show Stat Data
         for stat in stat_data:
             stat_box = Frame(stats_frame, bg=BUTTON_COLOR, width=120, height=60)
             stat_box.pack_propagate(False)
