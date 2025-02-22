@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 import subprocess
+import runpy
 
 # Colors (matched with Register and Login pages)
 bgcolor = "#E0E0E0"  # Background color
@@ -12,15 +13,15 @@ label_text_color = "black"  # Text color for labels
 
 def back_to_welcome():
     forgotps.destroy()
-    subprocess.Popen(["python", "welcome.py"])
+    runpy.run_path('welcome.py')
 
 def open_login():
     forgotps.destroy()
-    subprocess.Popen(["python", "login.py"])
+    runpy.run_path('login.py')
 
 def open_registration():
     forgotps.destroy()
-    subprocess.Popen(["python", "register.py"])
+    runpy.run_path('register.py')
 
 def forgot_pw():
     username_or_email = name_entry.get().strip()

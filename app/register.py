@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 import subprocess
 import sqlite3
+import runpy
 
 # Colors
 bgcolor = "#E0E0E0"
@@ -16,11 +17,11 @@ register.attributes('-fullscreen', True)
 
 def back_to_welcome():
     register.destroy()
-    subprocess.Popen(["python", "welcome.py"])
+    runpy.run_path('welcome.py')
 
 def open_login():
     register.destroy()
-    subprocess.Popen(["python", "login.py"])
+    runpy.run_path('login.py')
 
 def register_user():
     fullname = name_entry.get()

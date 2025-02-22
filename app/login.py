@@ -15,23 +15,23 @@ label_text_color = "black"  # Text color for labels
 
 def back_to_welcome():
     user_login.destroy()
-    subprocess.Popen(["python", "welcome.py"])
+    runpy.run_path('welcome.py')
 
 def open_login():
     user_login.destroy()
-    subprocess.Popen(["python", "login.py"])
+    runpy.run_path('login.py')
 
 def open_registration():
     user_login.destroy()
-    subprocess.Popen(["python", "register.py"])
+    runpy.run_path('register.py')
 
 def go_to_forgot():
     user_login.destroy()
-    subprocess.Popen(["python", "forgotps.py"])
+    runpy.run_path('forgotps.py')
 
 def open_admin_login():
     user_login.destroy()
-    subprocess.Popen(["python", "admin.py"])
+    runpy.run_path('admin.py')
 
 def login():
     username_or_email = name_entry.get().strip()

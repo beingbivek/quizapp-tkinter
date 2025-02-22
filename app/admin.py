@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 import subprocess
+import runpy
 
 # Colors
 bgcolor = "#ffffff"  # Light gray
@@ -14,15 +15,15 @@ ADMIN_CODE = "12345"
 
 def back_to_welcome():
     admin_login.destroy()
-    subprocess.Popen(["python", "welcome.py"])
+    runpy.run_path('welcome.py')
 
 def open_login():
     admin_login.destroy()
-    subprocess.Popen(["python", "login.py"])
+    runpy.run_path('login.py')
 
 def open_registration():
     admin_login.destroy()
-    subprocess.Popen(["python", "register.py"])
+    runpy.run_path('register.py')
 
 def admin_login_function():
     entered_code = admin_code_entry.get().strip()
