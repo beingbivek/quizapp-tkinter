@@ -123,7 +123,7 @@ def openbutton(btn_text):
 
         # Show Stat Data
         for stat in stat_data:
-            stat_box = Frame(stats_frame, bg=BUTTON_COLOR, width=120, height=60)
+            stat_box = Frame(stats_frame, bg=BUTTON_COLOR, width=150, height=60)
             stat_box.pack_propagate(False)
             stat_box.pack(side=LEFT, padx=10, pady=10)
             
@@ -549,14 +549,17 @@ def openbutton(btn_text):
 
         def edit_course_record():
             def save_edit_course():
-                try:
-                    c.execute('UPDATE courses SET coursename = ? WHERE course_id = ?', (course_name_entry.get(), item_data["values"][0]))
-                    conn.commit()
-                    update_course_table(get_courses())
-                    edit_course_window.destroy()
-                    messagebox.showinfo(title='Success',message='Course Edited successfully.')
-                except Exception as e:
-                    messagebox.showerror(title='Error in Editing Course',message='Edit Course Error: ' + str(e))
+                if course_name_entry.get().isprintable():
+                    try:
+                        c.execute('UPDATE courses SET coursename = ? WHERE course_id = ?', (course_name_entry.get(), item_data["values"][0]))
+                        conn.commit()
+                        update_course_table(get_courses())
+                        edit_course_window.destroy()
+                        messagebox.showinfo(title='Success',message='Course Edited successfully.')
+                    except Exception as e:
+                        messagebox.showerror(title='Error in Editing Course',message='Edit Course Error: ' + str(e))
+                else:
+                    messagebox.showwarning(title='Black Data',message='Blank Data in Course Name.')
 
             def cancel_edit_course():
                 edit_course_window.destroy()
@@ -629,15 +632,18 @@ def openbutton(btn_text):
         def add_category():
 
             def save_category():
-                try:
-                    # print(next((course for course in get_courses() if course[1] == selected_course.get()),None))
-                    c.execute('INSERT INTO categories (category_name, course_id) VALUES (?,?)', (category_name_entry.get(),next((course[0] for course in get_courses() if course[1] == selected_course.get()),None)))
-                    conn.commit()
-                    add_category_window.destroy()
-                    update_category_table(get_categories())
-                    messagebox.showinfo(title='Success',message='Course successfully created.')
-                except Exception as e:
-                    messagebox.showerror(title='Error in Adding Categories',message='Save Category Error: ' + str(e))
+                if category_name_entry.get().isprintable():
+                    try:
+                        # print(next((course for course in get_courses() if course[1] == selected_course.get()),None))
+                        c.execute('INSERT INTO categories (category_name, course_id) VALUES (?,?)', (category_name_entry.get(),next((course[0] for course in get_courses() if course[1] == selected_course.get()),None)))
+                        conn.commit()
+                        add_category_window.destroy()
+                        update_category_table(get_categories())
+                        messagebox.showinfo(title='Success',message='Course successfully created.')
+                    except Exception as e:
+                        messagebox.showerror(title='Error in Adding Categories',message='Save Category Error: ' + str(e))
+                else:
+                    messagebox.showwarning(title='Black Data',message='Blank Data in Category Name.')
 
             def cancel_category():
                 add_category_window.destroy()
@@ -1118,27 +1124,27 @@ def openbutton(btn_text):
         
         #function to add questions to specific test, corse, category
         def add_mock_question():
-             add_question_window = Toplevel(main_frame)
-             add_question_window.title("Add Questions To Mock Test")
-             add_question_window.geometry("500x400")
-    
-             Label(add_question_window, text="Mock Test Name:").pack()
-             test_names = [test[1] for test in fetch_mock_tests()]
-             mock_test_combo = ttk.Combobox(add_question_window, values=test_names)
-             mock_test_combo.pack()
-                
-             Label(add_question_window, text="Courses:").pack()
-             course_names = [test[1] for test in get_courses()]
-             courses_combo = ttk.Combobox(add_question_window, values= course_names)
-             courses_combo.pack()
-                
-             Label(add_question_window, text="Categories:").pack()
-             
-             categories_combo = ttk.Combobox(add_question_window)
-             categories_combo.pack()
+            add_question_window = Toplevel(main_frame)
+            add_question_window.title("Add Questions To Mock Test")
+            add_question_window.geometry("500x400")
 
-              # Update categories based on selected course
-             def update_categories(event):
+            Label(add_question_window, text="Mock Test Name:").pack(side=LEFT)
+            test_names = [test[1] for test in fetch_mock_tests()]
+            mock_test_combo = ttk.Combobox(add_question_window, values=test_names)
+            mock_test_combo.pack(side=RIGHT)
+            
+            Label(add_question_window, text="Courses:").pack(side=LEFT)
+            course_names = [test[1] for test in get_courses()]
+            courses_combo = ttk.Combobox(add_question_window, values= course_names)
+            courses_combo.pack(side=RIGHT)
+            
+            Label(add_question_window, text="Categories:").pack()
+            
+            categories_combo = ttk.Combobox(add_question_window)
+            categories_combo.pack()
+
+            # Update categories based on selected course
+            def update_categories(event):
                 selected_course_name = courses_combo.get()
                 course_id = next((course[0] for course in get_courses() if course[1] == selected_course_name), None)
                 if course_id:
@@ -1146,13 +1152,13 @@ def openbutton(btn_text):
                     categories_combo['values'] = category_names
                     categories_combo.set('')  # Clear the current selection
 
-             courses_combo.bind("<<ComboboxSelected>>", update_categories)  # Bind the event
-                
-             Label(add_question_window, text="No of Questions:").pack()
-             questions_entry = Entry(add_question_window)
-             questions_entry.pack()
-    
-             def save_question():
+            courses_combo.bind("<<ComboboxSelected>>", update_categories)  # Bind the event
+            
+            Label(add_question_window, text="No of Questions:").pack()
+            questions_entry = Entry(add_question_window)
+            questions_entry.pack()
+
+            def save_question():
                 selected_test = mock_test_combo.get()
                 course = courses_combo.get()
                 category = categories_combo.get()
@@ -1185,7 +1191,7 @@ def openbutton(btn_text):
                 update_questions_table()
                 messagebox.showinfo("Success", "Question added successfully!")
         
-             Button(add_question_window, text="Save", command=save_question).pack()
+            Button(add_question_window, text="Save", command=save_question).pack()
     
         # Updates the mock test table with every change
         def update_mock_test_table():
@@ -1240,7 +1246,7 @@ def openbutton(btn_text):
 
 
 
-    # Question - admin section - bivek
+    # Question - admin section - aayush
     elif btn_text == buttons[5]:
 
         header = Label(main_frame, text="Question", font=header_font, bg=MAINFRAME_COLOR)
