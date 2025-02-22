@@ -27,6 +27,8 @@ def open_registration():
 
 def admin_login_function():
     entered_code = admin_code_entry.get().strip()
+    messagebox.showinfo("Success", "Login successful!")
+    runpy.run_path('admindashboard.py')
 
     if not entered_code:
         messagebox.showerror("Error", "Admin code is required")

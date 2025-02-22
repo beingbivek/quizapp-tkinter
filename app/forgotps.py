@@ -1,6 +1,5 @@
 from tkinter import *
 from tkinter import messagebox
-import subprocess
 import runpy
 
 # Colors (matched with Register and Login pages)

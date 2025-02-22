@@ -1,8 +1,6 @@
 from tkinter import *
 from tkinter import messagebox
-import subprocess
 import sqlite3
-import os
 import runpy
 
 # Colors (matched with Register page)

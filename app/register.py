@@ -1,6 +1,5 @@
 from tkinter import *
 from tkinter import messagebox
-import subprocess
 import sqlite3
 import runpy
 
@@ -46,7 +45,7 @@ def register_user():
         conn.close()
         messagebox.showinfo("Success", "Registration successful!")
         register.destroy()
-        subprocess.Popen(["python", "userdashboard.py"])
+        runpy.run_path('login.py')
     except sqlite3.IntegrityError:
         messagebox.showerror("Error", "Username or email already exists")
     except Exception as e:
