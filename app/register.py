@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 import sqlite3
 import runpy
+import tkinter.font as font
 
 # Colors
 bgcolor = "#E0E0E0"
@@ -118,6 +119,47 @@ Button(frame, text="Register", command=register_user,fg='white',bg=button_color)
 infotopframe = Frame(register, bd=1, relief="ridge", padx=0, pady=0, bg=header_color)
 infotopframe.place(x=100, y=140, width=500, height=20)
 Label(infotopframe, text="Register", font=("Arial", 10), padx=15, pady=0, fg='white',bg=header_color).place(x=0, y=0)
+
+# Making close and minimize button manually
+MAINFRAME_COLOR = "#E0E0E0"
+SIDEBAR_COLOR = "#2C3E50"
+BUTTON_COLOR = "#34495E"
+HIGHLIGHT_COLOR = "#1A252F"
+HEADER_COLOR = "#57a1f8"
+PROFILE_COLOR = "#1F618D"
+LOGOUT_COLOR = "#E74C3C"
+FG_COLOR = "white"
+button_font = font.Font(size=14)
+
+def min():
+    register.iconify()
+
+def on_enter(i):
+    btn2['background'] = "red"
+
+def on_leave(i):
+    btn2['background'] = HEADER_COLOR
+
+def enter(i):
+    btn['background'] = "red"
+
+def leave(i):
+    btn['background'] = HEADER_COLOR
+
+def max():
+    msg_box = messagebox.askquestion('Exit Application', 'Are you sure you want to close the application?', icon='warning')
+    if msg_box == 'yes':
+        register.destroy()
+
+btn2 = Button(topframemain, text="✕", command=max, width=4, bg=HEADER_COLOR, border=1, font=button_font)
+btn2.place(x=1125,y=-5)
+btn2.bind('<Enter>', on_enter)
+btn2.bind('<Leave>', on_leave)
+
+btn = Button(topframemain, text="-", command=min, width=4, bg=HEADER_COLOR, border=1, font=button_font)
+btn.place(x=1175,y=-5)
+btn.bind('<Enter>', enter)
+btn.bind('<Leave>', leave)
 
 backframe = Frame(register, bd=1, relief="ridge", padx=0, pady=0, bg='black')
 backframe.place(x=450, y=140, width=50, height=20)

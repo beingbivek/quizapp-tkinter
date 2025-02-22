@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 import runpy
+import tkinter.font as font
 
 # Colors (matched with Register and Login pages)
 bgcolor = "#E0E0E0"  # Background color
@@ -79,7 +80,7 @@ forgotps.bind("<Configure>", adjust_frames)
 framemain = Frame(forgotps, bd=2, relief="ridge", padx=0, pady=0, bg=bgcolor)
 framemain.place(x=0, y=0, width=700, height=400)
 
-topframemain = Frame(forgotps, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
+topframemain = Frame(forgotps, bd=1, relief="ridge", padx=0, pady=0, bg=header_color)
 topframemain.place(x=0, y=0, width=700, height=25)
 Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg=header_color, fg='white').place(x=0, y=0)
 
@@ -100,11 +101,52 @@ user_entry.place(x=5, y=70)
 
 Button(frame, text="Update", command=forgot_pw, fg='white', bg=button_color).place(x=100, y=190)
 
-infotopframe = Frame(forgotps, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
+infotopframe = Frame(forgotps, bd=1, relief="ridge", padx=0, pady=0, bg=header_color)
 infotopframe.place(x=200, y=140, width=300, height=20)
-Label(infotopframe, text="Forgot Password", font=("Arial", 10), padx=15, pady=-2, bg=header_color, fg='white').place(x=0, y=0)
+Label(infotopframe, text="Forgot Password", font=("Arial", 10), padx=15, pady=0, bg=header_color, fg='white').place(x=0, y=0)
 
-backframe = Frame(forgotps, bd=2, relief="ridge", padx=0, pady=0, bg='black')
+# Making close and minimize button manually
+MAINFRAME_COLOR = "#E0E0E0"
+SIDEBAR_COLOR = "#2C3E50"
+BUTTON_COLOR = "#34495E"
+HIGHLIGHT_COLOR = "#1A252F"
+HEADER_COLOR = "#57a1f8"
+PROFILE_COLOR = "#1F618D"
+LOGOUT_COLOR = "#E74C3C"
+FG_COLOR = "white"
+button_font = font.Font(size=14)
+
+def min():
+    forgotps.iconify()
+
+def on_enter(i):
+    btn2['background'] = "red"
+
+def on_leave(i):
+    btn2['background'] = HEADER_COLOR
+
+def enter(i):
+    btn['background'] = "red"
+
+def leave(i):
+    btn['background'] = HEADER_COLOR
+
+def max():
+    msg_box = messagebox.askquestion('Exit Application', 'Are you sure you want to close the application?', icon='warning')
+    if msg_box == 'yes':
+        forgotps.destroy()
+
+btn2 = Button(topframemain, text="✕", command=max, width=4, bg=HEADER_COLOR, border=1, font=button_font)
+btn2.place(x=1125,y=-5)
+btn2.bind('<Enter>', on_enter)
+btn2.bind('<Leave>', on_leave)
+
+btn = Button(topframemain, text="-", command=min, width=4, bg=HEADER_COLOR, border=1, font=button_font)
+btn.place(x=1175,y=-5)
+btn.bind('<Enter>', enter)
+btn.bind('<Leave>', leave)
+
+backframe = Frame(forgotps, bd=1, relief="ridge", padx=0, pady=0, bg='black')
 backframe.place(x=450, y=140, width=50, height=20)
 
 # Use Label as a button
@@ -115,7 +157,7 @@ back_label = Label(
     fg="white",
     font=("Arial", 10),
 )
-back_label.place(x=0, y=-1)
+back_label.place(x=0, y=0)
 
 # Bind a click event to the label
 back_label.bind("<Button-1>", lambda e: open_login())

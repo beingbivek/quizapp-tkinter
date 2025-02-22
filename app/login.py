@@ -99,7 +99,7 @@ user_login.bind("<Configure>", adjust_frames)
 framemain = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg=bgcolor)
 framemain.place(x=0, y=0, width=700, height=400)
 
-topframemain = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
+topframemain = Frame(user_login, bd=1, relief="ridge", padx=0, pady=0, bg=header_color)
 topframemain.place(x=0, y=0, width=700, height=25)
 Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg=header_color, fg='white').place(x=0, y=0)
 
@@ -135,12 +135,12 @@ def max():
         user_login.destroy()
 
 btn2 = Button(topframemain, text="✕", command=max, width=4, bg=HEADER_COLOR, border=1, font=button_font)
-btn2.place(x=1235,y=-5)
+btn2.place(x=1125,y=-5)
 btn2.bind('<Enter>', on_enter)
 btn2.bind('<Leave>', on_leave)
 
 btn = Button(topframemain, text="-", command=min, width=4, bg=HEADER_COLOR, border=1, font=button_font)
-btn.place(x=1195,y=-5)
+btn.place(x=1175,y=-5)
 btn.bind('<Enter>', enter)
 btn.bind('<Leave>', leave)
 
@@ -163,15 +163,15 @@ Button(frame, text="Forgot Password", command=go_to_forgot, fg='white', bg=butto
 Button(frame, text="Admin Login", command=open_admin_login, fg='white', bg=button_color).place(x=156, y=150)
 Button(frame, text="Login", command=login, fg='white', bg=button_color).place(x=100, y=190)
 
-infotopframe = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
+infotopframe = Frame(user_login, bd=1, relief="ridge", padx=0, pady=0, bg=header_color)
 infotopframe.place(x=200, y=140, width=300, height=20)
-Label(infotopframe, text="Login", font=("Arial", 10), padx=15, pady=-2, bg=header_color, fg='white').place(x=0, y=0)
+Label(infotopframe, text="Login", font=("Arial", 10), padx=15, pady=0, bg=header_color, fg='white').place(x=0, y=0)
 
-backframe = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg='black')
+backframe = Frame(user_login, bd=1, relief="ridge", padx=0, pady=0, bg='black')
 backframe.place(x=450, y=140, width=50, height=20)
 
 back_label = Label(backframe, text="Back", bg="black", fg="white", font=("Arial", 10))
-back_label.place(x=0, y=-1)
+back_label.place(x=0, y=0)
 back_label.bind("<Button-1>", lambda e: back_to_welcome())
 
 register_button = Button(framemain, text="Register", command=open_registration, fg='white', bg=button_color)
