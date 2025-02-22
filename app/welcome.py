@@ -22,35 +22,40 @@ def create_database():
             password TEXT NOT NULL
         )
         """)
+        print('table made')
 
         # Courses table
         c.execute("""
         CREATE TABLE IF NOT EXISTS courses (
             course_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            coursename TEXT NOT NULL
+            coursename TEXT NOT NULL,
+            coursedesc TEXT
         )
         """)
+        print('table made')
 
         # Courses-Categories table
         c.execute("""
         CREATE TABLE IF NOT EXISTS categories (
             category_id INTEGER PRIMARY KEY AUTOINCREMENT,
             category_name VARCHAR(100) NOT NULL,
-            course_id INT,
+            course_id INT NOT NULL,
             FOREIGN KEY (course_id) REFERENCES courses(course_id)
         )
         """)
+        print('table made')
 
         # Mocktest table
         c.execute("""
         CREATE TABLE IF NOT EXISTS mocktests (
             mocktest_id INTEGER PRIMARY KEY AUTOINCREMENT,
             mocktest_name TEXT NOT NULL,
-            mocktest_details TEXT,
+            mocktest_desc TEXT,
             fullmark INTEGER NOT NULL,
-            passmark INTEGER NOT NULL,
+            passmark INTEGER NOT NULL
         )
         """)
+        print('table made')
 
         # Questions table
         c.execute('''
@@ -65,6 +70,7 @@ def create_database():
             FOREIGN KEY (category_id) REFERENCES categories (category_id)
         )
         ''')
+        print('table made')
 
         # Mockquestions table
         c.execute('''
@@ -79,6 +85,7 @@ def create_database():
             FOREIGN KEY (category_id) REFERENCES categories (category_id)
         )
         ''')
+        print('table made')
 
         # Leaderboard table
         # c.execute('''
@@ -107,6 +114,7 @@ def create_database():
             FOREIGN KEY (mocktest_id) REFERENCES mocktests (mocktest_id)
         )
         ''')
+        print('table made')
 
         # Commit database
         conn.commit()

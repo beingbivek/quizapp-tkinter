@@ -1157,11 +1157,11 @@ def openbutton(btn_text):
                 course = courses_combo.get()
                 category = categories_combo.get()
                 num_questions = questions_entry.get()
+                global get_categories
                 
                 if not (selected_test and course and category and num_questions.isdigit()):
                     messagebox.showerror("Error", "Please fill all fields correctly.")
                     return
-                
                 mock_test_id = next((test[0] for test in fetch_mock_tests() if test[1] == selected_test), None)
                 course_id = next((test[0] for test in get_courses() if test[1] == course), None)
                 category_id = next((cat[0] for cat in get_categories(course_id) if cat[1] == category), None)
@@ -1175,7 +1175,7 @@ def openbutton(btn_text):
                     return
 
                 
-                conn = sqlite3.connect("quiz.db")
+                conn = sqlite3.connect(DATABASE_FILE)
                 cursor = conn.cursor()
                 cursor.execute("INSERT INTO mockquestions (mocktest_id, course_id, category_id, no_of_questions) VALUES (?, ?, ?, ?)",
                             (mock_test_id, course_id, category_id,

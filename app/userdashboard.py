@@ -68,6 +68,27 @@ def get_courses():
     conn.close()
     return courses
 
+def get_categories(course_id=None):
+    conn = sqlite3.connect(DATABASE_FILE)
+    cursor = conn.cursor()
+    if course_id:
+        cursor.execute("SELECT * FROM categories WHERE course_id = ?", (course_id,))
+    else:
+        cursor.execute("SELECT * FROM categories")
+    categories = cursor.fetchall()
+    categories = [list(category) for category in categories]
+    # print(categories)
+    courses = get_courses()
+    # print(courses)
+
+    for category in categories:
+        for course in courses:
+            if category[2] == course[0]:
+                category[2] = course[1]
+                break
+    conn.close()
+    return categories
+
 # Sidebar Frame
 sidebar = Frame(root, bg=SIDEBAR_COLOR, width=200, height=600)
 sidebar.pack(side='left', fill='y')
@@ -105,24 +126,78 @@ def openbutton(btn_text):
 
     # Main Dashboard Code
     if btn_text == "Dashboard":
+        # Set logged-in user (Replace with actual login logic)
+        LOGGED_IN_USER_ID = 1  # Change this dynamically based on user session
+
+        # Connect to database
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+
+        # Fetch Random Question for "Question of the Day"
+        cursor.execute("SELECT question_id, question, correct_ans, incorrect_ans, course_id, category_id FROM questions ORDER BY RANDOM() LIMIT 1")
+        qotd_data = cursor.fetchone()
+        question_id, question_text, correct_answer, incorrect_answers, course_id, category_id = qotd_data
+
+        # Parse incorrect answers stored as JSON list
+        import json
+        incorrect_answers = json.loads(incorrect_answers)
+        options = incorrect_answers + [correct_answer]
+        shuffle(options)
+
+        def question_location():
+            coursename = next((name[1] for name in get_courses() if course_id == name[0]),"Random")
+            categoryname = next((name[1] for name in get_categories() if category_id == name[0]),"Question")
+            return coursename + ' ' + categoryname
+
+        conn.close()  # Close database connection after fetching question
+
         # Question of the Day
-        qotd_label = Label(main_frame, text="Question of the day!", font=header_font, bg=MAINFRAME_COLOR)
+        qotd_label = Label(main_frame, text="Question of the Day!", font=("Arial", 16, "bold"), bg=MAINFRAME_COLOR)
         qotd_label.pack(anchor='w')
 
-        topic_label = Label(main_frame, text="Topic: Loksewa/Animal", font=label_font, bg=MAINFRAME_COLOR)
+        topic_label = Label(main_frame, text=f"Topic: {question_location()}", font=("Arial", 12), bg=MAINFRAME_COLOR)
         topic_label.pack(anchor='w')
 
-        question_label = Label(main_frame, text="Q. How fast can a Cheetah run?", font=("Arial", 12), bg=MAINFRAME_COLOR)
+        question_label = Label(main_frame, text=f"Q. {question_text}", font=("Arial", 12), bg=MAINFRAME_COLOR)
         question_label.pack(anchor='w')
 
-        options = ["80 kmph", "90 Kmph", "100 Kmph", "120 Kmph"]
         selected_option = StringVar()
         selected_option.set(None)
 
-        for opt in options:
-            Radiobutton(main_frame, text=opt, variable=selected_option, value=opt, bg=MAINFRAME_COLOR).pack(anchor='w')
+        option_buttons = []
+        def check_answer():
+            selected = selected_option.get()
+            if selected == correct_answer:
+                btn_submitqotd.config(state=DISABLED, text="Correct!", bg="green")
+            else:
+                btn_submitqotd.config(text="Try Again", bg="red")
 
-        btn_submitqotd = Button(main_frame, text='Submit',bg=BUTTON_COLOR,command=submitqotd).pack(anchor='w')
+        for opt in options:
+            rb = Radiobutton(main_frame, text=opt, variable=selected_option, value=opt, bg=MAINFRAME_COLOR)
+            rb.pack(anchor='w')
+            option_buttons.append(rb)
+
+        btn_submitqotd = Button(main_frame, text='Submit', bg=BUTTON_COLOR, command=check_answer)
+        btn_submitqotd.pack(anchor='w')
+
+        # Progress table Function
+        def fetch_progress_data(user_id):
+            conn = sqlite3.connect(DATABASE_FILE)
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT c.course_id, c.coursename, COUNT(mr.result), 
+                    SUM(CASE WHEN mr.result >= 50 THEN 1 ELSE 0 END) AS correct,
+                    SUM(CASE WHEN mr.result < 50 THEN 1 ELSE 0 END) AS incorrect
+                FROM mocktestresults mr
+                JOIN courses c ON mr.course_id = c.course_id
+                WHERE mr.user_id = ?
+                GROUP BY c.course_id, c.coursename
+            """, (user_id,))
+            
+            progress_data = cursor.fetchall()
+            conn.close()
+            return progress_data
 
         # Progress Table
         progress_label = Label(main_frame, text="Your Progress", font=("Arial", 14, "bold"), bg=MAINFRAME_COLOR)
@@ -135,37 +210,100 @@ def openbutton(btn_text):
             progress_table.heading(col, text=col)
             progress_table.column(col, width=100, anchor='center')
 
-        progress_data = [(1, "CEE", 40, 30, 10), (2, "IOE", 38, 8, 30), (3, "Driving", 41, 1, 40), (4, "LokSewa", 45, 40, 5)]
-        for row in progress_data:
-            progress_table.insert('', END, values=row)
+        progress_data = fetch_progress_data(LOGGED_IN_USER_ID)
+        for i, row in enumerate(progress_data, start=1):
+            progress_table.insert('', 'end', values=(i, *row))
         progress_table.pack()
+
+        # Fetch Latest 5 Mock Test Results
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+
+        cursor.execute("""
+                        SELECT m.mocktest_id, m.mocktest_name, mr.result, c.coursename
+                        FROM mocktestresults mr
+                        JOIN mocktests m ON mr.mocktest_id = m.mocktest_id
+                        JOIN courses c ON mr.course_id = c.course_id
+                        WHERE mr.user_id = ?
+                        ORDER BY result_id DESC
+                        LIMIT 5
+                    """, (LOGGED_IN_USER_ID,))
+
+
+        mock_results = cursor.fetchall()
+        conn.close()
 
         # Mock Test Results Table
         mock_label = Label(main_frame, text="Previous Mock Test Results", font=("Arial", 14, "bold"), bg=MAINFRAME_COLOR)
         mock_label.pack(anchor='w', pady=10)
 
-        mock_columns = ("SN", "Mock TestID", "Datetime", "Course", "Result")
+        mock_columns = ("SN", "Mock Test ID", "Datetime", "Course", "Result")
         mock_table = ttk.Treeview(main_frame, columns=mock_columns, show='headings', height=4)
 
         for col in mock_columns:
             mock_table.heading(col, text=col)
             mock_table.column(col, width=120, anchor='center')
 
-        mock_data = [(1, "CEE12", "2024/5/20 15:20", "CEE", "50/100"),
-                     (2, "IOE312", "2024/5/20 15:20", "IOE", "50/100"),
-                     (3, "Driving123", "2024/5/20 15:20", "Driving", "50/100"),
-                     (4, "LokSewa4334", "2024/5/20 15:20", "Loksewa", "50/100")]
+        for i, row in enumerate(mock_results, start=1):
+            mock_table.insert('', END, values=(i, row[0], row[1], row[3], f"{row[2]}/100"))
 
-        for row in mock_data:
-            mock_table.insert('', END, values=row)
         mock_table.pack()
 
         
     #Leaderboard user section.    
     elif btn_text == "LeaderBoard":
-        
-        def create_table(frame, data):
 
+        LOGGED_IN_USER = "user10"  # Change this dynamically based on the logged-in user
+
+        def fetch_leaderboard_data(logged_in_user):
+            conn = sqlite3.connect(DATABASE_FILE)
+            cursor = conn.cursor()
+            
+            query = """
+                SELECT 
+                    c.coursename, 
+                    u.username, 
+                    SUM(mr.result) AS total_score
+                FROM mocktestresults mr
+                JOIN users u ON mr.user_id = u.user_id
+                JOIN courses c ON mr.course_id = c.course_id
+                GROUP BY c.coursename, u.username
+                ORDER BY c.coursename, total_score DESC;
+            """
+            
+            cursor.execute(query)
+            results = cursor.fetchall()
+            conn.close()
+
+            leaderboard_data = {}
+            user_positions = {}
+
+            for course, username, total_score in results:
+                if course not in leaderboard_data:
+                    leaderboard_data[course] = []
+                leaderboard_data[course].append([len(leaderboard_data[course]) + 1, username, total_score])
+
+                # Store the position of the logged-in user
+                if username == logged_in_user:
+                    user_positions[course] = len(leaderboard_data[course])
+
+            # Filter data: Top 5 + logged-in user (if they are outside top 5)
+            filtered_data = {}
+            for course, users in leaderboard_data.items():
+                top_5 = users[:5]  # Get top 5 users
+
+                if course in user_positions and user_positions[course] > 5:
+                    # Find logged-in user's data
+                    logged_user_data = next((x for x in users if x[1] == logged_in_user), None)
+                    if logged_user_data:
+                        logged_user_data = [user_positions[course]] + logged_user_data[1:]  # Update with actual position
+                        top_5.append(logged_user_data)
+
+                filtered_data[course] = top_5
+
+            return filtered_data
+
+        def create_table(frame, data):
             headers = ["SN", "Username", "Score"]
             for col, header in enumerate(headers):
                 Label(frame, text=header, font=("Arial", 12, "bold"), bg="grey", width=10).grid(row=0, column=col, padx=1, pady=1)
@@ -174,63 +312,21 @@ def openbutton(btn_text):
                 for col_idx, value in enumerate(row_data):
                     Label(frame, text=value, font=("Arial", 12), bg="white", width=10, relief="ridge").grid(row=row_idx + 1, column=col_idx, padx=1, pady=1)
 
-        header = Label(main_frame, text="Leaderboard", font=header_font, bg=MAINFRAME_COLOR)
-        header.pack(pady=10)
         
-        data = {
-            "Loksewa": [
-                [1, "User1", "90"],
-                [2, "User2", "85"],
-                [3, "User3", "75"],
-                [4, "User4", "65"],
-                [5, "User5", "60"],
-                [6, "User6", "55"],
-            ],
-            "CEE": [
-                [1, "User5", "95"],
-                [2, "User6", "88"],
-                [3, "User7", "78"],
-                [4, "User8", "82"],
-                [5, "User5", "60"],
-                [6, "User6", "55"],
-            ],
-            "IOE": [
-                [1, "User9", "92"],
-                [2, "User10", "87"],
-                [3, "User11", "77"],
-                [4, "User12", "81"],
-                [5, "User5", "60"],
-                [6, "User6", "55"],
-            ],
-            "Driving": [
-                [1, "User13", "89"],
-                [2, "User14", "84"],
-                [3, "User15", "74"],
-                [4, "User16", "79"],
-                [5, "User5", "60"],
-                [6, "User6", "55"],
-            ],
-        }
+        header = Label(main_frame, text="Leaderboard", font=("Arial", 16, "bold"), bg="white")
+        header.pack(pady=10)
 
-        table_frame1 = Frame(main_frame, bd=2)
-        table_frame1.place(x=400, y=135, width=390, height=250)
-        Label(main_frame, text="Loksewa", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=400, y=100)
-        create_table(table_frame1, data["Loksewa"])
+        # Fetch and populate leaderboard
+        data = fetch_leaderboard_data(LOGGED_IN_USER)
 
-        table_frame2 = Frame(main_frame, bd=2)
-        table_frame2.place(x=900, y=135, width=390, height=250)
-        Label(main_frame, text="CEE", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=900, y=100)
-        create_table(table_frame2, data["CEE"])
+        positions = [(400, 135), (900, 135), (400, 525), (900, 525)]
+        course_titles = list(data.keys())
 
-        table_frame3 = Frame(main_frame, bd=2)
-        table_frame3.place(x=400, y=525, width=390, height=250)
-        Label(main_frame, text="IOE", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=400, y=490)
-        create_table(table_frame3, data["IOE"])
-
-        table_frame4 = Frame(main_frame, bd=2)
-        table_frame4.place(x=900, y=525, width=390, height=250)
-        Label(main_frame, text="Driving", font=('Arial', 14, 'bold'), fg='black',bg='#E74C3C').place(x=900, y=490)
-        create_table(table_frame4, data["Driving"])
+        for i, course in enumerate(course_titles[:4]):  # Display up to 4 courses
+            table_frame = Frame(main_frame, bd=2)
+            table_frame.place(x=positions[i][0], y=positions[i][1], width=390, height=250)
+            Label(main_frame, text=course, font=('Arial', 14, 'bold'), fg='black', bg='#E74C3C').place(x=positions[i][0], y=positions[i][1] - 35)
+            create_table(table_frame, data[course])
 
         pass
     
