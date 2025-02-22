@@ -3,9 +3,17 @@ from tkinter import ttk
 from tkinter import messagebox
 import tkinter.font as font
 from PIL import ImageTk, Image
-import runpy
 import sqlite3
 from random import *
+import os
+
+# Read the user ID from the temporary file
+try:
+    with open("temp_user_id.txt", "r") as f:
+        user_id = f.read().strip()
+    os.remove("temp_user_id.txt")  # Clean up the temporary file
+except FileNotFoundError:
+    user_id = None
 
 # User window
 root = Tk()
@@ -65,7 +73,7 @@ profile_img = Label(sidebar, text="Profile Image", bg='white', width=15, height=
 profile_img.pack(pady=10)
 
 # Username and Score
-username_label = Label(sidebar, text="Aayush Bohara", fg=FG_COLOR, bg=SIDEBAR_COLOR, font=label_font)
+username_label = Label(sidebar, text=f"User ID: {user_id}", fg=FG_COLOR, bg=SIDEBAR_COLOR, font=label_font)
 username_label.pack()
 
 score_label = Label(sidebar, text="Score: 1500", fg=FG_COLOR, bg=SIDEBAR_COLOR, font=("Arial", 10))
@@ -150,7 +158,6 @@ def openbutton(btn_text):
 
     # Edit profile - user section - mukesh
     elif btn_text == "Profile":
-
         pass
 
     else:

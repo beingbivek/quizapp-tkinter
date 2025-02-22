@@ -2,13 +2,16 @@ from tkinter import *
 from tkinter import messagebox
 import subprocess
 import sqlite3
+import os
+import runpy
 
-# Colors (matched with Admin panel)
-bgcolor = "#ffffff"  # Light gray
-header_color = "#003366"  # Deep blue
-frame_bg = "#e6e6e6"  # Gray
-label_text_color = "#003366"  # Deep blue for text
-tablecolor = '#00509e'
+# Colors (matched with Register page)
+bgcolor = "#E0E0E0"
+header_color = "#34495E"
+frame_bg = "#E0E0E0"
+button_color = '#1F618D'
+tablecolor = '#34495E'
+label_text_color = "black"  # Text color for labels
 
 def back_to_welcome():
     user_login.destroy()
@@ -54,9 +57,14 @@ def login():
             # Check if the password matches
             if user[6] == password:  # Assuming password is the 7th column in the table
                 messagebox.showinfo("Success", "Login successful!")
+                # Write user ID to a temporary file
+                with open("temp_user_id.txt", "w") as f:
+                    f.write(str(user[0]))  # Assuming user ID is the first column
                 user_login.destroy()
-                subprocess.Popen(["python", "userdashboard.py"])
-                
+                # Launch userdashboard.py in a new process
+                OPEN_FILE = r'..\quizapp-tkinter\app\userdashboard.py'
+
+                runpy.run_path(OPEN_FILE)
             else:
                 messagebox.showerror("Error", "Incorrect password")
         else:
@@ -100,20 +108,20 @@ welcomeframe = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg=tablec
 welcomeframe.place(x=150, y=70, width=400, height=60)
 Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 25, "bold"), bg=tablecolor, fg='white').pack(pady=10, padx=10)
 
-frame = Frame(user_login, bd=2, relief="ridge", padx=20, pady=20, bg=bgcolor)
+frame = Frame(user_login, bd=2, relief="ridge", padx=20, pady=20, bg='white')
 frame.place(x=200, y=140, width=300, height=250)
 
-Label(frame, text="Email/Username:", bg=bgcolor, fg=label_text_color).place(x=5, y=0)
-name_entry = Entry(frame)
+Label(frame, text="Email/Username:", bg='white', fg=label_text_color).place(x=5, y=0)
+name_entry = Entry(frame, bg='black', fg='white')
 name_entry.place(x=5, y=20)
 
-Label(frame, text="Password:", bg=bgcolor, fg=label_text_color).place(x=5, y=50)
-user_entry = Entry(frame, show="*")
+Label(frame, text="Password:", bg='white', fg=label_text_color).place(x=5, y=50)
+user_entry = Entry(frame, show="*", bg='black', fg='white')
 user_entry.place(x=5, y=70)
 
-Button(frame, text="Forgot Password", command=go_to_forgot, highlightbackground='white').place(x=122, y=110)
-Button(frame, text="Admin Login", command=open_admin_login, highlightbackground='white').place(x=156, y=150)
-Button(frame, text="Login", command=login, highlightbackground='white').place(x=100, y=190)
+Button(frame, text="Forgot Password", command=go_to_forgot, fg='white', bg=button_color).place(x=122, y=110)
+Button(frame, text="Admin Login", command=open_admin_login, fg='white', bg=button_color).place(x=156, y=150)
+Button(frame, text="Login", command=login, fg='white', bg=button_color).place(x=100, y=190)
 
 infotopframe = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
 infotopframe.place(x=200, y=140, width=300, height=20)
@@ -126,10 +134,10 @@ back_label = Label(backframe, text="Back", bg="black", fg="white", font=("Arial"
 back_label.place(x=0, y=-1)
 back_label.bind("<Button-1>", lambda e: back_to_welcome())
 
-register_button = Button(framemain, text="Register", command=open_registration, highlightbackground='white')
+register_button = Button(framemain, text="Register", command=open_registration, fg='white', bg=button_color)
 register_button.place(x=500, y=30)
 
-login_button = Button(framemain, text="Login", command=open_login, highlightbackground='white')
+login_button = Button(framemain, text="Login", command=open_login, fg='white', bg=button_color)
 login_button.place(x=600, y=30)
 
 adjust_frames()

@@ -78,7 +78,7 @@ register.bind("<Configure>", adjust_frames)
 framemain = Frame(register, bd=2, relief="ridge", padx=0, pady=0, bg=bgcolor)
 framemain.place(x=0, y=0, width=700, height=400)
 
-topframemain = Frame(register, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
+topframemain = Frame(register, bd=1, relief="ridge", padx=0, pady=0, bg=header_color)
 topframemain.place(x=0, y=0, width=700, height=25)
 Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0,fg='white',bg=header_color).place(x=0, y=0)
 
@@ -115,11 +115,11 @@ confirm_pass_entry.place(x=250, y=70)
 
 Button(frame, text="Register", command=register_user,fg='white',bg=button_color).place(x=200, y=190)
 
-infotopframe = Frame(register, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
+infotopframe = Frame(register, bd=1, relief="ridge", padx=0, pady=0, bg=header_color)
 infotopframe.place(x=100, y=140, width=500, height=20)
 Label(infotopframe, text="Register", font=("Arial", 10), padx=15, pady=0, fg='white',bg=header_color).place(x=0, y=0)
 
-backframe = Frame(register, bd=2, relief="ridge", padx=0, pady=0, bg='black')
+backframe = Frame(register, bd=1, relief="ridge", padx=0, pady=0, bg='black')
 backframe.place(x=450, y=140, width=50, height=20)
 
 back_label = Label(backframe, text="Back", bg="black", fg="white", font=("Arial", 10))
