@@ -422,6 +422,11 @@ def openbutton(btn_text):
                 topic_tab = create_page(topic_tabs, f"Content for {topic_name}")
                 topic_tabs.add(topic_tab, text=topic_name)
 
+    # Mock Test - user section - Bivek
+    elif btn_text == "Mock Test":
+        
+        pass
+
     else:
         label = Label(main_frame, text=btn_text, font=("Arial", 20, "bold"), bg=MAINFRAME_COLOR)
         label.pack(expand=True)
