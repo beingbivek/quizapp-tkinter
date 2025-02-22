@@ -1275,7 +1275,12 @@ for btn_text in buttons:
     sidebarbutton.pack(pady=2)
     buttons_dict[btn_text] = sidebarbutton
 
-logout_btn = Button(sidebar, text="🔓 LogOut", bg=LOGOUT_COLOR, fg=FG_COLOR, relief=FLAT, width=20, height=2)
+def logout():
+    root.destroy()
+    runpy.run_path(r'..\quizapp-tkinter\app\welcome.py')
+    pass
+
+logout_btn = Button(sidebar, text="🔓 LogOut", bg=LOGOUT_COLOR, fg=FG_COLOR, relief=FLAT, width=20, height=2,command=logout)
 logout_btn.pack(pady=20)
 
 # Main Dashboard

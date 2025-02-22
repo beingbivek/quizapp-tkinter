@@ -557,8 +557,13 @@ sidebar_button("LeaderBoard")
 sidebar_button("Mock Test")
 sidebar_button("Profile")
 
+def logout():
+    root.destroy()
+    runpy.run_path(r'..\quizapp-tkinter\app\welcome.py')
+    pass
+
 # Logout Button
-logout_btn = Button(sidebar, text="Logout", bg=LOGOUT_COLOR, fg=FG_COLOR, font=("Arial", 10, "bold"), width=20, height=2, bd=0)
+logout_btn = Button(sidebar, text="Logout", bg=LOGOUT_COLOR, fg=FG_COLOR, font=("Arial", 10, "bold"), width=20, height=2, bd=0,command=logout)
 logout_btn.pack(side='bottom', pady=20)
 
 # Main Content Frame
