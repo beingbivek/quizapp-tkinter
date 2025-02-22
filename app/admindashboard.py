@@ -7,7 +7,7 @@ import runpy
 import sqlite3
 from tkinter import simpledialog
 import tkinter as tk
-from tkcalender import DateEntry
+from tkcalendar import DateEntry
 
 # Admin Window
 root = Tk()
@@ -1216,7 +1216,7 @@ def openbutton(btn_text):
         
 
         #question table
-        questions_table = tTreeview(main_frame, columns=("ID", "Mock Test-Name", "Course-Name", "Category", "Questions"), show="headings")
+        questions_table = ttk.Treeview(main_frame, columns=("ID", "Mock Test-Name", "Course-Name", "Category", "Questions"), show="headings")
         for col in ["ID", "Mock Test-Name", "Course-Name", "Category", "Questions"]:
                questions_table.heading(col, text=col)
         questions_table.pack()
