@@ -1,5 +1,5 @@
 from tkinter import *
-import subprocess
+import runpy
 import sqlite3
 
 def create_database():
@@ -100,12 +100,13 @@ def create_database():
         # Close the connection
         conn.close()
 
-# Colors
-bgcolor = "#ffffff"  # Light gray
-header_color = "#003366"  # Deep blue
-frame_bg = "#e6e6e6"  # Gray
-label_text_color = "#003366"  # Deep blue for text
-tablecolor= '#00509e'
+# Colors (matched with Register page)
+bgcolor = "#E0E0E0"  # Background color
+header_color = "#34495E"  # Header color
+frame_bg = "#E0E0E0"  # Frame background color
+button_color = '#1F618D'  # Button color
+tablecolor = '#34495E'  # Table color
+label_text_color = "black"  # Text color for labels
 
 welcome = Tk()
 welcome.title("Quiz App")
@@ -117,11 +118,11 @@ create_database()
 
 def open_registration():
     welcome.destroy()
-    subprocess.Popen(["python", "register.py"])
+    runpy.run_path('register.py')
 
 def open_login():
     welcome.destroy()
-    subprocess.Popen(["python", "login.py"])
+    runpy.run_path('login.py')
 
 # Function to center frames dynamically
 def center_frames(event=None):
@@ -178,7 +179,7 @@ welcomeframe.place(x=150, y=70, width=400, height=60)
 Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 25, "bold"), bg=tablecolor, fg="white").pack(pady=10, padx=10)
 
 # Welcome message frame
-frame = Frame(welcome, bd=2, relief="ridge", padx=20, pady=20, bg=bgcolor)
+frame = Frame(welcome, bd=2, relief="ridge", padx=20, pady=20, bg=frame_bg)
 Label(frame, text='''
 Get ready to explore a world of knowledge and sharpen your skills with ease. 
 Our app offers a variety of tests and practice questions tailored for:
@@ -190,17 +191,17 @@ IOE (Institute of Engineering)
 
 Whether you're preparing for competitive exams or brushing up your knowledge,
 Quiz App is here to help you succeed. Start your journey today!
-''', font=("Arial", 13), bg=bgcolor,fg='black').place(x=-10, y=0)
+''', font=("Arial", 13), bg=frame_bg, fg=label_text_color).place(x=-10, y=0)
 
 # Buttons
-Button(frame, text="Register", command=open_registration, highlightbackground='white').place(x=0, y=190)
-Button(frame, text="Login", command=open_login, highlightbackground='white').place(x=390, y=190)
+Button(frame, text="Register", command=open_registration, fg='white', bg=button_color).place(x=0, y=190)
+Button(frame, text="Login", command=open_login, fg='white', bg=button_color).place(x=390, y=190)
 
 # Top buttons
-register_button = Button(framemain, text="Register", command=open_registration,highlightbackground='white')
+register_button = Button(framemain, text="Register", command=open_registration, fg='white', bg=button_color)
 register_button.place(x=500, y=30)
 
-login_button = Button(framemain, text="Login", command=open_login,highlightbackground='white')
+login_button = Button(framemain, text="Login", command=open_login, fg='white', bg=button_color)
 login_button.place(x=600, y=30)
 
 # Bind the resize event to reposition elements dynamically

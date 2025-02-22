@@ -1,14 +1,14 @@
 from tkinter import *
 from tkinter import messagebox
-import subprocess
 import runpy
 
-# Colors
-bgcolor = "#ffffff"  # Light gray
-header_color = "#003366"  # Deep blue
-frame_bg = "#e6e6e6"  # Gray
-label_text_color = "#003366"  # Deep blue for text
-tablecolor= '#00509e'
+# Colors (matched with Register page)
+bgcolor = "#E0E0E0"  # Background color
+header_color = "#34495E"  # Header color
+frame_bg = "#E0E0E0"  # Frame background color
+button_color = '#1F618D'  # Button color
+tablecolor = '#34495E'  # Table color
+label_text_color = "black"  # Text color for labels
 
 # Predefined admin code (change this as needed)
 ADMIN_CODE = "12345"
@@ -69,26 +69,26 @@ admin_login.bind("<Configure>", adjust_frames)
 framemain = Frame(admin_login, bd=2, relief="ridge", padx=0, pady=0, bg=bgcolor)
 framemain.place(x=0, y=0, width=700, height=400)
 
-topframemain = Frame(admin_login, bd=2, relief="ridge", padx=0, pady=0, bg='#003366')
+topframemain = Frame(admin_login, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
 topframemain.place(x=0, y=0, width=700, height=25)
-Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg='#003366').place(x=0, y=0)
+Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg=header_color, fg='white').place(x=0, y=0)
 
 welcomeframe = Frame(admin_login, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
 welcomeframe.place(x=150, y=70, width=400, height=60)
-Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 25, "bold"), bg=tablecolor).pack(pady=10, padx=10)
+Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 25, "bold"), bg=tablecolor, fg='white').pack(pady=10, padx=10)
 
-frame = Frame(admin_login, bd=2, relief="ridge", padx=20, pady=20, bg=bgcolor)
+frame = Frame(admin_login, bd=2, relief="ridge", padx=20, pady=20, bg='white')
 frame.place(x=200, y=140, width=300, height=250)
 
-Label(frame, text="Enter Admin Code:",bg='white',fg='black').place(x=5, y=0)
-admin_code_entry = Entry(frame, show="*")
+Label(frame, text="Enter Admin Code:", bg='white', fg=label_text_color).place(x=5, y=0)
+admin_code_entry = Entry(frame, show="*", bg='black', fg='white')
 admin_code_entry.place(x=5, y=20)
 
-Button(frame, text="Login", command=admin_login_function,highlightbackground='white').place(x=100, y=190)
+Button(frame, text="Login", command=admin_login_function, fg='white', bg=button_color).place(x=100, y=190)
 
-infotopframe = Frame(admin_login, bd=2, relief="ridge", padx=0, pady=0, bg='#003366')
+infotopframe = Frame(admin_login, bd=2, relief="ridge", padx=0, pady=0, bg=header_color)
 infotopframe.place(x=200, y=140, width=300, height=20)
-Label(infotopframe, text="Admin Login", font=("Arial", 10), padx=15, pady=-2, bg='#003366').place(x=0, y=0)
+Label(infotopframe, text="Admin Login", font=("Arial", 10), padx=15, pady=-2, bg=header_color, fg='white').place(x=0, y=0)
 
 backframe = Frame(admin_login, bd=2, relief="ridge", padx=0, pady=0, bg='black')
 backframe.place(x=450, y=140, width=50, height=20)
@@ -104,14 +104,13 @@ back_label = Label(
 back_label.place(x=0, y=-1)
 
 # Bind a click event to the label
-back_label.bind("<Button-1>", lambda e : open_login())
-
+back_label.bind("<Button-1>", lambda e: open_login())
 
 # Top buttons
-register_button = Button(framemain, text="Register", command=open_registration,highlightbackground='white')
+register_button = Button(framemain, text="Register", command=open_registration, fg='white', bg=button_color)
 register_button.place(x=500, y=30)
 
-login_button = Button(framemain, text="Login", command=open_login,highlightbackground='white')
+login_button = Button(framemain, text="Login", command=open_login, fg='white', bg=button_color)
 login_button.place(x=600, y=30)
 
 adjust_frames()
