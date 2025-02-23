@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 import sqlite3
 import runpy
-import tkinter.font as font
+import pybase64  # For decryption
 
 # Colors (matched with Register page)
 bgcolor = "#E0E0E0"
@@ -32,6 +32,17 @@ def open_admin_login():
     user_login.destroy()
     runpy.run_path('admin.py')
 
+def decrypt_password(encrypted_password):
+    try:
+        if encrypted_password is None:
+            raise ValueError("No password found in the database.")
+        secret = encrypted_password.encode('ascii')  # Encode the encrypted password to bytes
+        secret = pybase64.b64decode(secret)  # Decrypt using Base64
+        return secret.decode('ascii')  # Convert back to the original password
+    except Exception as e:
+        messagebox.showerror("Error", f"An error occurred during decryption: {e}")
+        return None
+
 def login():
     username_or_email = name_entry.get().strip()
     password = user_entry.get().strip()
@@ -53,17 +64,25 @@ def login():
         user = c.fetchone()
 
         if user:
-            # Check if the password matches
-            if user[6] == password:  # Assuming password is the 7th column in the table
+            # Retrieve the encrypted password from the database
+            encrypted_password = user[5]  # Assuming password is the 6th column in the table
+
+            # Decrypt the password
+            decrypted_password = decrypt_password(encrypted_password)
+
+            if decrypted_password is None:
+                messagebox.showerror("Error", "Failed to decrypt password. Please contact support.")
+                return
+
+            # Check if the entered password matches the decrypted password
+            if password == decrypted_password:
                 messagebox.showinfo("Success", "Login successful!")
                 # Write user ID to a temporary file
                 with open("temp_user_id.txt", "w") as f:
                     f.write(str(user[0]))  # Assuming user ID is the first column
                 user_login.destroy()
                 # Launch userdashboard.py in a new process
-                OPEN_FILE = r'..\quizapp-tkinter\app\userdashboard.py'
-
-                runpy.run_path(OPEN_FILE)
+                runpy.run_path('userdashboard.py')
             else:
                 messagebox.showerror("Error", "Incorrect password")
         else:
@@ -102,47 +121,6 @@ framemain.place(x=0, y=0, width=700, height=400)
 topframemain = Frame(user_login, bd=1, relief="ridge", padx=0, pady=0, bg=header_color)
 topframemain.place(x=0, y=0, width=700, height=25)
 Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg=header_color, fg='white').place(x=0, y=0)
-
-# Making close and minimize button manually
-MAINFRAME_COLOR = "#E0E0E0"
-SIDEBAR_COLOR = "#2C3E50"
-BUTTON_COLOR = "#34495E"
-HIGHLIGHT_COLOR = "#1A252F"
-HEADER_COLOR = "#57a1f8"
-PROFILE_COLOR = "#1F618D"
-LOGOUT_COLOR = "#E74C3C"
-FG_COLOR = "white"
-button_font = font.Font(size=14)
-
-def min():
-    user_login.iconify()
-
-def on_enter(i):
-    btn2['background'] = "red"
-
-def on_leave(i):
-    btn2['background'] = HEADER_COLOR
-
-def enter(i):
-    btn['background'] = "red"
-
-def leave(i):
-    btn['background'] = HEADER_COLOR
-
-def max():
-    msg_box = messagebox.askquestion('Exit Application', 'Are you sure you want to close the application?', icon='warning')
-    if msg_box == 'yes':
-        user_login.destroy()
-
-btn2 = Button(topframemain, text="✕", command=max, width=4, bg=HEADER_COLOR, border=1, font=button_font)
-btn2.place(x=1230,y=-5)
-btn2.bind('<Enter>', on_enter)
-btn2.bind('<Leave>', on_leave)
-
-btn = Button(topframemain, text="-", command=min, width=4, bg=HEADER_COLOR, border=1, font=button_font)
-btn.place(x=1180,y=-5)
-btn.bind('<Enter>', enter)
-btn.bind('<Leave>', leave)
 
 welcomeframe = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
 welcomeframe.place(x=150, y=70, width=400, height=60)

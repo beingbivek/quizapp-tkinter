@@ -3,6 +3,7 @@ from tkinter import messagebox
 import sqlite3
 import runpy
 import tkinter.font as font
+import pybase64  
 
 # Colors
 bgcolor = "#E0E0E0"
@@ -36,12 +37,17 @@ def register_user():
         return
 
     try:
+        # Encrypt the password using Base64
+        secret = password.encode('ascii')  # Encode the password to bytes
+        secret = pybase64.b64encode(secret)  # Encrypt using Base64
+        secret = secret.decode('ascii')  # Convert back to string for storage
+
         conn = sqlite3.connect('quiz.db')  # Replace with your actual database name
         c = conn.cursor()
         c.execute("""
             INSERT INTO users (fullname, email, username, contact, password)
             VALUES (?, ?, ?, ?, ?)
-        """, (fullname, email, username, contact, password))
+        """, (fullname, email, username, contact, secret))  # Store the encrypted password
         conn.commit()
         conn.close()
         messagebox.showinfo("Success", "Registration successful!")
