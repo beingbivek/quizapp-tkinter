@@ -793,7 +793,7 @@ def openbutton(btn_text):
             for row in questions_table.get_children():
                 questions_table.delete(row)
 
-            #i = 0
+            i = 0
             for question in fetch_questions():
                 course_name = next((test[1] for test in fetch_courses() if test[0] == question[1]), None)
                 category_name = next((test[1] for test in fetch_categories() if test[0] == question[2]), None)
@@ -811,8 +811,8 @@ def openbutton(btn_text):
                 if (query in question[3].lower() or query in options.lower() or 
                     query in str(course_name).lower() or query in str(category_name).lower()):
                     questions_table.insert("", "end", values=(question[0], question[3], question[4], options, course_name, category_name))
-                   # i += 1
-            #total.config(text=f'{i}')
+                    i += 1
+            total.config(text=f'{i}')
 
         # Add a frame for the search bar
         search_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
@@ -832,7 +832,7 @@ def openbutton(btn_text):
             for row in questions_table.get_children():
                 questions_table.delete(row)
            
-            #i = 0
+            i = 0
             for question in fetch_questions():
                
                 course_name = next((test[1] for test in fetch_courses() if test[0] == question[1]), None)
@@ -847,10 +847,10 @@ def openbutton(btn_text):
                 except json.JSONDecodeError:
                     options = "Invalid data"  # Handle error if JSON is malformed
                 
-                #i += 1
-                # Insert into Treeview
+                i += 1
+                #Insert into Treeview
                 questions_table.insert("", "end", values=(question[0], question[3], question[4], options, course_name, category_name))
-            #total.config(text=f'{i}')
+            total.config(text=f'{i}')
         
         
         #Delete question table
@@ -1118,8 +1118,14 @@ def openbutton(btn_text):
         del_question_btn = Button(questiontable_frame, text="Delete Question", command=delete_question_selected, bg= LOGOUT_COLOR, font= button_font, fg= FG_COLOR  )
         del_question_btn.pack(side=LEFT, padx=10,pady = 10)
 
-        total= Label(questiontable_frame,text='')
-        total.pack(side=RIGHT)
+        total_frame = Frame(questiontable_frame)
+        total_frame.pack(side=RIGHT)
+
+        total= Label(total_frame,text='',font = button_font)
+        total.pack(side=RIGHT,padx=100)
+
+        total_label= Label(total_frame,text='Total Questions : ',font = button_font)
+        total_label.pack(side=RIGHT)
 
 
 
