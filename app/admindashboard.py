@@ -787,14 +787,54 @@ def openbutton(btn_text):
             conn.close()
             return categories
         
+        #Search function
+        def search_questions():
+            query = search_entry.get().strip().lower()
+            for row in questions_table.get_children():
+                questions_table.delete(row)
 
+            #i = 0
+            for question in fetch_questions():
+                course_name = next((test[1] for test in fetch_courses() if test[0] == question[1]), None)
+                category_name = next((test[1] for test in fetch_categories() if test[0] == question[2]), None)
+
+                try:
+                    options = json.loads(question[5])  # Load JSON
+                    if isinstance(options, list):
+                        options = ", ".join(options)
+                    else:
+                        options = str(options)
+                except json.JSONDecodeError:
+                    options = "Invalid data"
+
+                # Check if query matches any field
+                if (query in question[3].lower() or query in options.lower() or 
+                    query in str(course_name).lower() or query in str(category_name).lower()):
+                    questions_table.insert("", "end", values=(question[0], question[3], question[4], options, course_name, category_name))
+                   # i += 1
+            #total.config(text=f'{i}')
+
+        # Add a frame for the search bar
+        search_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
+        search_frame.pack(pady=10, fill=X)
+
+        # Add a search entry box
+        search_entry = Entry(search_frame, width=30,font=(15))
+        search_entry.pack(side=LEFT, padx=10, pady=5)
+
+        # Add a search button
+        search_button = Button(search_frame, text="Search", command=search_questions, bg=BUTTON_COLOR, font=button_font, fg=FG_COLOR)
+        search_button.pack(side=LEFT, padx=5)
+
+        
+        #Update question table
         def update_questions_table():
             for row in questions_table.get_children():
                 questions_table.delete(row)
-            i = 1
+           
+            #i = 0
             for question in fetch_questions():
                
-                
                 course_name = next((test[1] for test in fetch_courses() if test[0] == question[1]), None)
                 category_name = next((test[1] for test in fetch_categories() if test[0] == question[2]), None)
                  # Ensure the data is properly converted into a list
@@ -807,10 +847,13 @@ def openbutton(btn_text):
                 except json.JSONDecodeError:
                     options = "Invalid data"  # Handle error if JSON is malformed
                 
+                #i += 1
                 # Insert into Treeview
-                questions_table.insert("", "end", values=(i, question[3], question[4], options, course_name, category_name))
-                i += 1
+                questions_table.insert("", "end", values=(question[0], question[3], question[4], options, course_name, category_name))
+            #total.config(text=f'{i}')
         
+        
+        #Delete question table
         def delete_question_selected():
             selected_item = questions_table.selection()
             if not selected_item:
@@ -818,13 +861,14 @@ def openbutton(btn_text):
                 return
 
             selected_question = questions_table.item(selected_item, "values")
-            option = messagebox.askokcancel('Delete records',f'Do you want to delete Q:{selected_question[1]}?')
+            print(selected_question[0])
+            option = messagebox.askokcancel('Delete records',f'Do you want to delete Q:{selected_question[1]}')
             if option :
 
 
                 conn= sqlite3.connect(DATABASE_FILE)
                 cursor= conn.cursor()
-                cursor.execute('DELETE FROM questions WHERE question_id= ? ', (selected_question[0]))
+                cursor.execute('DELETE FROM questions WHERE question_id= ? ', (selected_question[0],))
                 conn.commit()
                 conn.close()
                 update_questions_table()
@@ -861,8 +905,9 @@ def openbutton(btn_text):
             tk.Label(add_window,text='Enter question:').pack()
             #question_box = Entry(add_window, width=35)
             #question_box.pack()
-            question_box=Text(add_window,height= 5,width= 40)
+            question_box= Text(add_window,height= 5,width= 40)
             question_box.pack(pady=10)
+            
             tk.Label(add_window, text="Incorrect answer:").pack()
             #Incorrect_box = Entry(add_window, width=35)
             #Incorrect_box.pack()
@@ -877,12 +922,12 @@ def openbutton(btn_text):
                 
                 course = courses_combo.get()
                 category = categories_combo.get()
-                Question = question_box.get()  # Get the value and strip whitespace
-                Incorrect_ans = f"{Incorrect_box.get()}"
+                Question = question_box.get("1.0", "end-1c")  # Get the value and strip whitespace
+                Incorrect_ans = f"{Incorrect_box.get("1.0", "end-1c")}"
                 Incorrect_ans = json.dumps(Incorrect_ans.split(','))
                 # print(Incorrect_ans.split(','))
                 # Get the value and strip whitespace
-                Correct_ans = correct_box.get()      # Get the value and strip whitespace
+                Correct_ans = correct_box.get("1.0", "end-1c")      # Get the value and strip whitespace
                 
                 
                 if not ( course or category or Question or Incorrect_ans or Correct_ans):
@@ -990,10 +1035,10 @@ def openbutton(btn_text):
             def save_question():
                 course = c_name.get()
                 category = ca_name.get()
-                Question = question_box.get()  # Get the value and strip whitespace
-                Incorrect_ans = f"{Incorrect_box.get()}"
+                Question = question_box.get("1.0", "end-1c")  # Get the value and strip whitespace
+                Incorrect_ans = f"{Incorrect_box.get("1.0", "end-1c")}"
                 Incorrect_ans = json.dumps(Incorrect_ans.split(','))
-                Correct_ans = correct_box.get() # Get the value and strip whitespace
+                Correct_ans = correct_box.get("1.0", "end-1c") # Get the value and strip whitespace
 
                 if not (course and category and Question and Incorrect_ans and Correct_ans):
                     messagebox.showerror("Error", "Please fill all fields correctly.")
@@ -1033,23 +1078,21 @@ def openbutton(btn_text):
 
 
 
-        
-
-
+       
 
 
         questiontable_frame = Frame(main_frame, bg = MAINFRAME_COLOR, height = 50, width = 90)
         questiontable_frame.pack(pady=10,fill=BOTH,expand=  True)
 
-        addquestion_btn = Button(questiontable_frame, text="Add Question", command=open_add_question_form, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
-        addquestion_btn.pack( padx=10,pady = 10)
+        addquestion_btn = Button(search_frame, text="Add Question", command=open_add_question_form, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
+        addquestion_btn.pack(side=RIGHT, padx=10,pady = 10)
 
 
 
-        questions_table = ttk.Treeview(questiontable_frame, columns=("SN", "Question", "Correct","Incorrect",  "Courses", "Category"), show="headings")
+        questions_table = ttk.Treeview(questiontable_frame, columns=("Id", "Question", "Correct","Incorrect",  "Courses", "Category"), show="headings")
 
         # Define column headings
-        questions_table.heading("SN", text="SN")
+        questions_table.heading("Id", text="Id")
         questions_table.heading("Question", text="Question")
         questions_table.heading("Incorrect", text="Incorrect")  # Fixed capitalization
         questions_table.heading("Correct", text="Correct")
@@ -1057,7 +1100,7 @@ def openbutton(btn_text):
         questions_table.heading("Category", text="Category")
 
         # Adjust column widths
-        questions_table.column("SN", width=50, anchor=CENTER)
+        questions_table.column("Id", width=50, anchor=CENTER)
         questions_table.column("Question", width=250,anchor=CENTER)
         questions_table.column("Incorrect", width=100, anchor=CENTER)
         questions_table.column("Correct", width=100, anchor=CENTER)
@@ -1067,13 +1110,16 @@ def openbutton(btn_text):
         # Pack the Treeview
         questions_table.pack(fill=BOTH, expand=True,padx = 10, pady = 10)
 
+
         
         editquestion_btn = Button(questiontable_frame, text="Edit Question", command=open_edit_question_form, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
         editquestion_btn.pack(side=LEFT, padx=10,pady = 10)
 
-        del_question_btn = Button(questiontable_frame, text="Delete Question", command=delete_question_selected, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
+        del_question_btn = Button(questiontable_frame, text="Delete Question", command=delete_question_selected, bg= LOGOUT_COLOR, font= button_font, fg= FG_COLOR  )
         del_question_btn.pack(side=LEFT, padx=10,pady = 10)
 
+        total= Label(questiontable_frame,text='')
+        total.pack(side=RIGHT)
 
 
 
