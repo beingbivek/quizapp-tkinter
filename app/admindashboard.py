@@ -111,10 +111,36 @@ def openbutton(btn_text):
 
     # user - admin section
 
+    # Modify the `elif btn_text == buttons[1]:` section
     elif btn_text == buttons[1]:
         # Clear the main frame
         for widget in main_frame.winfo_children():
             widget.destroy()
+
+        # Function to fetch users from the database
+        def fetch_users():
+            try:
+                conn = sqlite3.connect('quiz.db')  # Replace with your actual database name
+                c = conn.cursor()
+                c.execute("SELECT user_id, username, fullname, contact, email FROM users")
+                users = c.fetchall()
+                conn.close()
+                print("Fetched Users:", users)  # Debugging: Print fetched data
+                return users
+            except Exception as e:
+                messagebox.showerror("Error", f"An error occurred while fetching users: {e}")
+                return []
+
+        # Function to refresh the table with data from the database
+        def refresh_table():
+            global rows
+            rows = fetch_users()  # Fetch users from the database
+            print("Rows Data:", rows)  # Debugging: Print rows data
+            for row in tree.get_children():
+                tree.delete(row)  # Clear the existing rows in the table
+            for row in rows:
+                tree.insert("", "end", values=row)  # Insert fetched data into the table
+            tree.configure(height=len(rows))
 
         # Colors
         bgcolor = "#E0E0E0"
@@ -179,17 +205,10 @@ def openbutton(btn_text):
             tree.heading(col, text=col)
             tree.column(col, anchor=CENTER, width=150)
 
-        # Sample data
-        rows = [
-            ("1", "poplol2", "Ram Rai", "9876543210", "a@gmail.com"),
-            ("2", "user123", "John Doe", "1234567890", "john@example.com"),
-            ("3", "testuser", "Jane Doe", "0987654321", "jane@example.com")
-        ]
+        # Fetch and display users from the database
+        refresh_table()
 
-        for row in rows:
-            tree.insert("", "end", values=row)
-
-        tree.configure(height=len(rows))
+        # Ensure the Treeview is placed correctly
         tree.place(relx=0, rely=0, relwidth=1, relheight=1)
 
         # Action Buttons
@@ -198,6 +217,7 @@ def openbutton(btn_text):
 
         delete_button = Button(main_frame, text="Delete", bg=delete_color, fg="black", relief=FLAT, command=lambda: delete_user())
         delete_button.place(relx=0.15, rely=0.9, relwidth=0.1, relheight=0.05)
+
 
         # Functions
         def user_no_selected(selected_user_no):
@@ -263,12 +283,21 @@ def openbutton(btn_text):
             Button(register_window, text="Submit", command=lambda: submit_registration(
                 username_entry.get(), name_entry.get(), contact_entry.get(), email_entry.get(), register_window
             )).place(relx=0.4, rely=0.6)
-
+        
         def submit_registration(username, name, contact, email, window):
-            new_user = (str(len(rows) + 1), username, name, contact, email)
-            rows.append(new_user)
-            tree.insert("", "end", values=new_user)
-            window.destroy()
+            try:
+                conn = sqlite3.connect('quiz.db')  # Replace with your actual database name
+                c = conn.cursor()
+                c.execute("""
+                    INSERT INTO users (username, fullname, contact, email, password)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (username, name, contact, email, "default_password"))  # Replace "default_password" with actual password handling
+                conn.commit()
+                conn.close()
+                refresh_table()  # Refresh the table after adding a new user
+                window.destroy()
+            except Exception as e:
+                messagebox.showerror("Error", f"An error occurred: {e}")
 
         def edit_user():
             selected_item = tree.selection()
@@ -306,13 +335,21 @@ def openbutton(btn_text):
             )).place(relx=0.4, rely=0.6)
 
         def submit_edit(selected_item, username, name, contact, email, window):
-            for i, row in enumerate(rows):
-                if row[0] == tree.item(selected_item, "values")[0]:
-                    rows[i] = (row[0], username, name, contact, email)
-                    break
-
-            tree.item(selected_item, values=(rows[i]))
-            window.destroy()
+            try:
+                user_id = tree.item(selected_item, "values")[0]
+                conn = sqlite3.connect('quiz.db')  # Replace with your actual database name
+                c = conn.cursor()
+                c.execute("""
+                    UPDATE users
+                    SET username = ?, fullname = ?, contact = ?, email = ?
+                    WHERE user_id = ?
+                """, (username, name, contact, email, user_id))
+                conn.commit()
+                conn.close()
+                refresh_table()  # Refresh the table after editing
+                window.destroy()
+            except Exception as e:
+                messagebox.showerror("Error", f"An error occurred: {e}")
 
         def delete_user():
             selected_item = tree.selection()
@@ -321,10 +358,17 @@ def openbutton(btn_text):
                 return
 
             if messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this user?"):
-                selected_user = tree.item(selected_item, "values")
-                global rows
-                rows = [row for row in rows if row[0] != selected_user[0]]
-                tree.delete(selected_item)
+                user_id = tree.item(selected_item, "values")[0]
+                try:
+                    conn = sqlite3.connect('quiz.db')  # Replace with your actual database name
+                    c = conn.cursor()
+                    c.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
+                    conn.commit()
+                    conn.close()
+                    refresh_table()  # Refresh the table after deletion
+                except Exception as e:
+                    messagebox.showerror("Error", f"An error occurred: {e}")
+
 
     # Courses - admin section - bivek
     elif btn_text == buttons[2]:
