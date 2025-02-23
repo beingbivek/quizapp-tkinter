@@ -8,6 +8,7 @@ import sqlite3
 from tkinter import simpledialog
 import tkinter as tk
 from tkcalendar import DateEntry
+import json
 
 # Admin Window
 root = Tk()
@@ -1076,7 +1077,28 @@ def openbutton(btn_text):
            questions = cursor.fetchall()
            conn.close()
            return questions
+        
+        #takes data from corses
+        def fetch_courses():
+            conn = sqlite3.connect(DATABASE_FILE)
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM mockquestions WHERE mockquestion_id = ?", (question_id,))
+            conn.commit()
+            conn.close()
+            update_questions_table()
 
+       # Modify fetch_categories to filter by course_id
+        def fetch_categories(course_id=None):
+            conn = sqlite3.connect(DATABASE_FILE)
+            cursor = conn.cursor()
+            if course_id:
+                cursor.execute("SELECT * FROM categories WHERE course_id = ?", (course_id,))
+            else:
+                cursor.execute("SELECT * FROM categories")
+            categories = cursor.fetchall()
+            conn.close()
+            return categories
+        
         def delete_question(question_id):
             conn = sqlite3.connect(DATABASE_FILE)
             cursor = conn.cursor()
@@ -1114,161 +1136,281 @@ def openbutton(btn_text):
 
         #updates question table everytime we make changes
         def update_questions_table():
-            for row in questions_table.get_children():
+           for row in questions_table.get_children():
                 questions_table.delete(row)
-            global get_categories
-            for question in fetch_questions():
+           for question in fetch_questions():
                 mocktest_name = next((test[1] for test in fetch_mock_tests() if test[0] == question[1]), None)
-                course_name = next((test[1] for test in get_courses() if test[0] == question[2]), None)
-                category_name = next((test[1] for test in get_categories() if test[0] == question[3]), None)
-                # print(category_name)
-                questions_table.insert("", "end", values=(question[0], mocktest_name, course_name, category_name, question[4]))
+                course_name = next((test[1] for test in fetch_courses() if test[0] == question[2]), None)
+                questions_table.insert("", "end", values=(question[0], mocktest_name, course_name, question[3], question[4]))
         
         #Function to add mocktest name, full marks, passmarks
         def add_mock_test():
-            add_mocktest = Toplevel(main_frame)
+            add_mocktest = tk.Toplevel(main_frame)
             add_mocktest.title("Add Questions To Mock Test")
-            add_mocktest.geometry("500x400")
-
-            Label(add_mocktest, text="Enter Mock Test Name:").pack()
+            add_mocktest.geometry("600x300")
+            add_mocktest.attributes('-topmost', True)
+    
+            
+           
+            
+            
+            
+            tk.Label(add_mocktest, text="Enter Mock Test Name:").pack()
             e1 = Entry(add_mocktest, width=35)
-            e1.pack()
-            Label(add_mocktest, text="Enter Full Marks:").pack()
+            e1.pack(pady=10)
+
+            tk.Label(add_mocktest, text="Enter Mock Test description:").pack()
+            text_desc = Text(add_mocktest,height=2, width=40)
+            text_desc.pack(pady=10)
+            
+            tk.Label(add_mocktest, text="Enter Full Marks:").pack()
             e2 = Entry(add_mocktest, width=35)
-            e2.pack()
-            Label(add_mocktest, text="Enter Pass Marks:").pack()
+            e2.pack(pady=10)
+            tk.Label(add_mocktest, text="Enter Pass Marks:").pack()
             e3 = Entry(add_mocktest, width=35)
-            e3.pack()
+            e3.pack(pady=10)
 
             #saves the input taken from admin 
             def save_mock():
                 mocktest_name = e1.get().strip()  # Get the value and strip whitespace
+                mocktest_desc = text_desc.get("1.0", "end-1c")
                 full_marks = e2.get().strip()      # Get the value and strip whitespace
                 pass_marks = e3.get().strip()       # Get the value and strip whitespace
         
         # Check if any field is empty
-                if not mocktest_name or not full_marks or not pass_marks:
+                if not mocktest_name or not mocktest_desc or not full_marks or not pass_marks:
                    messagebox.showwarning("Warning", "Please fill in all fields.")
-                   return
-            
-                try:
-                  conn = sqlite3.connect("quiz.db")
-                  cursor = conn.cursor()
-                  cursor.execute("INSERT INTO mocktests (mocktest_name, fullmark, passmark) VALUES (?, ?, ?)", 
-                            (mocktest_name,full_marks,pass_marks))
-                  conn.commit()
-                  conn.close()
-                  update_mock_test_table()
-                  messagebox.showinfo("Success", "Test added successfully!")
-                except sqlite3.IntegrityError:
-                                messagebox.showerror("Error", "Mock test with this name already exists.")
+                   
+
+                elif full_marks <= pass_marks:
+                    messagebox.showwarning("Warning", "Passmarks should be less than fullmarks!")
+                    
+
+                else:
+                    try:
+                        conn = sqlite3.connect(DATABASE_FILE)
+                        cursor = conn.cursor()
+                        cursor.execute("INSERT INTO mocktests (mocktest_name, mocktest_desc, fullmark, passmark) VALUES (?,?,?,?)", 
+                                    (mocktest_name,mocktest_desc,full_marks,pass_marks))
+                        conn.commit()
+                        conn.close()
+                        update_mock_test_table()
+                        messagebox.showinfo("Success", "Test added successfully!")
+                        add_mocktest.destroy()
+                    except sqlite3.IntegrityError:
+                        messagebox.showerror("Error", "Mock test with this name already exists.")
+                    
                     
             
-            Button(add_mocktest, text="Save", command=save_mock).pack()
+            #tk.Button(add_mocktest, text="Save", command=save_mock).pack()
+
+            add_mocktest.attributes('-toolwindow', True)
+
+            def cancel():
+                add_mocktest.destroy()
+
+            btn_frame = Frame(add_mocktest )
+            btn_frame.pack(pady = 10,fill=X,)
+                
+            update_btn=Button(btn_frame, text="Save", command=save_mock,font= button_font, fg= FG_COLOR ,bg = BUTTON_COLOR)
+            update_btn.pack(side=LEFT,padx = 100)
+            cancel_btn = Button(btn_frame, text="Cancel", command=cancel, bg = LOGOUT_COLOR,font = button_font,fg = FG_COLOR)
+            cancel_btn.pack(side=RIGHT,padx = 100)
+           
         
         #function to add questions to specific test, corse, category
         def add_mock_question():
-            add_question_window = Toplevel(main_frame)
+            add_question_window = tk.Toplevel(main_frame)
             add_question_window.title("Add Questions To Mock Test")
-            add_question_window.geometry("500x400")
+            add_question_window.geometry("600x300")
+            course_id = None
+            category_id = None
+            add_question_window.attributes('-topmost', True)
+           
 
-            Label(add_question_window, text="Mock Test Name:").pack(side=LEFT)
+            tk.Label(add_question_window, text="Mock Test Name:").pack()
             test_names = [test[1] for test in fetch_mock_tests()]
-            mock_test_combo = ttk.Combobox(add_question_window, values=test_names)
-            mock_test_combo.pack(side=RIGHT)
+            mock_test_combo = ttk.Combobox(add_question_window, values=test_names, state='readonly')
+            mock_test_combo.pack()
             
-            Label(add_question_window, text="Courses:").pack(side=LEFT)
-            course_names = [test[1] for test in get_courses()]
-            courses_combo = ttk.Combobox(add_question_window, values= course_names)
-            courses_combo.pack(side=RIGHT)
+            tk.Label(add_question_window, text="Courses:").pack()
+            course_names = [test[1] for test in fetch_courses()]
+            courses_combo = ttk.Combobox(add_question_window, values= course_names, state='readonly')
+            courses_combo.pack()
             
-            Label(add_question_window, text="Categories:").pack()
+            tk.Label(add_question_window, text="Categories:").pack()
             
-            categories_combo = ttk.Combobox(add_question_window)
+            categories_combo = ttk.Combobox(add_question_window, state='readonly')
             categories_combo.pack()
 
-            # Update categories based on selected course
+              # Update categories based on selected course
             def update_categories(event):
                 selected_course_name = courses_combo.get()
-                course_id = next((course[0] for course in get_courses() if course[1] == selected_course_name), None)
+                course_id = next((course[0] for course in fetch_courses() if course[1] == selected_course_name), None)
                 if course_id:
-                    category_names = [category[1] for category in get_categories(course_id)]
+                    category_names = [category[1] for category in fetch_categories(course_id)]
                     categories_combo['values'] = category_names
                     categories_combo.set('')  # Clear the current selection
 
+                
+            def update_question(event):
+                if categories_combo.get():
+                    selected_course_name = courses_combo.get()
+                    nonlocal course_id
+                    nonlocal category_id
+                    course_id = next((course[0] for course in fetch_courses() if course[1] == selected_course_name), None)
+
+
+                    category = categories_combo.get()
+                    category_id = next((cat[0] for cat in fetch_categories(course_id) if cat[1] == category), None)
+                    no_of_question(course_id,category_id)
+
+            def no_of_question(course_id,category_id):
+                conn = sqlite3.connect(DATABASE_FILE)
+                cursor = conn.cursor()
+                cursor.execute("SELECT question_id FROM questions WHERE course_id=? AND category_id=?", (course_id,category_id,))
+                question_no = cursor.fetchall()
+                question_no = str(len(question_no))
+                conn.commit()
+                conn.close()
+                check_qno.config(text=f'Total Questions in {categories_combo.get()} :: {question_no}')
+                return question_no
+                
+
             courses_combo.bind("<<ComboboxSelected>>", update_categories)  # Bind the event
+            categories_combo.bind("<<ComboboxSelected>>", update_question)  # Bind the event
+
+            check_qno =Label(add_question_window,text= '')
+            check_qno.pack()
             
-            Label(add_question_window, text="No of Questions:").pack()
-            questions_entry = Entry(add_question_window)
+            tk.Label(add_question_window, text="No of Questions:").pack()
+            questions_entry = tk.Entry(add_question_window)
             questions_entry.pack()
 
+
+    
             def save_question():
                 selected_test = mock_test_combo.get()
                 course = courses_combo.get()
                 category = categories_combo.get()
                 num_questions = questions_entry.get()
-                global get_categories
+                
+                nonlocal course_id
+                nonlocal category_id
                 
                 if not (selected_test and course and category and num_questions.isdigit()):
                     messagebox.showerror("Error", "Please fill all fields correctly.")
-                    return
-                mock_test_id = next((test[0] for test in fetch_mock_tests() if test[1] == selected_test), None)
-                course_id = next((test[0] for test in get_courses() if test[1] == course), None)
-                category_id = next((cat[0] for cat in get_categories(course_id) if cat[1] == category), None)
-
-                 # Debugging statements
-                print(f"Mock Test ID: {mock_test_id}, Course ID: {course_id}, Category ID: {category_id}, No of Questions: {num_questions}")
-
-                # Check if IDs are retrieved correctly
-                if not all([mock_test_id, course_id, category_id]):
-                    messagebox.showerror("Error", "Could not find the selected IDs. Please check your selections.")
-                    return
+                    
+              
+                elif num_questions > no_of_question(course_id,category_id):
+                    messagebox.showerror('Error', 'Please insert valid no of questions!')
+                   
+                else:
 
                 
-                conn = sqlite3.connect(DATABASE_FILE)
-                cursor = conn.cursor()
-                cursor.execute("INSERT INTO mockquestions (mocktest_id, course_id, category_id, no_of_questions) VALUES (?, ?, ?, ?)",
-                            (mock_test_id, course_id, category_id,
-                              num_questions))
-                conn.commit()
-                conn.close()
-                update_questions_table()
-                messagebox.showinfo("Success", "Question added successfully!")
+                    mock_test_id = next((test[0] for test in fetch_mock_tests() if test[1] == selected_test), None)
+                    course_id = next((test[0] for test in fetch_courses() if test[1] == course), None)
+                    category_id = next((cat[0] for cat in fetch_categories(course_id) if cat[1] == category), None)
+
+                    # Debugging statements
+                    print(f"Mock Test ID: {mock_test_id}, Course ID: {course_id}, Category ID: {category_id}, No of Questions: {num_questions}")
+
+                    # Check if IDs are retrieved correctly
+                    if not all([mock_test_id, course_id, category_id]):
+                        messagebox.showerror("Error", "Could not find the selected IDs. Please check your selections.")
+                        return
+
+                    
+                    conn = sqlite3.connect(DATABASE_FILE)
+                    cursor = conn.cursor()
+                    cursor.execute("INSERT INTO mockquestions (mocktest_id, course_id, category_id, no_of_questions) VALUES (?, ?, ?, ?)",
+                                (mock_test_id, course_id, category_id,
+                                num_questions))
+                    conn.commit()
+                    conn.close()
+                    update_questions_table()
+                    messagebox.showinfo("Success", "Question added successfully!")
+                    add_question_window.destroy()
         
-            Button(add_question_window, text="Save", command=save_question).pack()
-    
+             #tk.Button(add_question_window, text="Save", command=save_question).pack()
+
+            add_question_window.attributes('-toolwindow', True)
+
+            def cancel():
+                add_question_window.destroy()
+
+            btn_frame = Frame(add_question_window )
+            btn_frame.pack(pady = 10,fill=X,)
+            
+            update_btn=Button(btn_frame, text="Save", command=save_question,font= button_font, fg= FG_COLOR ,bg = BUTTON_COLOR)
+            update_btn.pack(side=LEFT,padx = 100)
+            cancel_btn = Button(btn_frame, text="Cancel", command=cancel, bg = LOGOUT_COLOR,font = button_font,fg = FG_COLOR)
+            cancel_btn.pack(side=RIGHT,padx = 100)
+        
+
         # Updates the mock test table with every change
         def update_mock_test_table():
             for row in mock_test_table.get_children():
                 mock_test_table.delete(row)
             for test in fetch_mock_tests():
-                mock_test_table.insert("", "end", values=(test[0], test[1], test[2], test[3]))
+                mock_test_table.insert("", "end", values=(test[0], test[1], test[2], test[3],test[4]))
 
        
         # setup_database()
         
         #main frame for table
-        mocktable_frame = Frame(main_frame)
+        mocktable_frame = Frame(main_frame,bg = MAINFRAME_COLOR)
         mocktable_frame.pack(pady=10)
+
+        mocktest_frame = Frame(mocktable_frame,bg = MAINFRAME_COLOR)
+        mocktest_frame.pack(fill = X,pady = 10)
+
+        add_test_btn = Button(mocktest_frame, text="Add Mock Test", command=add_mock_test, bg= BUTTON_COLOR, font= button_font , fg= FG_COLOR )
+        add_test_btn.pack(side=LEFT, pady=10)
+
+        delete_btn = Button(mocktest_frame, text="Delete Mock Test", command=delete_mock_test, bg= LOGOUT_COLOR, font= button_font, fg= FG_COLOR  )
+        delete_btn.pack(side=RIGHT, pady=10)
+        
+
 
 
         # Create UI elements
-        mock_test_table = ttk.Treeview(mocktable_frame, columns=("ID", "Mock Test Name", "Full Mark", "Pass Mark"), show="headings")
-        mock_test_table.heading("ID", text="ID")
-        mock_test_table.heading("Mock Test Name", text="Mock Test Name")
-        mock_test_table.heading("Full Mark", text="Full Mark")
-        mock_test_table.heading("Pass Mark", text="Pass Mark")
+        list_mocktest = ["ID", "Mock Test Name","Mocktest Description", "Full Mark", "Pass Mark"]
+        mock_test_table = ttk.Treeview(mocktable_frame, columns=list_mocktest, show="headings")
+        for i in list_mocktest:
+
+            mock_test_table.heading(i, text=i)
+            mock_test_table.column(i,anchor= CENTER)
+        # mock_test_table.heading("Mock Test Name", text="Mock Test Name")
+        # mock_test_table.heading("Mocktest Description", text="Mocktest Description")
+        # mock_test_table.heading("Full Mark", text="Full Mark")
+        # mock_test_table.heading("Pass Mark", text="Pass Mark")
         mock_test_table.pack(fill=BOTH, expand=True)
 
         # Buttons to add mock tests and mock questions
-        btn_frame = Frame(main_frame, bg = MAINFRAME_COLOR)
-        btn_frame.pack(pady=10)
+        btn_frame = Frame(mocktable_frame, bg = MAINFRAME_COLOR)
+        btn_frame.pack(fill = X,pady=10)
 
-        add_test_btn = Button(btn_frame, text="Add Mock Test", command=add_mock_test, bg= BUTTON_COLOR, font= button_font , fg= FG_COLOR )
-        add_test_btn.pack(side=LEFT, padx=10)
+        
+        add_question_btn = Button(btn_frame, text="Add No Of Questions", command=add_mock_question, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
+        add_question_btn.pack(side=LEFT, pady=10)
 
-        add_question_btn = Button(btn_frame, text="Add Mock Question", command=add_mock_question, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
-        add_question_btn.pack(side=LEFT, padx=10)
+        delete_btn = Button(btn_frame, text="Delete Mock QNs", command=delete_selected_question, bg= LOGOUT_COLOR, font= button_font, fg= FG_COLOR  )
+        delete_btn.pack(side=RIGHT, pady=10)
+        
+
+      
+
+        #question table
+        
+        questions_table = ttk.Treeview(main_frame, columns=("ID", "Mock Test-Name", "Course-Name", "Category", "Questions"), show="headings")
+        for col in ["ID", "Mock Test-Name", "Course-Name", "Category", "Questions"]:
+               questions_table.heading(col, text=col)
+               questions_table.column(col,anchor=CENTER)
+        questions_table.pack()
+
+       
+
 
         delete_btn = Button(btn_frame, text="Delete", command=delete_mock_test, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
         delete_btn.pack(side=LEFT, padx=10)
@@ -1287,17 +1429,425 @@ def openbutton(btn_text):
 
         update_mock_test_table()
         update_questions_table()
+       
 
 
 
     # Question - admin section - aayush
     elif btn_text == buttons[5]:
 
-        header = Label(main_frame, text="Question", font=header_font, bg=MAINFRAME_COLOR)
+        
+        #header section
+        header = Label(main_frame, text="Questions", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
 
 
-        pass
+
+        def fetch_questions():
+           conn = sqlite3.connect(DATABASE_FILE)
+           cursor = conn.cursor()
+           cursor.execute("SELECT * FROM questions")
+           questions = cursor.fetchall()
+           conn.close()
+           return questions
+        
+
+        #takes data from corses
+        def fetch_courses():
+            conn = sqlite3.connect(DATABASE_FILE)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM courses")
+            courses = cursor.fetchall()
+            conn.close()
+            return courses
+
+       # Modify fetch_categories to filter by course_id
+        def fetch_categories(course_id=None):
+            conn = sqlite3.connect(DATABASE_FILE)
+            cursor = conn.cursor()
+            if course_id:
+                cursor.execute("SELECT * FROM categories WHERE course_id = ?", (course_id,))
+            else:
+                cursor.execute("SELECT * FROM categories")
+            categories = cursor.fetchall()
+            conn.close()
+            return categories
+        
+        #Search function
+        def search_questions():
+            query = search_entry.get().strip().lower()
+            for row in questions_table.get_children():
+                questions_table.delete(row)
+
+            i = 0
+            for question in fetch_questions():
+                course_name = next((test[1] for test in fetch_courses() if test[0] == question[1]), None)
+                category_name = next((test[1] for test in fetch_categories() if test[0] == question[2]), None)
+
+                try:
+                    options = json.loads(question[5])  # Load JSON
+                    if isinstance(options, list):
+                        options = ", ".join(options)
+                    else:
+                        options = str(options)
+                except json.JSONDecodeError:
+                    options = "Invalid data"
+
+                # Check if query matches any field
+                if (query in question[3].lower() or query in options.lower() or 
+                    query in str(course_name).lower() or query in str(category_name).lower()):
+                    questions_table.insert("", "end", values=(question[0], question[3], question[4], options, course_name, category_name))
+                    i += 1
+            total.config(text=f'{i}')
+
+        # Add a frame for the search bar
+        search_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
+        search_frame.pack(pady=10, fill=X)
+
+        # Add a search entry box
+        search_entry = Entry(search_frame, width=30,font=(15))
+        search_entry.pack(side=LEFT, padx=10, pady=5)
+
+        # Add a search button
+        search_button = Button(search_frame, text="Search", command=search_questions, bg=BUTTON_COLOR, font=button_font, fg=FG_COLOR)
+        search_button.pack(side=LEFT, padx=5)
+
+        
+        #Update question table
+        def update_questions_table():
+            for row in questions_table.get_children():
+                questions_table.delete(row)
+           
+            i = 0
+            for question in fetch_questions():
+               
+                course_name = next((test[1] for test in fetch_courses() if test[0] == question[1]), None)
+                category_name = next((test[1] for test in fetch_categories() if test[0] == question[2]), None)
+                 # Ensure the data is properly converted into a list
+                try:
+                    options = json.loads(question[5])  # Load JSON
+                    if isinstance(options, list):  # Check if it's a list
+                        options = ", ".join(options)  # Convert list to a string (for display)
+                    else:
+                        options = str(options)  # Convert to string if it's not a list
+                except json.JSONDecodeError:
+                    options = "Invalid data"  # Handle error if JSON is malformed
+                
+                i += 1
+                #Insert into Treeview
+                questions_table.insert("", "end", values=(question[0], question[3], question[4], options, course_name, category_name))
+            total.config(text=f'{i}')
+        
+        
+        #Delete question table
+        def delete_question_selected():
+            selected_item = questions_table.selection()
+            if not selected_item:
+                messagebox.showwarning("No Selection", "Please select a question to edit.")
+                return
+
+            selected_question = questions_table.item(selected_item, "values")
+            print(selected_question[0])
+            option = messagebox.askokcancel('Delete records',f'Do you want to delete Q:{selected_question[1]}')
+            if option :
+
+
+                conn= sqlite3.connect(DATABASE_FILE)
+                cursor= conn.cursor()
+                cursor.execute('DELETE FROM questions WHERE question_id= ? ', (selected_question[0],))
+                conn.commit()
+                conn.close()
+                update_questions_table()
+        
+        def open_add_question_form():
+            add_window = tk.Toplevel(main_frame)
+            add_window.title("Add Question")
+            add_window.geometry("600x450")
+
+            #Courses
+            tk.Label(add_window, text="Courses:").pack()
+            course_names = [test[1] for test in fetch_courses()]
+            courses_combo = ttk.Combobox(add_window, values= course_names, state='readonly')
+            courses_combo.pack(pady=10)
+
+            #Category   
+            tk.Label(add_window, text="Categories:").pack()
+             
+            categories_combo = ttk.Combobox(add_window,state='readonly')
+            categories_combo.pack(pady=10)
+
+              # Update categories based on selected course
+            def update_categories(event):
+                selected_course_name = courses_combo.get()
+                course_id = next((course[0] for course in fetch_courses() if course[1] == selected_course_name), None)
+                if course_id:
+                    category_names = [category[1] for category in fetch_categories(course_id)]
+                    categories_combo['values'] = category_names
+                    categories_combo.set('')  # Clear the current selection
+
+            courses_combo.bind("<<ComboboxSelected>>", update_categories)  # Bind the event
+
+            #Question
+            tk.Label(add_window,text='Enter question:').pack()
+            #question_box = Entry(add_window, width=35)
+            #question_box.pack()
+            question_box= Text(add_window,height= 5,width= 40)
+            question_box.pack(pady=10)
+            
+            tk.Label(add_window, text="Incorrect answer:").pack()
+            #Incorrect_box = Entry(add_window, width=35)
+            #Incorrect_box.pack()
+            Incorrect_box = Text(add_window, height= 2, width = 40)
+            Incorrect_box.pack(pady=10)
+
+            tk.Label(add_window, text="Correct answer:").pack()
+            correct_box = Text(add_window, height=1, width=40)
+            correct_box.pack(pady=10)
+
+            def save_question():
+                
+                course = courses_combo.get()
+                category = categories_combo.get()
+                Question = question_box.get("1.0", "end-1c")  # Get the value and strip whitespace
+                Incorrect_ans = f"{Incorrect_box.get("1.0", "end-1c")}"
+                Incorrect_ans = json.dumps(Incorrect_ans.split(','))
+                # print(Incorrect_ans.split(','))
+                # Get the value and strip whitespace
+                Correct_ans = correct_box.get("1.0", "end-1c")      # Get the value and strip whitespace
+                
+                
+                if not ( course or category or Question or Incorrect_ans or Correct_ans):
+                    messagebox.showerror("Error", "Please fill all fields correctly.")
+                    return
+                
+                
+                course_id = next((test[0] for test in fetch_courses() if test[1] == course), None)
+                category_id = next((cat[0] for cat in fetch_categories(course_id) if cat[1] == category), None)
+
+                 # Debugging statements
+                print(f" Course ID: {course_id}, Category ID: {category_id}")
+
+                # Check if IDs are retrieved correctly
+                if not all([ course_id, category_id]):
+                    messagebox.showerror("Error", "Could not find the selected IDs. Please check your selections.")
+                    return
+
+                
+                conn = sqlite3.connect(DATABASE_FILE)
+                cursor = conn.cursor()
+                cursor.execute("INSERT INTO questions ( question,course_id, category_id, correct_ans, incorrect_ans) VALUES (?,?, ?, ?, ?)",
+                            ( Question,course_id, category_id, Correct_ans,Incorrect_ans
+                              ))
+                conn.commit()
+                conn.close()
+                update_questions_table()
+                
+                messagebox.showinfo("Success", "Question added successfully!")
+                add_window.destroy()
+                
+        
+            #tk.Button(add_window, text="Save", command=save_question).pack()
+
+            add_window.attributes('-toolwindow', True)
+
+            def cancel():
+                add_window.destroy()
+
+            btn_frame = Frame(add_window, )
+            btn_frame.pack(pady = 10,fill=X,)
+                
+            update_btn=Button(btn_frame, text="Save", command=save_question,font= button_font, fg= FG_COLOR ,bg = BUTTON_COLOR)
+            update_btn.pack(side=LEFT,padx = 100)
+            cancel_btn = Button(btn_frame, text="Cancel", command=cancel, bg = LOGOUT_COLOR,font = button_font,fg = FG_COLOR)
+            cancel_btn.pack(side=RIGHT,padx = 100)
+           
+
+        #Edit question form
+        def open_edit_question_form():
+            selected_item = questions_table.selection()
+            if not selected_item:
+                messagebox.showwarning("No Selection", "Please select a question to edit.")
+                return
+
+            selected_question = questions_table.item(selected_item, "values")
+            
+           
+            edit_window = tk.Toplevel(main_frame)
+            edit_window.title("Edit Question")
+            edit_window.geometry("600x450")
+
+            #Courses
+            tk.Label(edit_window, text="Courses:").pack()
+
+            # Fetch courses and set default selection
+            course_names = [course[1] for course in fetch_courses()]
+            c_name = tk.StringVar()
+            c_name.set(selected_question[4])  # Default selection
+
+            # Create Course ComboBox
+            courses_combo = ttk.Combobox(edit_window, textvariable=c_name, values=course_names, state="readonly")
+            courses_combo.pack(pady=10)
+
+            # Label for Categories
+            tk.Label(edit_window, text="Categories:").pack()
+
+            # Fetch initial categories based on the default course
+            default_course_id = next((course[0] for course in fetch_courses() if course[1] == c_name.get()), None)
+            category_names = [category[1] for category in fetch_categories(default_course_id)]
+
+            # Create Category ComboBox
+            ca_name = tk.StringVar()
+            ca_name.set(selected_question[5])  # Default selection
+
+            categories_combo = ttk.Combobox(edit_window, textvariable=ca_name, values=category_names, state="readonly")
+            categories_combo.pack(pady=10)
+
+            # Function to update categories when a course is selected
+            def update_categories(event):
+                selected_course_name = c_name.get()
+                selected_course_id = next((course[0] for course in fetch_courses() if course[1] == selected_course_name), None)
+                
+                if selected_course_id is not None:
+                    new_category_names = [category[1] for category in fetch_categories(selected_course_id)]
+                    categories_combo['values'] = new_category_names  # Update category dropdown
+                    if new_category_names:
+                        ca_name.set(new_category_names[0])  # Set first category as default
+                    else:
+                        ca_name.set("")  # Clear selection if no categories available
+
+            # Bind course selection to update categories
+            courses_combo.bind("<<ComboboxSelected>>", update_categories)
+
+            #Question
+            tk.Label(edit_window,text='Enter question:').pack()
+            question_box = Text(edit_window, height=5,width=40)
+            question_box.insert('1.0',selected_question[1])
+            question_box.pack(pady = 10)
+
+            tk.Label(edit_window, text="Incorrect answer:").pack()
+            Incorrect_box = Text(edit_window,height=2, width=40)
+            Incorrect_box.insert('1.0',selected_question[3])
+            Incorrect_box.pack(pady=10)
+
+            tk.Label(edit_window, text="Correct answer:").pack()
+            correct_box = Text(edit_window,height=1, width=40)
+            correct_box.insert('1.0',selected_question[2])
+            correct_box.pack(pady=10)
+
+            def save_question():
+                course = c_name.get()
+                category = ca_name.get()
+                Question = question_box.get("1.0", "end-1c")  # Get the value and strip whitespace
+                Incorrect_ans = f"{Incorrect_box.get("1.0", "end-1c")}"
+                Incorrect_ans = json.dumps(Incorrect_ans.split(','))
+                Correct_ans = correct_box.get("1.0", "end-1c") # Get the value and strip whitespace
+
+                if not (course and category and Question and Incorrect_ans and Correct_ans):
+                    messagebox.showerror("Error", "Please fill all fields correctly.")
+                    return
+
+                course_id = next((test[0] for test in fetch_courses() if test[1] == course), None)
+                category_id = next((cat[0] for cat in fetch_categories(course_id) if cat[1] == category), None)
+
+                # Retrieve the question ID from the selected question
+                question_id = selected_question[0]  # Assuming the question ID is the first element in selected_question
+
+                # Debugging statements
+                print(f"Course ID: {course_id}, Category ID: {category_id}, Question ID: {question_id}")
+
+                # Check if IDs are retrieved correctly
+                if not all([course_id, category_id, question_id]):
+                    messagebox.showerror("Error", "Could not find the selected IDs. Please check your selections.")
+                    return
+
+                conn = sqlite3.connect(DATABASE_FILE)
+                cursor = conn.cursor()
+                cursor.execute(
+                    "UPDATE questions SET question=?, course_id=?, category_id=?, correct_ans=?, incorrect_ans=? WHERE question_id=?",
+                    (Question, course_id, category_id, Correct_ans, Incorrect_ans, question_id)
+                )
+                conn.commit()
+                conn.close()
+                update_questions_table()
+
+                messagebox.showinfo("Success", "Question edited successfully!")
+                edit_window.destroy()
+            
+            edit_window.attributes('-toolwindow', True)
+
+            def cancel():
+                edit_window.destroy()
+
+            btn_frame = Frame(edit_window, )
+            btn_frame.pack(pady = 10,fill=X,)
+                
+            update_btn=Button(btn_frame, text="Update", command=save_question,font= button_font, fg= FG_COLOR ,bg = BUTTON_COLOR)
+            update_btn.pack(side=LEFT,padx = 100)
+            cancel_btn = Button(btn_frame, text="Cancel", command=cancel, bg = LOGOUT_COLOR,font = button_font,fg = FG_COLOR)
+            cancel_btn.pack(side=RIGHT,padx = 100)
+           
+
+                
+                
+
+
+
+       
+
+
+        questiontable_frame = Frame(main_frame, bg = MAINFRAME_COLOR, height = 50, width = 90)
+        questiontable_frame.pack(pady=10,fill=BOTH,expand=  True)
+
+        addquestion_btn = Button(search_frame, text="Add Question", command=open_add_question_form, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
+        addquestion_btn.pack(side=RIGHT, padx=10,pady = 10)
+
+        question_column = ["Id", "Question", "Correct","Incorrect",  "Courses", "Category"]
+        questions_table = ttk.Treeview(questiontable_frame, columns=question_column, show="headings")
+
+        # Define column headings
+        questions_table.heading("Id", text="Id")
+        questions_table.heading("Question", text="Question")
+        questions_table.heading("Incorrect", text="Incorrect")  # Fixed capitalization
+        questions_table.heading("Correct", text="Correct")
+        questions_table.heading("Courses", text="Courses")  # Ensure consistency
+        questions_table.heading("Category", text="Category")
+
+        # Adjust column widths
+        questions_table.column("Id", width=50, anchor=CENTER)
+        questions_table.column("Question", width=250,anchor=CENTER)
+        questions_table.column("Incorrect", width=100, anchor=CENTER)
+        questions_table.column("Correct", width=100, anchor=CENTER)
+        questions_table.column("Courses", width=150,anchor=CENTER)
+        questions_table.column("Category", width=150,anchor=CENTER)
+
+        # Pack the Treeview
+        questions_table.pack(fill=BOTH, expand=True,padx = 10, pady = 10)
+
+
+        
+        editquestion_btn = Button(questiontable_frame, text="Edit Question", command=open_edit_question_form, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
+        editquestion_btn.pack(side=LEFT, padx=10,pady = 10)
+
+        del_question_btn = Button(questiontable_frame, text="Delete Question", command=delete_question_selected, bg= LOGOUT_COLOR, font= button_font, fg= FG_COLOR  )
+        del_question_btn.pack(side=LEFT, padx=10,pady = 10)
+
+        total_frame = Frame(questiontable_frame)
+        total_frame.pack(side=RIGHT)
+
+        total= Label(total_frame,text='',font = button_font)
+        total.pack(side=RIGHT,padx=100)
+
+        total_label= Label(total_frame,text='Total Questions : ',font = button_font)
+        total_label.pack(side=RIGHT)
+
+
+
+
+        update_questions_table()
+
+
+
+
 
     else:
         label = Label(main_frame, text=btn_text, font=("Arial", 20, "bold"), bg=MAINFRAME_COLOR)

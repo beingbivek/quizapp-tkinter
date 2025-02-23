@@ -803,6 +803,8 @@ def openbutton(btn_text):
         label = Label(main_frame, text=btn_text, font=("Arial", 20, "bold"), bg=MAINFRAME_COLOR)
         label.pack(expand=True)
 
+    
+
 # Sidebar Buttons
 def sidebar_button(text, bg_color=BUTTON_COLOR):
     btn = Button(sidebar, text=text, bg=bg_color, fg=FG_COLOR, font=("Arial", 10, "bold"), width=20, height=2, bd=0, command=lambda: openbutton(text))
