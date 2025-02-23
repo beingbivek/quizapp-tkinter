@@ -8,6 +8,7 @@ import sqlite3
 from random import *
 import pybase64
 import re #For password validation.
+import time
 
 # User window
 root = Tk()
@@ -538,54 +539,149 @@ def openbutton(btn_text):
 
     # Mock Test - user section - Bivek
     elif btn_text == "Mock Test":
-        # mocktest funcitons
         def switch_frame(switchvalue):
             switchvalue = not switchvalue
-            # Clear the mock test content area
             for widget in mocktest_frame.winfo_children():
                 widget.destroy()
             update_frame(switchvalue)
 
         def update_frame(start_mock):
-            # start btn function
+            global time_left, mock_running  # Track if mock test is running
+            
             def start_mocktest():
                 if selected_mocktest.get().isprintable():
+                    nonlocal mocktestname 
+                    mocktestname = selected_mocktest.get()
+                    disable_sidebar()  # Disable sidebar when test starts
                     switch_frame(start_mock)
                 else:
-                    messagebox.showwarning(title='Invalid Data',message='Invalid Selection in Mock Test.')
+                    messagebox.showwarning(title='Invalid Data', message='Invalid Selection in Mock Test.')
+
             if start_mock:
-                heading_frame = Frame(mocktest_frame)
-                heading_frame.pack()
+                nonlocal mocktestname
 
-                mocktestname_label = Label(heading_frame,text='test',font=label_font,bg=MAINFRAME_COLOR,)
-                pass
+                # Mock Test timer and header functions
+                
+                def get_mocktest_fulltime(mocktest_id):
+                    conn = sqlite3.connect(DATABASE_FILE)
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT mocktest_name, fulltime FROM mocktests WHERE mocktest_id = ?", (mocktest_id,))
+                    result = cursor.fetchone()
+                    conn.close()
+                    return result if result else ("Unknown Test", 95)  # Default 95 minutes if not found
+
+                def countdown():
+                    global time_left, mock_running
+                    if time_left > 0:
+                        hours = time_left // 3600
+                        minutes = (time_left % 3600) // 60
+                        seconds = time_left % 60
+                        mocktesttimer_label.config(text=f"{hours:02}:{minutes:02}:{seconds:02}")
+                        time_left -= 1
+                        mocktesttimer_label.after(1000, countdown)
+                    else:
+                        time_up()
+
+                def time_up():
+                    switch_frame(start_mock)
+                    global mock_running
+                    mock_running = False
+                    enable_sidebar()  # Enable sidebar when test ends
+                    messagebox.showinfo("Time Up!", "Your test time is over!")
+
+                mocktest_name, fulltime = get_mocktest_fulltime(
+                    next((mt[0] for mt in get_mocktest() if mt[1] == mocktestname), 1)
+                )
+
+                # # Question Functions
+                # def get_questions():
+                #     conn = sqlite3.connect(DATABASE_FILE)
+                #     c = conn.cursor()
+                #     c.execute()
+                #     pass
+
+
+
+                time_left = fulltime * 60  
+                mock_running = True  # Mock test is active
+
+                heading_frame = Frame(mocktest_frame, border=2, borderwidth=2)
+                heading_frame.pack(fill='x')
+
+                mocktestname_label = Label(heading_frame, text=mocktest_name, font=("Arial", 14, "bold"), bg="lightgray")
+                mocktestname_label.pack(side='left', padx=10)
+
+                mocktesttimer_label = Label(heading_frame, text="00:00:00", font=("Arial", 14, "bold"), fg="red", bg="lightgray")
+                mocktesttimer_label.pack(side='right', padx=10)
+
+                countdown()
+
+                # Question part
+                    
+
+                # Question designs
+
+                question_frame = Frame(mocktest_frame)
+                question_frame.pack(fill='both',pady='10')
+
+
+
+
             else:
-                Label(mocktest_frame,text='Select a Mocktest and press start!',bg=MAINFRAME_COLOR,font=label_font).pack()
+                Label(mocktest_frame, text='Select a Mocktest and press start!', bg=MAINFRAME_COLOR, font=label_font).pack()
 
-                selected_mocktest = StringVar(mocktest_frame,value=get_mocktest()[0][1])
+                selected_mocktest = StringVar(mocktest_frame, value=get_mocktest()[0][1])
 
-                mocktest_combo = ttk.Combobox(mocktest_frame,values=[mocktestname[1] for mocktestname in get_mocktest()],textvariable=selected_mocktest,state='readonly')
+                mocktest_combo = ttk.Combobox(mocktest_frame, values=[mocktestname[1] for mocktestname in get_mocktest()],
+                                              textvariable=selected_mocktest, state='readonly')
                 mocktest_combo.pack()
 
-                mocktest_details = Label(mocktest_frame,font=button_font)
-                mocktest_details.pack(padx=10,pady=10)
-                mocktest_details.config(text=next((detail[2] for detail in get_mocktest() if detail[1] == selected_mocktest.get()),""))
+                mocktest_details = Label(mocktest_frame, font=button_font)
+                mocktest_details.pack(padx=10, pady=10)
+                mocktest_details.config(text=next((detail[2] for detail in get_mocktest() if detail[1] == selected_mocktest.get()), ""))
 
-                start_button = Button(bg=BUTTON_COLOR,fg=FG_COLOR,text='Start',font=button_font,master=mocktest_frame,command=start_mocktest)
-                start_button.pack(padx=10,pady=10)
+                start_button = Button(bg=BUTTON_COLOR, fg=FG_COLOR, text='Start', font=button_font,
+                                      master=mocktest_frame, command=start_mocktest)
+                start_button.pack(padx=10, pady=10)
+
+        # 🔹 Functions to Lock and Unlock Sidebar
+        def disable_sidebar():
+            """Disable sidebar buttons to prevent navigation during the mock test."""
+            for widget in sidebar.winfo_children():
+                if isinstance(widget, Button):
+                    widget.config(state=DISABLED)  # Disable all buttons
+
+        def enable_sidebar():
+            """Re-enable sidebar buttons after the mock test ends."""
+            for widget in sidebar.winfo_children():
+                if isinstance(widget, Button):
+                    widget.config(state=NORMAL)  # Enable all buttons
+
+        # def warn_sidebar_access():
+        #     """Warn user when they try to click the sidebar during the test."""
+        #     if mock_running:
+        #         m = messagebox.askyesno("Warning", "You surely want to leave the test while it's running!\nAll done will get lost.")
+        #         if m:
+        #             enable_sidebar()
 
 
+        # # Attach warning function to sidebar buttons
+        # for widget in sidebar.winfo_children():
+        #     if isinstance(widget, Button):
+        #         widget.config(command=lambda: warn_sidebar_access())
+
+        # Initialize test state
         start_mock = False
+        mock_running = False  # Track if mock test is running
+        mocktestname = ''
 
         header = Label(main_frame, text="Mock Test", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
 
-        mocktest_frame = Frame(main_frame,border=5,borderwidth=5,padx=10,pady=10)
+        mocktest_frame = Frame(main_frame, border=5, borderwidth=5, padx=10, pady=10)
         mocktest_frame.pack()
 
         update_frame(start_mock)
-
-    
 
     else:
         label = Label(main_frame, text=btn_text, font=("Arial", 20, "bold"), bg=MAINFRAME_COLOR)
