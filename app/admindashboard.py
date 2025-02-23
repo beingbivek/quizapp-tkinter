@@ -957,8 +957,24 @@ def openbutton(btn_text):
                 update_questions_table()
                 
                 messagebox.showinfo("Success", "Question added successfully!")
+                add_window.destroy()
+                
         
-            tk.Button(add_window, text="Save", command=save_question).pack()
+            #tk.Button(add_window, text="Save", command=save_question).pack()
+
+            add_window.attributes('-toolwindow', True)
+
+            def cancel():
+                add_window.destroy()
+
+            btn_frame = Frame(add_window, )
+            btn_frame.pack(pady = 10,fill=X,)
+                
+            update_btn=Button(btn_frame, text="Save", command=save_question,font= button_font, fg= FG_COLOR ,bg = BUTTON_COLOR)
+            update_btn.pack(side=LEFT,padx = 100)
+            cancel_btn = Button(btn_frame, text="Cancel", command=cancel, bg = LOGOUT_COLOR,font = button_font,fg = FG_COLOR)
+            cancel_btn.pack(side=RIGHT,padx = 100)
+           
 
         #Edit question form
         def open_edit_question_form():
@@ -971,7 +987,7 @@ def openbutton(btn_text):
             
            
             edit_window = tk.Toplevel(main_frame)
-            edit_window.title("edit Question")
+            edit_window.title("Edit Question")
             edit_window.geometry("600x450")
 
             #Courses
@@ -1069,9 +1085,21 @@ def openbutton(btn_text):
                 update_questions_table()
 
                 messagebox.showinfo("Success", "Question edited successfully!")
+                edit_window.destroy()
+            
+            edit_window.attributes('-toolwindow', True)
 
+            def cancel():
+                edit_window.destroy()
+
+            btn_frame = Frame(edit_window, )
+            btn_frame.pack(pady = 10,fill=X,)
                 
-            tk.Button(edit_window, text="Update", command=save_question).pack()
+            update_btn=Button(btn_frame, text="Update", command=save_question,font= button_font, fg= FG_COLOR ,bg = BUTTON_COLOR)
+            update_btn.pack(side=LEFT,padx = 100)
+            cancel_btn = Button(btn_frame, text="Cancel", command=cancel, bg = LOGOUT_COLOR,font = button_font,fg = FG_COLOR)
+            cancel_btn.pack(side=RIGHT,padx = 100)
+           
 
                 
                 
