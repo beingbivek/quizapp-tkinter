@@ -148,7 +148,6 @@ def openbutton(btn_text):
         question_id, question_text, correct_answer, incorrect_answers, course_id, category_id = qotd_data
 
         # Parse incorrect answers stored as JSON list
-        import json
         incorrect_answers = json.loads(incorrect_answers)
         options = incorrect_answers + [correct_answer]
         shuffle(options)
@@ -583,11 +582,12 @@ def openbutton(btn_text):
                         time_up()
 
                 def time_up():
-                    switch_frame(start_mock)
+                    # switch_frame(start_mock)
+                    submit_test()
                     global mock_running
                     mock_running = False
-                    enable_sidebar()  # Enable sidebar when test ends
-                    messagebox.showinfo("Time Up!", "Your test time is over!")
+                    # enable_sidebar()  # Enable sidebar when test ends
+                    messagebox.showinfo("Time Up!", f"Your {mocktestname} time is over!")
 
                 mocktest_name, fulltime = get_mocktest_fulltime(
                     next((mt[0] for mt in get_mocktest() if mt[1] == mocktestname), 1)
@@ -675,7 +675,7 @@ def openbutton(btn_text):
 
                 # Display questions
                 for idx, (qid, question_text, correct, incorrect) in enumerate(questions, 1):
-                    q_frame = Frame(inner_frame, bd=1, relief="solid", padx=10, pady=10)
+                    q_frame = Frame(inner_frame, relief="solid", padx=10, pady=10)
                     q_frame.pack(fill="x", pady=5, padx=5)
                     
                     Label(q_frame, text=f"Question {idx}: {question_text}", font=("Arial", 12), wraplength=700).pack(anchor="w")
@@ -710,6 +710,7 @@ def openbutton(btn_text):
                     # Calculate percentage
                     percentage = (score / total) * 100 if total > 0 else 0
                     scaled_score = (score / total) * fullmark if total > 0 else 0
+                    scaled_score = scaled_score
                     
                     # Save result (assuming current_user is available)
                     current_user_id = 1  # Replace with actual logged-in user ID
@@ -721,19 +722,17 @@ def openbutton(btn_text):
                     conn.close()
                     
                     # Show result
-                    result_text = f"""Score: {scaled_score:.1f}/{fullmark}
+                    result_text = f"""Score: {scaled_score:.2f}/{fullmark}
+                    Percentage: {percentage}
                     Correct Answers: {score}/{total}
                     Pass Status: {'Passed' if scaled_score >= passmark else 'Failed'}"""
-                    messagebox.showinfo("Test Results", result_text)
                     switch_frame(start_mock)
                     enable_sidebar()
+                    messagebox.showinfo("Test Results", result_text)
 
                 submit_btn = Button(inner_frame, text="Submit Test", command=submit_test, 
                                   font=("Arial", 14, "bold"), bg="#4CAF50", fg="white")
                 submit_btn.pack(pady=20)
-
-
-
 
             else:
                 Label(mocktest_frame, text='Select a Mocktest and press start!', bg=MAINFRAME_COLOR, font=label_font).pack()
@@ -812,7 +811,6 @@ sidebar_button("Profile")
 def logout():
     root.destroy()
     runpy.run_path(r'..\quizapp-tkinter\app\welcome.py')
-    pass
 
 # Logout Button
 logout_btn = Button(sidebar, text="Logout", bg=LOGOUT_COLOR, fg=FG_COLOR, font=("Arial", 10, "bold"), width=20, height=2, bd=0,command=logout)

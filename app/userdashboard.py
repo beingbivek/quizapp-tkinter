@@ -8,7 +8,7 @@ import sqlite3
 from random import *
 import pybase64
 import re #For password validation.
-import time
+import json
 
 # User window
 root = Tk()
@@ -148,7 +148,6 @@ def openbutton(btn_text):
         question_id, question_text, correct_answer, incorrect_answers, course_id, category_id = qotd_data
 
         # Parse incorrect answers stored as JSON list
-        import json
         incorrect_answers = json.loads(incorrect_answers)
         options = incorrect_answers + [correct_answer]
         shuffle(options)
@@ -583,11 +582,12 @@ def openbutton(btn_text):
                         time_up()
 
                 def time_up():
-                    switch_frame(start_mock)
+                    # switch_frame(start_mock)
+                    submit_test()
                     global mock_running
                     mock_running = False
-                    enable_sidebar()  # Enable sidebar when test ends
-                    messagebox.showinfo("Time Up!", "Your test time is over!")
+                    # enable_sidebar()  # Enable sidebar when test ends
+                    messagebox.showinfo("Time Up!", f"Your {mocktestname} time is over!")
 
                 mocktest_name, fulltime = get_mocktest_fulltime(
                     next((mt[0] for mt in get_mocktest() if mt[1] == mocktestname), 1)
@@ -620,12 +620,119 @@ def openbutton(btn_text):
                     
 
                 # Question designs
-
                 question_frame = Frame(mocktest_frame)
-                question_frame.pack(fill='both',pady='10')
+                question_frame.pack(fill='both', expand=True, pady=10)
 
+                # Create scrollable frame
+                canvas = Canvas(question_frame, bd=5, highlightthickness=0,height=screen_height)
+                scroll_y = ttk.Scrollbar(question_frame, orient="vertical", command=canvas.yview)
+                scroll_x = ttk.Scrollbar(question_frame, orient="horizontal", command=canvas.xview)
+                canvas.configure(yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
 
+                # Pack scrollbars and canvas
+                scroll_y.pack(side="right", fill="y")
+                scroll_x.pack(side="bottom", fill="x")
+                canvas.pack(side="left", fill="both", expand=True)
 
+                # Inner frame for questions
+                inner_frame = Frame(canvas)
+                canvas.create_window((0,0), window=inner_frame, anchor="nw")
+
+                # Configure scroll region
+                def configure_scrollregion(event):
+                    canvas.configure(scrollregion=canvas.bbox("all"))
+                inner_frame.bind("<Configure>", configure_scrollregion)
+
+                # Get questions from database
+                def get_questions(mocktest_id):
+                    conn = sqlite3.connect(DATABASE_FILE)
+                    cursor = conn.cursor()
+                    
+                    # Get mocktest configuration
+                    cursor.execute("SELECT course_id, category_id, no_of_questions FROM mockquestions WHERE mocktest_id=?", (mocktest_id,))
+                    configs = cursor.fetchall()
+                    
+                    questions = []
+                    for config in configs:
+                        course_id, category_id, no_of_questions = config
+                        # Get random questions for this category
+                        cursor.execute("""SELECT question_id, question, correct_ans, incorrect_ans 
+                                       FROM questions 
+                                       WHERE course_id=? AND category_id=?
+                                       ORDER BY RANDOM() LIMIT ?""", 
+                                       (course_id, category_id, no_of_questions))
+                        questions.extend(cursor.fetchall())
+                    
+                    conn.close()
+                    return questions
+
+                # Get mocktest ID
+                mocktest_id = next((mt[0] for mt in get_mocktest() if mt[1] == mocktestname), 1)
+                
+                # Retrieve questions
+                questions = get_questions(mocktest_id)
+                user_answers = {}  # Store user's answers {question_id: answer}
+
+                # Display questions
+                for idx, (qid, question_text, correct, incorrect) in enumerate(questions, 1):
+                    q_frame = Frame(inner_frame, relief="solid", padx=10, pady=10)
+                    q_frame.pack(fill="x", pady=5, padx=5)
+                    
+                    Label(q_frame, text=f"Question {idx}: {question_text}", font=("Arial", 12), wraplength=700).pack(anchor="w")
+                    
+                    # Shuffle answer options
+                    incorrect = json.loads(incorrect)
+                    options = [correct] + incorrect
+                    shuffle(options)
+                    
+                    # Radio buttons for options
+                    var = StringVar()
+                    user_answers[qid] = var
+                    for opt in options:
+                        Radiobutton(q_frame, text=opt, variable=var, value=opt, 
+                                   font=("Arial", 11), wraplength=650).pack(anchor="w")
+
+                # Submit button
+                def submit_test():
+                    # Calculate score
+                    score = 0
+                    total = len(questions)
+                    for qid, correct in [(q[0], q[2]) for q in questions]:
+                        if user_answers[qid].get() == correct:
+                            score += 1
+                    
+                    # Get mocktest details
+                    conn = sqlite3.connect(DATABASE_FILE)
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT fullmark, passmark FROM mocktests WHERE mocktest_id=?", (mocktest_id,))
+                    fullmark, passmark = cursor.fetchone()
+                    
+                    # Calculate percentage
+                    percentage = (score / total) * 100 if total > 0 else 0
+                    scaled_score = (score / total) * fullmark if total > 0 else 0
+                    scaled_score = scaled_score
+                    
+                    # Save result (assuming current_user is available)
+                    current_user_id = 1  # Replace with actual logged-in user ID
+                    cursor.execute("""INSERT INTO mocktestresults 
+                                   (mocktest_id, user_id, course_id, result, resulttime)
+                                   VALUES (?, ?, ?, ?, datetime('now'))""",
+                                   (mocktest_id, current_user_id, questions[0][0] if questions else 0, scaled_score))
+                    conn.commit()
+                    conn.close()
+                    
+                    # Show result
+                    result_text = f"""Score: {scaled_score:.2f}/{fullmark}
+                    Percentage: {percentage}
+                    Correct Answers: {score}/{total}
+                    Pass Status: {'Passed' if scaled_score >= passmark else 'Failed'}"""
+                    switch_frame(start_mock)
+                    enable_sidebar()
+                    messagebox.showinfo("Test Results", result_text)
+
+                submit_btn = Button(inner_frame, text="Submit Test", command=submit_test, 
+                                  font=("Arial", 14, "bold"), bg="#4CAF50", fg="white")
+                submit_btn.pack(pady=20)
 
             else:
                 Label(mocktest_frame, text='Select a Mocktest and press start!', bg=MAINFRAME_COLOR, font=label_font).pack()
@@ -676,10 +783,10 @@ def openbutton(btn_text):
         mocktestname = ''
 
         header = Label(main_frame, text="Mock Test", font=header_font, bg=MAINFRAME_COLOR)
-        header.pack(pady=10)
+        header.pack(pady=10,fill='x')
 
         mocktest_frame = Frame(main_frame, border=5, borderwidth=5, padx=10, pady=10)
-        mocktest_frame.pack()
+        mocktest_frame.pack(fill='both')
 
         update_frame(start_mock)
 
@@ -704,7 +811,6 @@ sidebar_button("Profile")
 def logout():
     root.destroy()
     runpy.run_path(r'..\quizapp-tkinter\app\welcome.py')
-    pass
 
 # Logout Button
 logout_btn = Button(sidebar, text="Logout", bg=LOGOUT_COLOR, fg=FG_COLOR, font=("Arial", 10, "bold"), width=20, height=2, bd=0,command=logout)
