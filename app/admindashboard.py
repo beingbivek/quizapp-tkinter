@@ -8,6 +8,7 @@ import sqlite3
 from tkinter import simpledialog
 import tkinter as tk
 from tkcalendar import DateEntry  # Import DateEntry for date selection
+from datetime import datetime, date
 
 # Admin Window
 root = Tk()
@@ -435,16 +436,60 @@ def openbutton(btn_text):
 
     # Leaderboard - admin section
     elif btn_text == buttons[3]:
+        
+        # Replace all date string parsing with direct date object usage
+        def get_formatted_dates():
+            date_from_obj = date_from.get_date()
+            date_to_obj = date_to.get_date()
+            return (
+                date_from_obj.strftime("%Y-%m-%d 00:00:00"),
+                date_to_obj.strftime("%Y-%m-%d 23:59:59")
+            )
+        
+        # Search function to filter by username
         def search():
-            query = search_entry.get()
-            if query:
-                messagebox.showinfo("Search", f"You searched for: {query}")
-            else:
-                messagebox.showwarning("Search", "Please enter a search term.")
+            query = search_entry.get().strip()
+            if not query:
+                messagebox.showwarning("Search", "Please enter a username")
+                return
 
-        def course_selected(selected_course):
-            messagebox.showinfo("Course Selected", f"You selected: {selected_course}")
-            populate_table(selected_course)
+            conn = sqlite3.connect(DATABASE_FILE)
+            c = conn.cursor()
+            c.execute("SELECT user_id FROM users WHERE username = ?", (query,))
+            user_data = c.fetchone()
+            conn.close()
+            
+            if not user_data:
+                messagebox.showinfo("Not Found", f"User '{query}' not found")
+                return
+
+            # Get course filter
+            selected_course_name = selected_course.get()
+            course_id = None
+            if selected_course_name != "All":
+                conn = sqlite3.connect(DATABASE_FILE)
+                c = conn.cursor()
+                c.execute("SELECT course_id FROM courses WHERE coursename = ?", (selected_course_name,))
+                course_data = c.fetchone()
+                conn.close()
+                if course_data:
+                    course_id = course_data[0]
+
+            results = get_mocktest_results(user_id=user_data[0], course_id=course_id)
+            populate_table(results)
+
+        def course_selected(selected_course_name):
+            course_id = None
+            if selected_course_name != "All":
+                conn = sqlite3.connect(DATABASE_FILE)
+                c = conn.cursor()
+                c.execute("SELECT course_id FROM courses WHERE coursename = ?", (selected_course_name,))
+                course_data = c.fetchone()
+                conn.close()
+                course_id = course_data[0] if course_data else None
+
+            results = get_mocktest_results(course_id=course_id)
+            populate_table(results)
             
         # def get_mocktest_results(user_id=None,course_id=None):
             
@@ -474,31 +519,37 @@ def openbutton(btn_text):
             c = conn.cursor()
 
             query = """
-                SELECT user_id, course_id, SUM(result) as total_score 
-                FROM mocktestresults
+                SELECT 
+                    u.username, 
+                    c.coursename, 
+                    SUM(m.result) AS total_score
+                FROM mocktestresults m
+                JOIN users u ON m.user_id = u.user_id
+                JOIN courses c ON m.course_id = c.course_id
             """
 
-            # Applying filters dynamically
             conditions = []
             params = []
 
+            # Add filters
             if user_id:
-                conditions.append("user_id = ?")
+                conditions.append("m.user_id = ?")
                 params.append(user_id)
             if course_id:
-                conditions.append("course_id = ?")
+                conditions.append("m.course_id = ?")
                 params.append(course_id)
+            
+            # Always apply date filter
+            date_start, date_end = get_formatted_dates()
+            conditions.append("m.resulttime BETWEEN ? AND ?")
+            params.extend([date_start, date_end])
 
-            # Add WHERE clause if any conditions exist
-            if conditions:
-                query += " WHERE " + " AND ".join(conditions)
-
-            # Group by user and course
-            query += " GROUP BY user_id, course_id ORDER BY total_score DESC"
+            # Build final query
+            query += " WHERE " + " AND ".join(conditions) if conditions else ""
+            query += " GROUP BY m.user_id, m.course_id ORDER BY total_score DESC"
 
             c.execute(query, tuple(params))
             results = c.fetchall()
-
             conn.close()
             return results
             
@@ -548,27 +599,21 @@ def openbutton(btn_text):
         #     for row in data:
         #         table.insert("", "end", values=row)
                 
-        def populate_table(selected_course):
-            # Clear the previous data in Treeview
+        def populate_table(results):
+            # Clear existing data
             for item in table.get_children():
                 table.delete(item)
-
-            print(get_mocktest_results())
-            all_data = get_mocktest_results()
-
-            # Transform data for display (Serial Number, Course, User ID, Total Score)
-            data = [[index + 1, data[1], f"User {data[0]}", data[2]] for index, data in enumerate(all_data)]
-
-            # Insert new data into the table
-            for row in data:
-                table.insert("", "end", values=row)        
+            
+            # Insert new data
+            for idx, row in enumerate(results, 1):
+                table.insert("", "end", values=(idx, row[1], row[0], row[2]))
                 
         header = Label(main_frame, text="Leaderboard", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
                 
             # Search Section
         searchfr = Frame(main_frame, bd=2, relief="ridge", bg="lightgrey")
-        searchfr.place(x=420, y=200, width=305, height=50)
+        searchfr.pack(x=350, y=200, width=305, height=50)
         search_entry = Entry(searchfr, width=15, font=("Arial", 14))
         search_entry.place(x=90, y=8)
         search_button = Button(searchfr, text="Search", font=("Arial", 12), command=search)
@@ -584,14 +629,31 @@ def openbutton(btn_text):
         course_menu.place(x=15, y=4)
 
         # Date Selection
+        
+        current_date = date.today()
+        first_day_of_month = current_date.replace(day=1)
+        
         Label(main_frame, text="From:", font=('Arial', 14),bg=PROFILE_COLOR).place(x=1125, y=200)
-        date_from = DateEntry(main_frame, width=15, font=('Arial', 14), background='darkblue', foreground='white', borderwidth=2)
+        date_from = DateEntry(
+            main_frame, 
+            width=15, 
+            font=('Arial', 14),
+            date_pattern="mm/dd/yyyy"
+        )        
         date_from.place(x=1200, y=200)
 
         Label(main_frame, text="To:", font=('Arial', 14),bg=PROFILE_COLOR).place(x=1125, y=250)
-        date_to = DateEntry(main_frame, width=15, font=('Arial', 14), background='darkblue', foreground='white', borderwidth=2)
+        date_to = DateEntry(
+            main_frame,
+            width=15, 
+            font=('Arial', 14),
+            date_pattern="mm/dd/yyyy"
+        )        
         date_to.place(x=1200, y=250)
 
+        date_from.set_date(datetime.now().replace(day=1))
+        date_to.set_date(datetime.now())
+        
         # Table Frame (Treeview)
         table_frame = Frame(main_frame, bd=2, relief="ridge")
         table_frame.place(x=550, y=500, width=700, height=250)
@@ -613,7 +675,13 @@ def openbutton(btn_text):
         # Placing the table
         table.pack(expand=True, fill=BOTH)
 
-        populate_table("Loksewa")  # Default table population
+        # Load initial data after UI setup
+        def load_initial_data():
+            results = get_mocktest_results()
+            populate_table(results)
+
+        # Call this after all widgets are created
+        load_initial_data()
         
         pass
 
@@ -817,6 +885,6 @@ main_frame = Frame(root, bg=MAINFRAME_COLOR)
 main_frame.pack(expand=True, fill=BOTH)
 
 # Initialize with Dashboard
-openbutton(buttons[0])
+openbutton(buttons[3])
 
 root.mainloop()
