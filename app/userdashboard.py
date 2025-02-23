@@ -33,7 +33,7 @@ from quizdefaults import *
 root.title("Quiz App - User Dashboard")
 root.configure(bg=MAINFRAME_COLOR)
 
-# Edit profile Functions - mukesh
+
 
 # Making close and minimize button manually
 def min():
@@ -265,6 +265,11 @@ def openbutton(btn_text):
             mock_table.insert('', END, values=(i, row[0], row[1], row[3], f"{row[2]}/100"))
 
         mock_table.pack()
+        
+    #Leaderboard user section.    
+    elif btn_text == "LeaderBoard":
+        
+        def create_table(frame, data):
 
         
     #Leaderboard user section.    

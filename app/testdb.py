@@ -1,17 +1,19 @@
-import random
 import sqlite3
-import json  # To store incorrect answers as a JSON list
 from tkinter import *
 root = Tk()
 from quizdefaults import *
+import sqlite3
+import random
+import pybase64
+import json  # To store incorrect answers as a JSON list
 from datetime import datetime
 
-# Database connection
-# DATABASE_FILE = "your_database.db"  # Change this to your actual database path
+# DATABASE_FILE = "your_database.db"  # Replace with your actual database path
+
+# Connect to the database
 conn = sqlite3.connect(DATABASE_FILE)
 cursor = conn.cursor()
-
-# Users Table
+# User table
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS users (
     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
