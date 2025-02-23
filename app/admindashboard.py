@@ -1876,7 +1876,7 @@ def openbutton(btn_text):
             update_btn.pack(side=LEFT,padx = 100)
             cancel_btn = Button(btn_frame, text="Cancel", command=cancel, bg = LOGOUT_COLOR,font = button_font,fg = FG_COLOR)
             cancel_btn.pack(side=RIGHT,padx = 100)
-            
+
         questiontable_frame = Frame(main_frame, bg = MAINFRAME_COLOR, height = 50, width = 90)
         questiontable_frame.pack(pady=10,fill=BOTH,expand=  True)
 
@@ -1970,6 +1970,6 @@ main_frame = Frame(root, bg=MAINFRAME_COLOR)
 main_frame.pack(expand=True, fill=BOTH)
 
 # Initialize with Dashboard
-openbutton(buttons[3])
+openbutton(buttons[0])
 
 root.mainloop()
