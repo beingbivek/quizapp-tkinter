@@ -265,11 +265,6 @@ def openbutton(btn_text):
             mock_table.insert('', END, values=(i, row[0], row[1], row[3], f"{row[2]}/100"))
 
         mock_table.pack()
-        
-    #Leaderboard user section.    
-    elif btn_text == "LeaderBoard":
-        
-        def create_table(frame, data):
 
         
     #Leaderboard user section.    

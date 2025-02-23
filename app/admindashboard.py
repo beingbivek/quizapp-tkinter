@@ -1241,23 +1241,23 @@ def openbutton(btn_text):
         
         #Function to add mocktest name, full marks, passmarks
         def add_mock_test():
-            add_mocktest = tk.Toplevel(main_frame)
+            add_mocktest = Toplevel(main_frame)
             add_mocktest.title("Add Questions To Mock Test")
             add_mocktest.geometry("600x300")
             add_mocktest.attributes('-topmost', True)
     
-            tk.Label(add_mocktest, text="Enter Mock Test Name:").pack()
+            Label(add_mocktest, text="Enter Mock Test Name:").pack()
             e1 = Entry(add_mocktest, width=35)
             e1.pack(pady=10)
 
-            tk.Label(add_mocktest, text="Enter Mock Test description:").pack()
+            Label(add_mocktest, text="Enter Mock Test description:").pack()
             text_desc = Text(add_mocktest,height=2, width=40)
             text_desc.pack(pady=10)
             
-            tk.Label(add_mocktest, text="Enter Full Marks:").pack()
+            Label(add_mocktest, text="Enter Full Marks:").pack()
             e2 = Entry(add_mocktest, width=35)
             e2.pack(pady=10)
-            tk.Label(add_mocktest, text="Enter Pass Marks:").pack()
+            Label(add_mocktest, text="Enter Pass Marks:").pack()
             e3 = Entry(add_mocktest, width=35)
             e3.pack(pady=10)
 
@@ -1293,7 +1293,7 @@ def openbutton(btn_text):
                     
                     
             
-            #tk.Button(add_mocktest, text="Save", command=save_mock).pack()
+            #Button(add_mocktest, text="Save", command=save_mock).pack()
 
             add_mocktest.attributes('-toolwindow', True)
 
@@ -1311,7 +1311,7 @@ def openbutton(btn_text):
         
         #function to add questions to specific test, corse, category
         def add_mock_question():
-            add_question_window = tk.Toplevel(main_frame)
+            add_question_window = Toplevel(main_frame)
             add_question_window.title("Add Questions To Mock Test")
             add_question_window.geometry("600x300")
             course_id = None
@@ -1319,17 +1319,17 @@ def openbutton(btn_text):
             add_question_window.attributes('-topmost', True)
            
 
-            tk.Label(add_question_window, text="Mock Test Name:").pack()
+            Label(add_question_window, text="Mock Test Name:").pack()
             test_names = [test[1] for test in fetch_mock_tests()]
             mock_test_combo = ttk.Combobox(add_question_window, values=test_names, state='readonly')
             mock_test_combo.pack()
             
-            tk.Label(add_question_window, text="Courses:").pack()
+            Label(add_question_window, text="Courses:").pack()
             course_names = [test[1] for test in fetch_courses()]
             courses_combo = ttk.Combobox(add_question_window, values= course_names, state='readonly')
             courses_combo.pack()
             
-            tk.Label(add_question_window, text="Categories:").pack()
+            Label(add_question_window, text="Categories:").pack()
             
             categories_combo = ttk.Combobox(add_question_window, state='readonly')
             categories_combo.pack()
@@ -1374,8 +1374,8 @@ def openbutton(btn_text):
             check_qno =Label(add_question_window,text= '')
             check_qno.pack()
             
-            tk.Label(add_question_window, text="No of Questions:").pack()
-            questions_entry = tk.Entry(add_question_window)
+            Label(add_question_window, text="No of Questions:").pack()
+            questions_entry = Entry(add_question_window)
             questions_entry.pack()
 
 
@@ -1423,7 +1423,7 @@ def openbutton(btn_text):
                     messagebox.showinfo("Success", "Question added successfully!")
                     add_question_window.destroy()
         
-             #tk.Button(add_question_window, text="Save", command=save_question).pack()
+             #Button(add_question_window, text="Save", command=save_question).pack()
 
             add_question_window.attributes('-toolwindow', True)
 
@@ -1651,18 +1651,18 @@ def openbutton(btn_text):
                 update_questions_table()
         
         def open_add_question_form():
-            add_window = tk.Toplevel(main_frame)
+            add_window = Toplevel(main_frame)
             add_window.title("Add Question")
             add_window.geometry("600x450")
 
             #Courses
-            tk.Label(add_window, text="Courses:").pack()
+            Label(add_window, text="Courses:").pack()
             course_names = [test[1] for test in fetch_courses()]
             courses_combo = ttk.Combobox(add_window, values= course_names, state='readonly')
             courses_combo.pack(pady=10)
 
             #Category   
-            tk.Label(add_window, text="Categories:").pack()
+            Label(add_window, text="Categories:").pack()
              
             categories_combo = ttk.Combobox(add_window,state='readonly')
             categories_combo.pack(pady=10)
@@ -1679,19 +1679,19 @@ def openbutton(btn_text):
             courses_combo.bind("<<ComboboxSelected>>", update_categories)  # Bind the event
 
             #Question
-            tk.Label(add_window,text='Enter question:').pack()
+            Label(add_window,text='Enter question:').pack()
             #question_box = Entry(add_window, width=35)
             #question_box.pack()
             question_box= Text(add_window,height= 5,width= 40)
             question_box.pack(pady=10)
             
-            tk.Label(add_window, text="Incorrect answer:").pack()
+            Label(add_window, text="Incorrect answer:").pack()
             #Incorrect_box = Entry(add_window, width=35)
             #Incorrect_box.pack()
             Incorrect_box = Text(add_window, height= 2, width = 40)
             Incorrect_box.pack(pady=10)
 
-            tk.Label(add_window, text="Correct answer:").pack()
+            Label(add_window, text="Correct answer:").pack()
             correct_box = Text(add_window, height=1, width=40)
             correct_box.pack(pady=10)
 
@@ -1737,7 +1737,7 @@ def openbutton(btn_text):
                 add_window.destroy()
                 
         
-            #tk.Button(add_window, text="Save", command=save_question).pack()
+            #Button(add_window, text="Save", command=save_question).pack()
 
             add_window.attributes('-toolwindow', True)
 
@@ -1763,16 +1763,16 @@ def openbutton(btn_text):
             selected_question = questions_table.item(selected_item, "values")
             
            
-            edit_window = tk.Toplevel(main_frame)
+            edit_window = Toplevel(main_frame)
             edit_window.title("Edit Question")
             edit_window.geometry("600x450")
 
             #Courses
-            tk.Label(edit_window, text="Courses:").pack()
+            Label(edit_window, text="Courses:").pack()
 
             # Fetch courses and set default selection
             course_names = [course[1] for course in fetch_courses()]
-            c_name = tk.StringVar()
+            c_name = StringVar()
             c_name.set(selected_question[4])  # Default selection
 
             # Create Course ComboBox
@@ -1780,14 +1780,14 @@ def openbutton(btn_text):
             courses_combo.pack(pady=10)
 
             # Label for Categories
-            tk.Label(edit_window, text="Categories:").pack()
+            Label(edit_window, text="Categories:").pack()
 
             # Fetch initial categories based on the default course
             default_course_id = next((course[0] for course in fetch_courses() if course[1] == c_name.get()), None)
             category_names = [category[1] for category in fetch_categories(default_course_id)]
 
             # Create Category ComboBox
-            ca_name = tk.StringVar()
+            ca_name = StringVar()
             ca_name.set(selected_question[5])  # Default selection
 
             categories_combo = ttk.Combobox(edit_window, textvariable=ca_name, values=category_names, state="readonly")
@@ -1810,17 +1810,17 @@ def openbutton(btn_text):
             courses_combo.bind("<<ComboboxSelected>>", update_categories)
 
             #Question
-            tk.Label(edit_window,text='Enter question:').pack()
+            Label(edit_window,text='Enter question:').pack()
             question_box = Text(edit_window, height=5,width=40)
             question_box.insert('1.0',selected_question[1])
             question_box.pack(pady = 10)
 
-            tk.Label(edit_window, text="Incorrect answer:").pack()
+            Label(edit_window, text="Incorrect answer:").pack()
             Incorrect_box = Text(edit_window,height=2, width=40)
             Incorrect_box.insert('1.0',selected_question[3])
             Incorrect_box.pack(pady=10)
 
-            tk.Label(edit_window, text="Correct answer:").pack()
+            Label(edit_window, text="Correct answer:").pack()
             correct_box = Text(edit_window,height=1, width=40)
             correct_box.insert('1.0',selected_question[2])
             correct_box.pack(pady=10)
@@ -1876,16 +1876,7 @@ def openbutton(btn_text):
             update_btn.pack(side=LEFT,padx = 100)
             cancel_btn = Button(btn_frame, text="Cancel", command=cancel, bg = LOGOUT_COLOR,font = button_font,fg = FG_COLOR)
             cancel_btn.pack(side=RIGHT,padx = 100)
-           
-
-                
-                
-
-
-
-       
-
-
+            
         questiontable_frame = Frame(main_frame, bg = MAINFRAME_COLOR, height = 50, width = 90)
         questiontable_frame.pack(pady=10,fill=BOTH,expand=  True)
 
