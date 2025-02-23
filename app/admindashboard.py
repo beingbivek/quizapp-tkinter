@@ -577,9 +577,10 @@ def openbutton(btn_text):
         
         #Function to add mocktest name, full marks, passmarks
         def add_mock_test():
-            add_mocktest = tk.Toplevel(root)
+            add_mocktest = tk.Toplevel(main_frame)
             add_mocktest.title("Add Questions To Mock Test")
-            add_mocktest.geometry("500x400")
+            add_mocktest.geometry("600x300")
+            add_mocktest.attributes('-topmost', True)
     
             
            
@@ -588,63 +589,94 @@ def openbutton(btn_text):
             
             tk.Label(add_mocktest, text="Enter Mock Test Name:").pack()
             e1 = Entry(add_mocktest, width=35)
-            e1.pack()
+            e1.pack(pady=10)
+
+            tk.Label(add_mocktest, text="Enter Mock Test description:").pack()
+            text_desc = Text(add_mocktest,height=2, width=40)
+            text_desc.pack(pady=10)
+            
             tk.Label(add_mocktest, text="Enter Full Marks:").pack()
             e2 = Entry(add_mocktest, width=35)
-            e2.pack()
+            e2.pack(pady=10)
             tk.Label(add_mocktest, text="Enter Pass Marks:").pack()
             e3 = Entry(add_mocktest, width=35)
-            e3.pack()
+            e3.pack(pady=10)
 
             #saves the input taken from admin 
             def save_mock():
                 mocktest_name = e1.get().strip()  # Get the value and strip whitespace
+                mocktest_desc = text_desc.get("1.0", "end-1c")
                 full_marks = e2.get().strip()      # Get the value and strip whitespace
                 pass_marks = e3.get().strip()       # Get the value and strip whitespace
         
         # Check if any field is empty
-                if not mocktest_name or not full_marks or not pass_marks:
+                if not mocktest_name or not mocktest_desc or not full_marks or not pass_marks:
                    messagebox.showwarning("Warning", "Please fill in all fields.")
-                   return
-            
-                try:
-                  conn = sqlite3.connect(DATABASE_FILE)
-                  cursor = conn.cursor()
-                  cursor.execute("INSERT INTO mocktests (mocktest_name, fullmark, passmark) VALUES (?, ?, ?)", 
-                            (mocktest_name,full_marks,pass_marks))
-                  conn.commit()
-                  conn.close()
-                  update_mock_test_table()
-                  messagebox.showinfo("Success", "Test added successfully!")
-                except sqlite3.IntegrityError:
-                                messagebox.showerror("Error", "Mock test with this name already exists.")
+                   
+
+                elif full_marks <= pass_marks:
+                    messagebox.showwarning("Warning", "Passmarks should be less than fullmarks!")
+                    
+
+                else:
+                    try:
+                        conn = sqlite3.connect(DATABASE_FILE)
+                        cursor = conn.cursor()
+                        cursor.execute("INSERT INTO mocktests (mocktest_name, mocktest_desc, fullmark, passmark) VALUES (?,?,?,?)", 
+                                    (mocktest_name,mocktest_desc,full_marks,pass_marks))
+                        conn.commit()
+                        conn.close()
+                        update_mock_test_table()
+                        messagebox.showinfo("Success", "Test added successfully!")
+                        add_mocktest.destroy()
+                    except sqlite3.IntegrityError:
+                        messagebox.showerror("Error", "Mock test with this name already exists.")
+                    
                     
             
-            tk.Button(add_mocktest, text="Save", command=save_mock).pack()
+            #tk.Button(add_mocktest, text="Save", command=save_mock).pack()
+
+            add_mocktest.attributes('-toolwindow', True)
+
+            def cancel():
+                add_mocktest.destroy()
+
+            btn_frame = Frame(add_mocktest )
+            btn_frame.pack(pady = 10,fill=X,)
+                
+            update_btn=Button(btn_frame, text="Save", command=save_mock,font= button_font, fg= FG_COLOR ,bg = BUTTON_COLOR)
+            update_btn.pack(side=LEFT,padx = 100)
+            cancel_btn = Button(btn_frame, text="Cancel", command=cancel, bg = LOGOUT_COLOR,font = button_font,fg = FG_COLOR)
+            cancel_btn.pack(side=RIGHT,padx = 100)
+           
         
         #function to add questions to specific test, corse, category
         def add_mock_question():
-             add_question_window = tk.Toplevel(root)
-             add_question_window.title("Add Questions To Mock Test")
-             add_question_window.geometry("500x400")
-    
-             tk.Label(add_question_window, text="Mock Test Name:").pack()
-             test_names = [test[1] for test in fetch_mock_tests()]
-             mock_test_combo = ttk.Combobox(add_question_window, values=test_names, state='readonly')
-             mock_test_combo.pack()
-                
-             tk.Label(add_question_window, text="Courses:").pack()
-             course_names = [test[1] for test in fetch_courses()]
-             courses_combo = ttk.Combobox(add_question_window, values= course_names, state='readonly')
-             courses_combo.pack()
-                
-             tk.Label(add_question_window, text="Categories:").pack()
-             
-             categories_combo = ttk.Combobox(add_question_window, state='readonly')
-             categories_combo.pack()
+            add_question_window = tk.Toplevel(main_frame)
+            add_question_window.title("Add Questions To Mock Test")
+            add_question_window.geometry("600x300")
+            course_id = None
+            category_id = None
+            add_question_window.attributes('-topmost', True)
+           
+
+            tk.Label(add_question_window, text="Mock Test Name:").pack()
+            test_names = [test[1] for test in fetch_mock_tests()]
+            mock_test_combo = ttk.Combobox(add_question_window, values=test_names, state='readonly')
+            mock_test_combo.pack()
+            
+            tk.Label(add_question_window, text="Courses:").pack()
+            course_names = [test[1] for test in fetch_courses()]
+            courses_combo = ttk.Combobox(add_question_window, values= course_names, state='readonly')
+            courses_combo.pack()
+            
+            tk.Label(add_question_window, text="Categories:").pack()
+            
+            categories_combo = ttk.Combobox(add_question_window, state='readonly')
+            categories_combo.pack()
 
               # Update categories based on selected course
-             def update_categories(event):
+            def update_categories(event):
                 selected_course_name = courses_combo.get()
                 course_id = next((course[0] for course in fetch_courses() if course[1] == selected_course_name), None)
                 if course_id:
@@ -652,93 +684,164 @@ def openbutton(btn_text):
                     categories_combo['values'] = category_names
                     categories_combo.set('')  # Clear the current selection
 
-             courses_combo.bind("<<ComboboxSelected>>", update_categories)  # Bind the event
                 
-             tk.Label(add_question_window, text="No of Questions:").pack()
-             questions_entry = tk.Entry(add_question_window)
-             questions_entry.pack()
+            def update_question(event):
+                if categories_combo.get():
+                    selected_course_name = courses_combo.get()
+                    nonlocal course_id
+                    nonlocal category_id
+                    course_id = next((course[0] for course in fetch_courses() if course[1] == selected_course_name), None)
+
+
+                    category = categories_combo.get()
+                    category_id = next((cat[0] for cat in fetch_categories(course_id) if cat[1] == category), None)
+                    no_of_question(course_id,category_id)
+
+            def no_of_question(course_id,category_id):
+                conn = sqlite3.connect(DATABASE_FILE)
+                cursor = conn.cursor()
+                cursor.execute("SELECT question_id FROM questions WHERE course_id=? AND category_id=?", (course_id,category_id,))
+                question_no = cursor.fetchall()
+                question_no = str(len(question_no))
+                conn.commit()
+                conn.close()
+                check_qno.config(text=f'Total Questions in {categories_combo.get()} :: {question_no}')
+                return question_no
+                
+
+            courses_combo.bind("<<ComboboxSelected>>", update_categories)  # Bind the event
+            categories_combo.bind("<<ComboboxSelected>>", update_question)  # Bind the event
+
+            check_qno =Label(add_question_window,text= '')
+            check_qno.pack()
+            
+            tk.Label(add_question_window, text="No of Questions:").pack()
+            questions_entry = tk.Entry(add_question_window)
+            questions_entry.pack()
+
+
     
-             def save_question():
+            def save_question():
                 selected_test = mock_test_combo.get()
                 course = courses_combo.get()
                 category = categories_combo.get()
                 num_questions = questions_entry.get()
                 
+                nonlocal course_id
+                nonlocal category_id
+                
                 if not (selected_test and course and category and num_questions.isdigit()):
                     messagebox.showerror("Error", "Please fill all fields correctly.")
-                    return
-                
-                mock_test_id = next((test[0] for test in fetch_mock_tests() if test[1] == selected_test), None)
-                course_id = next((test[0] for test in fetch_courses() if test[1] == course), None)
-                category_id = next((cat[0] for cat in fetch_categories(course_id) if cat[1] == category), None)
-
-                 # Debugging statements
-                print(f"Mock Test ID: {mock_test_id}, Course ID: {course_id}, Category ID: {category_id}, No of Questions: {num_questions}")
-
-                # Check if IDs are retrieved correctly
-                if not all([mock_test_id, course_id, category_id]):
-                    messagebox.showerror("Error", "Could not find the selected IDs. Please check your selections.")
-                    return
+                    
+              
+                elif num_questions > no_of_question(course_id,category_id):
+                    messagebox.showerror('Error', 'Please insert valid no of questions!')
+                   
+                else:
 
                 
-                conn = sqlite3.connect(DATABASE_FILE)
-                cursor = conn.cursor()
-                cursor.execute("INSERT INTO mockquestions (mocktest_id, course_id, category_id, no_of_questions) VALUES (?, ?, ?, ?)",
-                            (mock_test_id, course_id, category_id,
-                              num_questions))
-                conn.commit()
-                conn.close()
-                update_questions_table()
-                messagebox.showinfo("Success", "Question added successfully!")
+                    mock_test_id = next((test[0] for test in fetch_mock_tests() if test[1] == selected_test), None)
+                    course_id = next((test[0] for test in fetch_courses() if test[1] == course), None)
+                    category_id = next((cat[0] for cat in fetch_categories(course_id) if cat[1] == category), None)
+
+                    # Debugging statements
+                    print(f"Mock Test ID: {mock_test_id}, Course ID: {course_id}, Category ID: {category_id}, No of Questions: {num_questions}")
+
+                    # Check if IDs are retrieved correctly
+                    if not all([mock_test_id, course_id, category_id]):
+                        messagebox.showerror("Error", "Could not find the selected IDs. Please check your selections.")
+                        return
+
+                    
+                    conn = sqlite3.connect(DATABASE_FILE)
+                    cursor = conn.cursor()
+                    cursor.execute("INSERT INTO mockquestions (mocktest_id, course_id, category_id, no_of_questions) VALUES (?, ?, ?, ?)",
+                                (mock_test_id, course_id, category_id,
+                                num_questions))
+                    conn.commit()
+                    conn.close()
+                    update_questions_table()
+                    messagebox.showinfo("Success", "Question added successfully!")
+                    add_question_window.destroy()
         
-             tk.Button(add_question_window, text="Save", command=save_question).pack()
-    
+             #tk.Button(add_question_window, text="Save", command=save_question).pack()
+
+            add_question_window.attributes('-toolwindow', True)
+
+            def cancel():
+                add_question_window.destroy()
+
+            btn_frame = Frame(add_question_window )
+            btn_frame.pack(pady = 10,fill=X,)
+            
+            update_btn=Button(btn_frame, text="Save", command=save_question,font= button_font, fg= FG_COLOR ,bg = BUTTON_COLOR)
+            update_btn.pack(side=LEFT,padx = 100)
+            cancel_btn = Button(btn_frame, text="Cancel", command=cancel, bg = LOGOUT_COLOR,font = button_font,fg = FG_COLOR)
+            cancel_btn.pack(side=RIGHT,padx = 100)
+        
+
         # Updates the mock test table with every change
         def update_mock_test_table():
             for row in mock_test_table.get_children():
                 mock_test_table.delete(row)
             for test in fetch_mock_tests():
-                mock_test_table.insert("", "end", values=(test[0], test[1], test[2], test[3]))
+                mock_test_table.insert("", "end", values=(test[0], test[1], test[2], test[3],test[4]))
 
        
         setup_database()
         
         #main frame for table
-        mocktable_frame = Frame(main_frame)
+        mocktable_frame = Frame(main_frame,bg = MAINFRAME_COLOR)
         mocktable_frame.pack(pady=10)
+
+        mocktest_frame = Frame(mocktable_frame,bg = MAINFRAME_COLOR)
+        mocktest_frame.pack(fill = X,pady = 10)
+
+        add_test_btn = Button(mocktest_frame, text="Add Mock Test", command=add_mock_test, bg= BUTTON_COLOR, font= button_font , fg= FG_COLOR )
+        add_test_btn.pack(side=LEFT, pady=10)
+
+        delete_btn = Button(mocktest_frame, text="Delete Mock Test", command=delete_mock_test, bg= LOGOUT_COLOR, font= button_font, fg= FG_COLOR  )
+        delete_btn.pack(side=RIGHT, pady=10)
+        
+
 
 
         # Create UI elements
-        mock_test_table = ttk.Treeview(mocktable_frame, columns=("ID", "Mock Test Name", "Full Mark", "Pass Mark"), show="headings")
-        mock_test_table.heading("ID", text="ID")
-        mock_test_table.heading("Mock Test Name", text="Mock Test Name")
-        mock_test_table.heading("Full Mark", text="Full Mark")
-        mock_test_table.heading("Pass Mark", text="Pass Mark")
+        list_mocktest = ["ID", "Mock Test Name","Mocktest Description", "Full Mark", "Pass Mark"]
+        mock_test_table = ttk.Treeview(mocktable_frame, columns=list_mocktest, show="headings")
+        for i in list_mocktest:
+
+            mock_test_table.heading(i, text=i)
+            mock_test_table.column(i,anchor= CENTER)
+        # mock_test_table.heading("Mock Test Name", text="Mock Test Name")
+        # mock_test_table.heading("Mocktest Description", text="Mocktest Description")
+        # mock_test_table.heading("Full Mark", text="Full Mark")
+        # mock_test_table.heading("Pass Mark", text="Pass Mark")
         mock_test_table.pack(fill=BOTH, expand=True)
 
         # Buttons to add mock tests and mock questions
-        btn_frame = Frame(main_frame, bg = MAINFRAME_COLOR)
-        btn_frame.pack(pady=10)
+        btn_frame = Frame(mocktable_frame, bg = MAINFRAME_COLOR)
+        btn_frame.pack(fill = X,pady=10)
 
-        add_test_btn = Button(btn_frame, text="Add Mock Test", command=add_mock_test, bg= BUTTON_COLOR, font= button_font , fg= FG_COLOR )
-        add_test_btn.pack(side=LEFT, padx=10)
+        
+        add_question_btn = Button(btn_frame, text="Add No Of Questions", command=add_mock_question, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
+        add_question_btn.pack(side=LEFT, pady=10)
 
-        add_question_btn = Button(btn_frame, text="Add Mock Question", command=add_mock_question, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
-        add_question_btn.pack(side=LEFT, padx=10)
-
-        delete_btn = Button(btn_frame, text="Delete", command=delete_mock_test, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
-        delete_btn.pack(side=LEFT, padx=10)
+        delete_btn = Button(btn_frame, text="Delete Mock QNs", command=delete_selected_question, bg= LOGOUT_COLOR, font= button_font, fg= FG_COLOR  )
+        delete_btn.pack(side=RIGHT, pady=10)
         
 
+      
+
         #question table
+        
         questions_table = ttk.Treeview(main_frame, columns=("ID", "Mock Test-Name", "Course-Name", "Category", "Questions"), show="headings")
         for col in ["ID", "Mock Test-Name", "Course-Name", "Category", "Questions"]:
                questions_table.heading(col, text=col)
+               questions_table.column(col,anchor=CENTER)
         questions_table.pack()
 
-        delete_btn = Button(btn_frame, text="Delete QNs", command=delete_selected_question, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
-        delete_btn.pack(side=LEFT, padx=10)
-        
+       
 
 
         update_mock_test_table()
