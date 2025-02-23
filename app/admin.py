@@ -16,20 +16,20 @@ ADMIN_CODE = "12345"
 
 def back_to_welcome():
     admin_login.destroy()
-    runpy.run_path('welcome.py')
+    runpy.run_path(r'..\quizapp-tkinter\app\welcome.py')
 
 def open_login():
     admin_login.destroy()
-    runpy.run_path('login.py')
+    runpy.run_path(r'..\quizapp-tkinter\app\login.py')
 
 def open_registration():
     admin_login.destroy()
-    runpy.run_path('register.py')
+    runpy.run_path(r'..\quizapp-tkinter\app\register.py')
 
 def admin_login_function():
     entered_code = admin_code_entry.get().strip()
     messagebox.showinfo("Success", "Login successful!")
-    runpy.run_path('admindashboard.py')
+    runpy.run_path(r'..\quizapp-tkinter\app\admindashboard.py')
 
     if not entered_code:
         messagebox.showerror("Error", "Admin code is required")

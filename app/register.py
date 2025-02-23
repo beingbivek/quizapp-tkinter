@@ -18,11 +18,11 @@ register.attributes('-fullscreen', True)
 
 def back_to_welcome():
     register.destroy()
-    runpy.run_path('welcome.py')
+    runpy.run_path(r'..\quizapp-tkinter\app\welcome.py')
 
 def open_login():
     register.destroy()
-    runpy.run_path('login.py')
+    runpy.run_path(r'..\quizapp-tkinter\app\login.py')
 
 def register_user():
     fullname = name_entry.get()
@@ -52,7 +52,7 @@ def register_user():
         conn.close()
         messagebox.showinfo("Success", "Registration successful!")
         register.destroy()
-        runpy.run_path('login.py')
+        runpy.run_path(r'..\quizapp-tkinter\app\login.py')
     except sqlite3.IntegrityError:
         messagebox.showerror("Error", "Username or email already exists")
     except Exception as e:

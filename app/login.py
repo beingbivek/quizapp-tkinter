@@ -14,23 +14,19 @@ label_text_color = "black"  # Text color for labels
 
 def back_to_welcome():
     user_login.destroy()
-    runpy.run_path('welcome.py')
-
-def open_login():
-    user_login.destroy()
-    runpy.run_path('login.py')
+    runpy.run_path(r'..\quizapp-tkinter\app\welcome.py')
 
 def open_registration():
     user_login.destroy()
-    runpy.run_path('register.py')
+    runpy.run_path(r'..\quizapp-tkinter\app\register.py')
 
 def go_to_forgot():
     user_login.destroy()
-    runpy.run_path('forgotps.py')
+    runpy.run_path(r'..\quizapp-tkinter\app\forgotps.py')
 
 def open_admin_login():
     user_login.destroy()
-    runpy.run_path('admin.py')
+    runpy.run_path(r'..\quizapp-tkinter\app\admin.py')
 
 def decrypt_password(encrypted_password):
     try:
@@ -85,7 +81,7 @@ def login():
                     f.write(str(user[0]))  # Assuming user ID is the first column
                 user_login.destroy()
                 # Launch userdashboard.py in a new process
-                runpy.run_path('userdashboard.py')
+                runpy.run_path(r'..\quizapp-tkinter\app\userdashboard.py')
             else:
                 messagebox.showerror("Error", "Incorrect password")
         else:
@@ -158,7 +154,7 @@ back_label.bind("<Button-1>", lambda e: back_to_welcome())
 register_button = Button(framemain, text="Register", command=open_registration, fg='white', bg=button_color)
 register_button.place(x=500, y=30)
 
-login_button = Button(framemain, text="Login", command=open_login, fg='white', bg=button_color)
+login_button = Button(framemain, text="Login", command=login, fg='white', bg=button_color)
 login_button.place(x=600, y=30)
 
 adjust_frames()

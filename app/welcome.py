@@ -120,11 +120,11 @@ create_database()
 
 def open_registration():
     welcome.destroy()
-    runpy.run_path('register.py')
+    runpy.run_path(r'..\quizapp-tkinter\app\register.py')
 
 def open_login():
     welcome.destroy()
-    runpy.run_path('login.py')
+    runpy.run_path(r'..\quizapp-tkinter\app\login.py')
 
 # Function to center frames dynamically
 def center_frames(event=None):
