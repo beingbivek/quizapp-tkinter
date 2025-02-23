@@ -38,14 +38,16 @@ def decrypt_password(encrypted_password):
             raise ValueError("No password found in the database.")
         secret = encrypted_password.encode('ascii')  # Encode the encrypted password to bytes
         secret = pybase64.b64decode(secret)  # Decrypt using Base64
-        return secret.decode('ascii')  # Convert back to the original password
+        secret = secret.decode('ascii')
+        print(secret)
+        return secret  # Convert back to the original password
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred during decryption: {e}")
         return None
 
 def login():
-    username_or_email = name_entry.get().strip()
-    password = user_entry.get().strip()
+    username_or_email = name_entry.get()
+    password = user_entry.get()
 
     if not username_or_email or not password:
         messagebox.showerror("Error", "All fields are required")
@@ -65,7 +67,8 @@ def login():
 
         if user:
             # Retrieve the encrypted password from the database
-            encrypted_password = user[5]  # Assuming password is the 6th column in the table
+            encrypted_password = user[6]  # Assuming password is the 6th column in the table
+            print(user)
 
             # Decrypt the password
             decrypted_password = decrypt_password(encrypted_password)
