@@ -491,28 +491,7 @@ def openbutton(btn_text):
             results = get_mocktest_results(course_id=course_id)
             populate_table(results)
             
-        # def get_mocktest_results(user_id=None,course_id=None):
-            
-        #     conn = sqlite3.connect(DATABASE_FILE)
-        #     c = conn.cursor()
-        #     if user_id:
-        #         query = """
-        #             SELECT * FROM mocktestresults WHERE user_id = ?
-        #         """
-
-        #         # Execute the query
-        #         c.execute(query, (user_id,))
-                
-        #     elif course_id:
-        #         query = """
-        #             SELECT * FROM mocktestresults WHERE course_id = ?
-        #         """
-
-        #         # Execute the query
-        #         c.execute(query, (course_id,))
-            
-        #     else:
-        #         c.execute('SELECT * FROM mocktestresults')
+        
             
         def get_mocktest_results(user_id=None, course_id=None):
             conn = sqlite3.connect(DATABASE_FILE)
@@ -553,51 +532,6 @@ def openbutton(btn_text):
             conn.close()
             return results
             
-            # if c.fetchall() == []:
-            #     # SQL Insert Query (Batch Insert)
-            #     query = """
-            #     INSERT INTO mocktestresults (mocktest_id, user_id, course_id, result, resulttime) 
-            #     VALUES (?, ?, ?, ?, ?)
-            #     """
-
-            #     # Data to insert (5 rows)
-            #     data = [
-            #         (101, 1, 201, 85, '2025-02-18 10:30:00'),
-            #         (102, 2, 202, 90, '2025-02-18 12:00:00'),
-            #         (103, 3, 203, 78, '2025-02-18 14:15:00'),
-            #         (104, 1, 201, 92, '2025-02-18 16:45:00'),
-            #         (105, 2, 202, 88, '2025-02-18 18:20:00')
-            #     ]
-
-            #     # Execute the query for multiple records
-            #     c.executemany(query, data)
-
-            #     # Commit and close
-            #     conn.commit()
-            # return c.fetchall()
-            
-            # pass
-        
-
-        # def populate_table(selected_course):
-        #     # Clear the previous data in Treeview
-        #     for item in table.get_children():
-        #         table.delete(item)
-
-        #     print(get_mocktest_results())
-        #     all_data = get_mocktest_results()
-        #     data = [[data[0],data[3],data[2],data[4]] for data in all_data]
-        #     # Sample table data
-        #     # data = [
-        #     #     [1, selected_course, "User1", "90"],
-        #     #     [2, selected_course, "User2", "85"],
-        #     #     [3, selected_course, "User3", "75"],
-        #     #     [4, selected_course, "User4", "80"],
-        #     # ]
-
-        #     # Insert new data into the table
-        #     for row in data:
-        #         table.insert("", "end", values=row)
                 
         def populate_table(results):
             # Clear existing data
@@ -612,20 +546,20 @@ def openbutton(btn_text):
         header.pack(pady=10)
                 
             # Search Section
-        searchfr = Frame(main_frame, bd=2, relief="ridge", bg="lightgrey")
-        searchfr.pack(x=350, y=200, width=305, height=50)
+        searchfr = Frame(main_frame, bg=MAINFRAME_COLOR)
+        searchfr.place(x=80, y=250, width=305, height=50)
         search_entry = Entry(searchfr, width=15, font=("Arial", 14))
-        search_entry.place(x=90, y=8)
-        search_button = Button(searchfr, text="Search", font=("Arial", 12), command=search)
-        search_button.place(x=5, y=4)
+        search_entry.place(x=5, y=10)
+        search_button = Button(searchfr, text="Search", font=("Arial", 12), command=search, bg=BUTTON_COLOR,fg=FG_COLOR)
+        search_button.place(x=215, y=5)
 
         # Course Selection
-        course_frame = Frame(main_frame, bd=2, relief="ridge", bg="lightgrey")
-        course_frame.place(x=420, y=300, width=305, height=50)
+        course_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
+        course_frame.place(x=400, y=250, width=305, height=50)
         courses = ['All']+[coursename[1] for coursename in get_courses()]
         selected_course = StringVar(value="Choose course")
         course_menu = OptionMenu(course_frame, selected_course, *courses, command=course_selected)
-        course_menu.config(font=("Arial", 12), width=20)
+        course_menu.config(font=("Arial", 12), width=20,bg=BUTTON_COLOR,fg=FG_COLOR)
         course_menu.place(x=15, y=4)
 
         # Date Selection
@@ -633,30 +567,30 @@ def openbutton(btn_text):
         current_date = date.today()
         first_day_of_month = current_date.replace(day=1)
         
-        Label(main_frame, text="From:", font=('Arial', 14),bg=PROFILE_COLOR).place(x=1125, y=200)
+        Label(main_frame, text="From:", font=('Arial', 14),bg=MAINFRAME_COLOR).place(x=925, y=260)
         date_from = DateEntry(
             main_frame, 
             width=15, 
             font=('Arial', 14),
             date_pattern="mm/dd/yyyy"
         )        
-        date_from.place(x=1200, y=200)
+        date_from.place(x=1000, y=260)
 
-        Label(main_frame, text="To:", font=('Arial', 14),bg=PROFILE_COLOR).place(x=1125, y=250)
+        Label(main_frame, text="To:", font=('Arial', 14),bg=MAINFRAME_COLOR).place(x=1250, y=260)
         date_to = DateEntry(
             main_frame,
             width=15, 
             font=('Arial', 14),
             date_pattern="mm/dd/yyyy"
         )        
-        date_to.place(x=1200, y=250)
+        date_to.place(x=1300, y=260)
 
         date_from.set_date(datetime.now().replace(day=1))
         date_to.set_date(datetime.now())
         
         # Table Frame (Treeview)
         table_frame = Frame(main_frame, bd=2, relief="ridge")
-        table_frame.place(x=550, y=500, width=700, height=250)
+        table_frame.place(x=350, y=325, width=1000, height=600)
 
         # Creating Treeview table
         columns = ("SN", "Course", "Username", "Score")
