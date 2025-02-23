@@ -1013,53 +1013,6 @@ def openbutton(btn_text):
         header = Label(main_frame, text="Mock Test", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
 
-        # def setup_database():
-        #     conn = sqlite3.connect(DATABASE_FILE)
-        #     cursor = conn.cursor()
-
-        #     # Create mocktests table
-        #     cursor.execute('''
-        #         CREATE TABLE IF NOT EXISTS mocktests (
-        #             mocktest_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        #             mocktest_name TEXT NOT NULL,
-        #             fullmark INTEGER NOT NULL,
-        #             passmark INTEGER NOT NULL
-        #         )
-        #     ''')
-
-        #     # Create courses table
-        #     cursor.execute('''
-        #         CREATE TABLE IF NOT EXISTS courses (
-        #             course_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        #             course_name TEXT NOT NULL
-        #         )
-        #     ''')
-
-        #     # Create categories table
-        #     cursor.execute('''
-        #         CREATE TABLE IF NOT EXISTS categories (
-        #             category_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        #             category_name TEXT NOT NULL
-        #         )
-        #     ''')
-
-        #     # Create mockquestions table
-        #     cursor.execute('''
-        #         CREATE TABLE IF NOT EXISTS mockquestions (
-        #             mockquestion_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        #             mocktest_id INTEGER NOT NULL,
-        #             course_id INTEGER NOT NULL,
-        #             category_id INTEGER NOT NULL,
-        #             no_of_questions INTEGER NOT NULL,
-        #             FOREIGN KEY (mocktest_id) REFERENCES mocktests (mocktest_id),
-        #             FOREIGN KEY (course_id) REFERENCES courses (course_id),
-        #             FOREIGN KEY (category_id) REFERENCES categories (category_id)
-        #         )
-        #     ''')
-
-        #     conn.commit()
-        #     conn.close()
-
         #takes data from mock table
         def fetch_mock_tests():
             conn = sqlite3.connect(DATABASE_FILE)
@@ -1079,7 +1032,7 @@ def openbutton(btn_text):
            return questions
         
         #takes data from corses
-        def fetch_courses():
+        def delete_question(question_id):
             conn = sqlite3.connect(DATABASE_FILE)
             cursor = conn.cursor()
             cursor.execute("DELETE FROM mockquestions WHERE mockquestion_id = ?", (question_id,))
@@ -1150,11 +1103,6 @@ def openbutton(btn_text):
             add_mocktest.geometry("600x300")
             add_mocktest.attributes('-topmost', True)
     
-            
-           
-            
-            
-            
             tk.Label(add_mocktest, text="Enter Mock Test Name:").pack()
             e1 = Entry(add_mocktest, width=35)
             e1.pack(pady=10)
