@@ -169,7 +169,7 @@ topframemain.place(x=0, y=0, width=700, height=25)
 Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg=header_color, fg="white").place(x=0, y=0)
 
 # Making close and minimize button manually
-maxminbtns(welcome)
+minclose_windowbtn(welcome)
 
 
 # Welcome frame

@@ -74,7 +74,7 @@ infotopframe.place(x=200, y=140, width=300, height=20)
 Label(infotopframe, text="Admin Login", font=("Arial", 10), padx=15, pady=0, bg=header_color, fg='white').place(x=0, y=0)
 
 # manual min close btn
-maxminbtns(admin_login)
+minclose_windowbtn(admin_login)
 
 backframe = Frame(admin_login, bd=1, relief="ridge", padx=0, pady=0, bg='black')
 backframe.place(x=450, y=140, width=50, height=20)

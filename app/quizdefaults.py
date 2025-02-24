@@ -106,7 +106,7 @@ Quiz App is here to help you succeed. Start your journey today!
 '''
 
 # Max Min Buttons
-def maxminbtns(root):
+def minclose_windowbtn(root):
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
 

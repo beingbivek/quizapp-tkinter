@@ -140,7 +140,7 @@ welcomeframe = Frame(register, bd=2, relief="ridge", padx=0, pady=0, bg=tablecol
 welcomeframe.place(x=150, y=70, width=400, height=60)
 Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 25, "bold"), bg=tablecolor,fg='white').pack(pady=10, padx=10)
 
-maxminbtns(register)
+minclose_windowbtn(register)
 
 frame = Frame(register, bd=2, relief="ridge", padx=20, pady=20, bg='white')
 frame.place(x=100, y=140, width=500, height=250)

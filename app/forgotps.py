@@ -148,7 +148,7 @@ frame = Frame(forgotps, bd=2, relief="ridge", padx=20, pady=20, bg='white')
 frame.place(x=200, y=140, width=300, height=300)
 
 # Min and Close buttons
-maxminbtns(forgotps)
+minclose_windowbtn(forgotps)
 
 # Username/Email field
 Label(frame, text="Username or Email:", bg='white', fg=label_text_color).place(x=5, y=10)
