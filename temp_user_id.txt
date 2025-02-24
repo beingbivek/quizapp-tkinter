@@ -1,1 +1,0 @@
-(2, 'bivek thapa', 'a@gmail.com', 'bivekthapa', '1234567890', None, 'YWFhYXNzc3M=', "What is your father's middle name?", 'bahadur')

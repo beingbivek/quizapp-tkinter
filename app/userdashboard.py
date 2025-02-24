@@ -1,15 +1,8 @@
 from tkinter import *
-from tkinter import ttk
-from tkinter import messagebox
+from tkinter import ttk, messagebox, PhotoImage
 import tkinter.font as font
-from PIL import ImageTk, Image
-import sqlite3
+import os, runpy, re, json, sqlite3
 from random import *
-import os
-import runpy
-import pybase64
-import re #For password validation.
-import json
 
 # Read the user details from the temporary file
 try:
@@ -27,6 +20,7 @@ root.attributes("-fullscreen", True)
 
 # Failsafe
 if not LOGGED_IN_USER:
+    messagebox.showerror('User Not Found','User not found in the file\nContact Support.')
     back_to_welcome(root)
 
 screen_width = root.winfo_screenwidth()
@@ -37,8 +31,6 @@ from quizdefaults import *
 
 root.title("Quiz App - User Dashboard")
 root.configure(bg=MAINFRAME_COLOR)
-
-
 
 # Making close and minimize button manually
 minclose_windowbtn(root)
@@ -104,7 +96,7 @@ sidebar = Frame(root, bg=SIDEBAR_COLOR, width=200, height=600)
 sidebar.pack(side='left', fill='y')
 
 # Profile Image Placeholder
-profile_img = Label(sidebar, text="Profile Image", bg='white', width=15, height=5)
+profile_img = Label(sidebar, image=ICON_FILE, bg='white', width=15, height=5)
 profile_img.pack(pady=10)
 
 # Username and Score
@@ -116,10 +108,6 @@ score_label.pack()
 
 # Store button references
 buttons = {}
-
-# Submit Question of the day
-def submitqotd():
-    pass
 
 # Sidebar Button Function
 def openbutton(btn_text):
@@ -265,7 +253,7 @@ def openbutton(btn_text):
     #Leaderboard user section.    
     elif btn_text == "LeaderBoard":
 
-        LOGGED_IN_USER = "user10"  # Change this dynamically based on the logged-in user
+        LOGGED_IN_USER = LOGGED_IN_USER[3]  # Change this dynamically based on the logged-in user
 
         def fetch_leaderboard_data(logged_in_user):
             conn = sqlite3.connect(DATABASE_FILE)
@@ -345,54 +333,40 @@ def openbutton(btn_text):
     # Edit profile - user section - mukesh
     elif btn_text == "Profile":
         # Edit profile Functions - mukesh
-        def submit():
-            # password changed to base64 encrypt
-            secret = validate_password.get()
-            secret = secret.encode('ascii')
-            secret = pybase64.b64encode(secret)
-            secret = secret.decode('ascii')
-            return secret
-            # To decrypt
-            '''
-            secret = password.get() # put the password variable
-            secret = secret.encode('ascii')
-            secret = pybase64.b64decode(secret)
-            secret = secret.decode('ascii') # this is the final password
-            '''
-            
-        def load_profile():
-            """Load user profile data from the database."""
-            try:
-                conn = sqlite3.connect(DATABASE_FILE)
-                c = conn.cursor()
-                c.execute('SELECT * FROM users')
-                users = c.fetchall()
-                conn.close()
-                        
-                return users[0]  # Return the first user's data (assuming there's only one user for simplicity)
-            except sqlite3.Error as e:
-                messagebox.showerror("Database Error", f"An error occurred: {e}")
-                return ['Mukesh Babu Acharya', 'babu@gmail.com', 'Babu.net', '9862148844', '123 Main Street', 'password']
 
-        def update_profile_in_db(user_id, fullname, email, username, contact, address, password):
+        def update_profile_in_db(user_id, fullname, email, username, contact, address, password, sq, sq_answer):
             """Update the user profile in the database."""
             try:
                 conn = sqlite3.connect(DATABASE_FILE)
                 c = conn.cursor()
-                if password != None:
+                if password and sq_answer:
                     query = """
                     UPDATE users
-                    SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, password = ?
+                    SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, password = ?, securityquestion = ?, securityanswer = ?
                     WHERE user_id = ?
                     """
-                    c.execute(query, (fullname, email, username, contact, address, password, user_id))
+                    c.execute(query, (fullname, email, username, contact, address, password, sq, sq_answer, user_id))
+                elif sq_answer:
+                    query = """
+                    UPDATE users
+                    SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, securityquestion = ?, securityanswer = ?
+                    WHERE user_id = ?
+                    """
+                    c.execute(query, (fullname, email, username, contact, address, sq, sq_answer, user_id))
+                elif password:
+                    query = """
+                    UPDATE users
+                    SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, password = ?, securityquestion = ?
+                    WHERE user_id = ?
+                    """
+                    c.execute(query, (fullname, email, username, contact, address, password, sq, user_id))
                 else:
                     query = """
                     UPDATE users
-                    SET fullname = ?, email = ?, username = ?, contact = ?, address = ?
+                    SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, securityquestion = ?
                     WHERE user_id = ?
                     """
-                    c.execute(query, (fullname, email, username, contact, address, user_id))    
+                    c.execute(query, (fullname, email, username, contact, address, sq, user_id))    
                 
                 conn.commit()
                 conn.close()
@@ -401,16 +375,14 @@ def openbutton(btn_text):
                 messagebox.showerror("Database Error", f"An error occurred: {e}")
 
         def validate_password(password):
-            """Validate the password to ensure it meets the requirements."""
             # Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 symbol
             if not re.match(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*[\W_]).+$', password,):
                 return False
             return True
 
         def update_profile():
-            """Handle the update profile button click."""
-            updated_values = [entry.get() for entry in entries]
-            fullname, username, contact, email, address, new_password, confirm_password = updated_values
+            updated_values = [entry.get().strip() for entry in entries] + list(sq.get()) + list(sq_answer_entry.get().strip())
+            fullname, username, contact, email, address, new_password, confirm_password, sq, sq_answer = updated_values
 
             # Check if the password fields are not empty
             if new_password or confirm_password:
@@ -424,45 +396,44 @@ def openbutton(btn_text):
                     return
 
                 # Encrypt the password using base64
-                password = new_password.encode('ascii')
-                password = pybase64.b64encode(password).decode('ascii')
+                password = str_encode(new_password)
             else:
                 # If password fields are empty, set password to None (do not update password)
                 password = None
+
+            # Checking for security questions
+            if sq_answer:
+                sq_answer = str_encode(sq_answer)
+                # Check if the question is same
+                if sq == users[7] and sq_answer == users[8]:
+                    sq_answer = None
+            else:
+                sq_answer = None
 
             # Ask for confirmation
             confirm = messagebox.askyesno("Confirm Update", "Are you sure you want to update your profile?")
             if confirm:
                 # Update the profile in the database
                 update_profile_in_db(
-                    user_id=users[0],  # Assuming the first column is user_id
+                    user_id=users[0], 
                     fullname=fullname,
                     email=email,
                     username=username,
                     contact=contact,
                     address=address,
-                    password=password
+                    password=password,
+                    sq=sq,
+                    sq_answer=sq_answer
                 )
 
-        def cancel():
-            """Close the application."""
-            root.destroy()
-
         # Load user profile data
-        users = load_profile()
-        print(users)
+        users = LOGGED_IN_USER
         
         header = Label(main_frame, text="Profile", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
         
         secframe = Frame(main_frame, bd=2, relief='ridge')
         secframe.place(x=380, y=50, width=900, height=700)
-         
-        score = Label(main_frame, text='score:1500',font=('Arial',12)).place(x=780,y=225)
-        
-        profile = Label(main_frame, text='👦', font=('Arial',60)).place(x=775,y=110)
-       
-        username = Label(main_frame, text=users[3], font=('Arial', 14, 'bold')).place(x=770, y=255)
 
 
         # Labels and Entries
@@ -487,6 +458,16 @@ def openbutton(btn_text):
             entry.place(x=x, y=y+20)
             entry.insert(0, value)
             entries.append(entry)
+
+        # Security Question Part
+        sq = StringVar()
+        sq.set(users[7])
+        # Label(main_frame, text="Select Security Question:", bg='white', fg='black').place(x=250, y=90)
+        Label(main_frame, text='Change Security Question').place(x=950, y=480)
+        OptionMenu(main_frame, sq, *security_questions).place(x=950, y=500)
+
+        Label(main_frame, text='New Security Answer').place(x=950, y=580)
+        sq_answer_entry = Entry(main_frame, width=35).place(x=950,y=600)
 
         # Buttons
         Button(main_frame,text='UPDATE', bg=BUTTON_COLOR, fg=FG_COLOR, font=('Arial', 14, 'bold'), command=update_profile).place(x=screen_width/2.5, y=690)

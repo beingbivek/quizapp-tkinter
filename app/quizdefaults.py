@@ -21,8 +21,9 @@ button_color = '#1F618D'  # Button color
 tablecolor = '#34495E'  # Table color
 label_text_color = "black"  # Text color for labels
 
-# Database file path
+# File path
 DATABASE_FILE = r'..\quizapp-tkinter\quiz.db'
+ICON_FILE = r'..\quizapp-tkinter\app\images\quizicon.ico'
 
 # Font 
 button_font = font.Font(size=14)
