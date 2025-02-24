@@ -12,6 +12,7 @@ HEADER_COLOR = "#57a1f8"
 PROFILE_COLOR = "#1F618D"
 LOGOUT_COLOR = "#E74C3C"
 FG_COLOR = "white"
+accent_color = "#1F618D"
 
 # Colors (Welcome, Login and Registration Page)
 bgcolor = "#E0E0E0"  # Background color

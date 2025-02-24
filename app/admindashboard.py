@@ -26,37 +26,7 @@ from quizdefaults import *
 root.configure(bg=MAINFRAME_COLOR)
 
 # making close and minimize button manually
-def min():
-    root.iconify()
-
-def on_enter(i):
-    btn2['background'] = "red"
-
-def on_leave(i):
-    btn2['background'] = HEADER_COLOR
-
-def max():
-    msg_box = messagebox.askquestion('Exit Application', 'Are you sure you want to close the application?', icon='warning')
-    if msg_box == 'yes':
-        root.destroy()
-
-label1 = LabelFrame(root, height=35, fg="blue", bg=HEADER_COLOR).place(x=0, y=0)
-btn2 = Button(root, text="✕", command=max, width=4, bg=HEADER_COLOR, border=0, font=font.Font(size=14))
-btn2.pack(anchor="ne")
-btn2.bind('<Enter>', on_enter)
-btn2.bind('<Leave>', on_leave)
-
-btn = Button(root, text="-", command=min, width=4, bg=HEADER_COLOR, border=0, font=font.Font(size=14))
-btn.place(x=screen_width-100, y=0)
-
-def enter(i):
-    btn['background'] = "red"
-
-def leave(i):
-    btn['background'] = HEADER_COLOR
-
-btn.bind('<Enter>', enter)
-btn.bind('<Leave>', leave)
+minclose_windowbtn(root)
 
 def get_courses():
     conn = sqlite3.connect(DATABASE_FILE)
@@ -101,6 +71,16 @@ def get_categories(course_id=None):
     conn.close()
     return categories
 
+def stats():
+    # Data from all tables
+    conn = sqlite3.connect(DATABASE_FILE)
+    c = conn.cursor()
+    c.execute('SELECT * FROM sqlite_sequence')
+    stat_data = c.fetchall()
+    conn.commit()
+    conn.close()
+    return stat_data
+
 # Sidebar button functions
 def openbutton(btn_text):
     # Clear the main frame
@@ -122,13 +102,7 @@ def openbutton(btn_text):
         stats_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
         stats_frame.pack()
 
-         # Data from all tables
-        conn = sqlite3.connect(DATABASE_FILE)
-        c = conn.cursor()
-        c.execute('SELECT * FROM sqlite_sequence')
-        stat_data = c.fetchall()
-        conn.commit()
-        conn.close()
+        stat_data = stats()
 
         # Show Stat Data
         for stat in stat_data:
@@ -158,22 +132,16 @@ def openbutton(btn_text):
         tree.pack()
 
     # user - admin section
-
-    # Modify the `elif btn_text == buttons[1]:` section
     elif btn_text == buttons[1]:
-        # Clear the main frame
-        for widget in main_frame.winfo_children():
-            widget.destroy()
 
         # Function to fetch users from the database
         def fetch_users():
             try:
-                conn = sqlite3.connect(DATABASE_FILE)  # Replace with your actual database name
+                conn = sqlite3.connect(DATABASE_FILE)
                 c = conn.cursor()
-                c.execute("SELECT user_id, username, fullname, contact, email FROM users")
+                c.execute("SELECT user_id, username, fullname, contact, email, address FROM users")
                 users = c.fetchall()
                 conn.close()
-                print("Fetched Users:", users)  # Debugging: Print fetched data
                 return users
             except Exception as e:
                 messagebox.showerror("Error", f"An error occurred while fetching users: {e}")
@@ -183,118 +151,203 @@ def openbutton(btn_text):
         def refresh_table():
             global rows
             rows = fetch_users()  # Fetch users from the database
-            print("Rows Data:", rows)  # Debugging: Print rows data
             for row in tree.get_children():
                 tree.delete(row)  # Clear the existing rows in the table
             for row in rows:
                 tree.insert("", "end", values=row)  # Insert fetched data into the table
-            tree.configure(height=len(rows))
 
-        # Colors
-        bgcolor = "#E0E0E0"
-        button_color = "#34495E"
-        accent_color = "#1F618D"
-        delete_color = "#E74C3C"
+        # Function to handle user registration
+        def register_user():
+            register_window = Toplevel(main_frame)
+            register_window.title("Register User")
+            register_window.geometry("500x400")
 
-        # Header
-        header = Label(main_frame, text="Users", font=("Arial", 16, "bold"), bg=MAINFRAME_COLOR)
-        header.place(relx=0.05, rely=0.02)
+            # Labels and Entries
+            Label(register_window, text="Username:").pack()
+            username_entry = Entry(register_window)
+            username_entry.pack()
 
-        # Stats section
-        stats_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
-        stats_frame.place(relx=0.05, rely=0.1, relwidth=0.9, relheight=0.1)
+            Label(register_window, text="Full Name:").pack()
+            fullname_entry = Entry(register_window)
+            fullname_entry.pack()
 
-        stat_data = [("123", "Total Users")]
-        for i, stat in enumerate(stat_data):
-            stat_box = Frame(stats_frame, bg=button_color, width=120, height=60)
-            stat_box.place(relx=i * 0.3, rely=0, relwidth=0.2, relheight=1)
+            Label(register_window, text="Contact:").pack()
+            contact_entry = Entry(register_window)
+            contact_entry.pack()
 
-            stat_label = Label(stat_box, text=stat[0], font=("Arial", 14, "bold"), fg="white", bg=button_color)
-            stat_label.place(relx=0.5, rely=0.3, anchor=CENTER)
-            stat_desc = Label(stat_box, text=stat[1], font=("Arial", 10), fg="white", bg=button_color)
-            stat_desc.place(relx=0.5, rely=0.7, anchor=CENTER)
+            Label(register_window, text="Email:").pack()
+            email_entry = Entry(register_window)
+            email_entry.pack()
 
-        # Add User Button
-        add_button = Button(stats_frame, text="Add User", bg=accent_color, fg="black", relief=FLAT, command=lambda: register_user())
-        add_button.place(relx=0.8, rely=0.2, relwidth=0.15, relheight=0.6)
+            Label(register_window, text="Address:").pack()
+            address_entry = Entry(register_window)
+            address_entry.pack()
 
-        # User display options
-        no_of_user = ["3", "6", "9", "12"]
-        selected_user_no = StringVar(value="No. of user displayed")
-        user_dropdown = OptionMenu(main_frame, selected_user_no, *no_of_user, command=lambda x: user_no_selected(x))
-        user_dropdown.config(font=("Arial", 10), width=13)
-        user_dropdown.place(relx=0.05, rely=0.25)
+            Label(register_window, text="Password:").pack()
+            password_entry = Entry(register_window, show="*")
+            password_entry.pack()
 
-        # Filter options
-        filter_value = ["Username", "SN"]
-        filter_with = StringVar(value="Filter With:")
-        filter_dropdown = OptionMenu(main_frame, filter_with, *filter_value, command=lambda x: filter_info(x))
-        filter_dropdown.config(font=("Arial", 10), width=13)
-        filter_dropdown.place(relx=0.25, rely=0.25)
+            Label(register_window, text="Security Question:").pack()
+            sq_var = StringVar(value=security_questions[0])
+            OptionMenu(register_window, sq_var, *security_questions).pack()
 
-        # Search Bar
-        search_label = Label(main_frame, text="Search:", font=("Arial", 13), bg=MAINFRAME_COLOR, fg='black')
-        search_label.place(relx=0.45, rely=0.25)
+            Label(register_window, text="Security Answer:").pack()
+            sq_answer_entry = Entry(register_window)
+            sq_answer_entry.pack()
 
-        search_entry = Entry(main_frame, font=("Arial", 10), width=20)
-        search_entry.place(relx=0.52, rely=0.25)
+            # Submit Button
+            Button(register_window, text="Submit", command=lambda: submit_registration(
+                username_entry.get(),
+                fullname_entry.get(),
+                contact_entry.get(),
+                email_entry.get(),
+                address_entry.get(),
+                password_entry.get(),
+                sq_var.get(),
+                sq_answer_entry.get(),
+                register_window
+            )).pack()
 
-        search_button = Button(main_frame, text="Search", bg=accent_color, fg="black", relief=FLAT, command=lambda: search_table())
-        search_button.place(relx=0.72, rely=0.25, width=80)
+        # Function to submit user registration
+        def submit_registration(username, fullname, contact, email, address, password, sq, sq_answer, window):
+            if not all([username, fullname, contact, email, address, password, sq, sq_answer]):
+                messagebox.showwarning("Input Error", "All fields are required!")
+                return
 
-        # Table
-        table_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
-        table_frame.place(relx=0.05, rely=0.35, relwidth=0.9, relheight=0.5)
+            try:
+                # Encode password and security answer
+                encoded_password = str_encode(password)
+                encoded_sq_answer = str_encode(sq_answer)
 
-        columns = ("Sn", "Username", "Name", "Contact", "Email")
-        tree = ttk.Treeview(table_frame, columns=columns, show="headings")
+                # Insert into database
+                conn = sqlite3.connect(DATABASE_FILE)
+                c = conn.cursor()
+                c.execute("""
+                    INSERT INTO users (username, fullname, contact, email, address, password, securityquestion, securityanswer)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (username, fullname, contact, email, address, encoded_password, sq, encoded_sq_answer))
+                conn.commit()
+                conn.close()
 
-        for col in columns:
-            tree.heading(col, text=col)
-            tree.column(col, anchor=CENTER, width=150)
+                messagebox.showinfo("Success", "User registered successfully!")
+                refresh_table()  # Refresh the table
+                window.destroy()
+            except sqlite3.IntegrityError:
+                messagebox.showerror("Error", "Username or email already exists!")
+            except Exception as e:
+                messagebox.showerror("Error", f"An error occurred: {e}")
 
-        # Fetch and display users from the database
-        refresh_table()
+        # Function to edit a user
+        def edit_user():
+            selected_item = tree.selection()
+            if not selected_item:
+                messagebox.showwarning("No Selection", "Please select a user to edit.")
+                return
 
-        # Ensure the Treeview is placed correctly
-        tree.place(relx=0, rely=0, relwidth=1, relheight=1)
+            selected_user = tree.item(selected_item, "values")
+            edit_window = Toplevel(root)
+            edit_window.title("Edit User")
+            edit_window.geometry("500x400")
 
-        # Action Buttons
-        edit_button = Button(main_frame, text="Edit", bg=accent_color, fg="black", relief=FLAT, command=lambda: edit_user())
-        edit_button.place(relx=0.05, rely=0.9, relwidth=0.1, relheight=0.05)
+            # Labels and Entries
+            Label(edit_window, text="Username:").pack()
+            username_entry = Entry(edit_window)
+            username_entry.insert(0, selected_user[1])
+            username_entry.pack()
 
-        delete_button = Button(main_frame, text="Delete", bg=delete_color, fg="black", relief=FLAT, command=lambda: delete_user())
-        delete_button.place(relx=0.15, rely=0.9, relwidth=0.1, relheight=0.05)
+            Label(edit_window, text="Full Name:").pack()
+            fullname_entry = Entry(edit_window)
+            fullname_entry.insert(0, selected_user[2])
+            fullname_entry.pack()
 
+            Label(edit_window, text="Contact:").pack()
+            contact_entry = Entry(edit_window)
+            contact_entry.insert(0, selected_user[3])
+            contact_entry.pack()
 
-        # Functions
-        def user_no_selected(selected_user_no):
+            Label(edit_window, text="Email:").pack()
+            email_entry = Entry(edit_window)
+            email_entry.insert(0, selected_user[4])
+            email_entry.pack()
+
+            Label(edit_window, text="Address:").pack()
+            address_entry = Entry(edit_window)
+            address_entry.insert(0, selected_user[5])
+            address_entry.pack()
+
+            # Submit Button
+            Button(edit_window, text="Submit", command=lambda: submit_edit(
+                selected_user[0],  # user_id
+                username_entry.get(),
+                fullname_entry.get(),
+                contact_entry.get(),
+                email_entry.get(),
+                address_entry.get(),
+                edit_window
+            )).pack()
+
+        # Function to submit user edits
+        def submit_edit(user_id, username, fullname, contact, email, address, window):
+            if not all([username, fullname, contact, email, address]):
+                messagebox.showwarning("Input Error", "All fields are required!")
+                return
+
+            try:
+                conn = sqlite3.connect(DATABASE_FILE)
+                c = conn.cursor()
+                c.execute("""
+                    UPDATE users
+                    SET username = ?, fullname = ?, contact = ?, email = ?, address = ?
+                    WHERE user_id = ?
+                """, (username, fullname, contact, email, address, user_id))
+                conn.commit()
+                conn.close()
+
+                messagebox.showinfo("Success", "User updated successfully!")
+                refresh_table()  # Refresh the table
+                window.destroy()
+            except sqlite3.IntegrityError:
+                messagebox.showerror("Error", "Username or email already exists!")
+            except Exception as e:
+                messagebox.showerror("Error", f"An error occurred: {e}")
+
+        # Function to delete a user
+        def delete_user():
+            selected_item = tree.selection()
+            if not selected_item:
+                messagebox.showwarning("No Selection", "Please select a user to delete.")
+                return
+
+            if messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this user?"):
+                user_id = tree.item(selected_item, "values")[0]
+                try:
+                    conn = sqlite3.connect(DATABASE_FILE)
+                    c = conn.cursor()
+                    c.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
+                    conn.commit()
+                    conn.close()
+                    refresh_table()  # Refresh the table
+                    messagebox.showinfo("Success", "User deleted successfully!")
+                except Exception as e:
+                    messagebox.showerror("Error", f"An error occurred: {e}")
+
+        # Function to filter users
+        def filter_users(filter_by):
             for row in tree.get_children():
                 tree.delete(row)
 
-            num_rows = int(selected_user_no)
-            for i in range(min(num_rows, len(rows))):
-                tree.insert("", "end", values=rows[i])
-
-            tree.configure(height=num_rows)
-
-        def filter_info(filter_with):
-            for row in tree.get_children():
-                tree.delete(row)
-
-            if filter_with == "Username":
+            if filter_by == "Username":
                 sorted_rows = sorted(rows, key=lambda x: x[1].lower())
-            elif filter_with == "SN":
-                sorted_rows = sorted(rows, key=lambda x: int(x[0]))
+            elif filter_by == "Email":
+                sorted_rows = sorted(rows, key=lambda x: x[4].lower())
             else:
                 sorted_rows = rows
 
             for row in sorted_rows:
                 tree.insert("", "end", values=row)
 
-            tree.configure(height=len(sorted_rows))
-
-        def search_table():
+        # Function to search users
+        def search_users():
             search_term = search_entry.get().strip().lower()
 
             for row in tree.get_children():
@@ -305,126 +358,81 @@ def openbutton(btn_text):
             for row in filtered_rows:
                 tree.insert("", "end", values=row)
 
-            tree.configure(height=len(filtered_rows))
+        # Function to display selected number of users
+        def display_users(limit):
+            for row in tree.get_children():
+                tree.delete(row)
 
-        def register_user():
-            register_window = Toplevel(root)
-            register_window.title("Register User")
-            register_window.geometry("500x300")
+            if limit == "All":
+                for row in rows:
+                    tree.insert("", "end", values=row)
+            else:
+                for row in rows[:int(limit)]:
+                    tree.insert("", "end", values=row)
 
-            Label(register_window, text="Username:").place(relx=0.1, rely=0.1)
-            username_entry = Entry(register_window)
-            username_entry.place(relx=0.4, rely=0.1)
+        header = Label(main_frame, text='Users', font=header_font, bg=MAINFRAME_COLOR)
+        header.pack(pady=10)
 
-            Label(register_window, text="Name:").place(relx=0.1, rely=0.2)
-            name_entry = Entry(register_window)
-            name_entry.place(relx=0.4, rely=0.2)
 
-            Label(register_window, text="Contact:").place(relx=0.1, rely=0.3)
-            contact_entry = Entry(register_window)
-            contact_entry.place(relx=0.4, rely=0.3)
+        # Rectangle stats no. frame
 
-            Label(register_window, text="Email:").place(relx=0.1, rely=0.4)
-            email_entry = Entry(register_window)
-            email_entry.place(relx=0.4, rely=0.4)
+        stats_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
+        stats_frame.pack()
+        stat_box = Frame(stats_frame, bg=BUTTON_COLOR, width=120, height=60)
+        stat_box.pack_propagate(False)
+        stat_box.pack(side=LEFT, padx=10, pady=10)
+            
+        stat_label = Label(stat_box, text=stats()[0][1], font=("Arial", 14, "bold"), fg=FG_COLOR, bg=BUTTON_COLOR)
+        stat_label.pack()
+        stat_desc = Label(stat_box, text='Total Users', font=("Arial", 10), fg=FG_COLOR, bg=BUTTON_COLOR)
+        stat_desc.pack()
 
-            sq = StringVar()
-            sq.set(security_questions[0])
-            Label(register_window, text="Select Security Question:", bg='white', fg='black').place(relx=0.1, rely=0.5)
-            OptionMenu(register_window, sq, *security_questions).place(relx=0.4, rely=0.5)
+        # Search Bar
+        search_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
+        search_frame.pack(padx=10, pady=10)
 
-            Label(register_window, text="Security Answer:").place(relx=0.1, rely=0.6)
-            sq_answer_entry = Entry(register_window)
-            sq_answer_entry.place(relx=0.4, rely=0.6)
+        Label(search_frame, text="Search:",bg=MAINFRAME_COLOR).pack(side="left", padx=5)
+        search_entry = Entry(search_frame,font=button_font)
+        search_entry.pack(side="left", padx=5, fill="x", expand=True)
 
-            Button(register_window, text="Submit", command=lambda: submit_registration(
-                username_entry.get(), name_entry.get(), contact_entry.get(), email_entry.get(), register_window
-            )).place(relx=0.5, rely=0.7)
-        
-        def submit_registration(username, name, contact, email, window):
-            try:
-                conn = sqlite3.connect(DATABASE_FILE)  # Replace with your actual database name
-                c = conn.cursor()
-                c.execute("""
-                    INSERT INTO users (username, fullname, contact, email, password)
-                    VALUES (?, ?, ?, ?, ?)
-                """, (username, name, contact, email, "default_password"))  # Replace "default_password" with actual password handling
-                conn.commit()
-                conn.close()
-                refresh_table()  # Refresh the table after adding a new user
-                window.destroy()
-            except Exception as e:
-                messagebox.showerror("Error", f"An error occurred: {e}")
+        Button(search_frame, text="Search", command=search_users, bg=BUTTON_COLOR,font=button_font,fg=FG_COLOR).pack(side="left", padx=5)
 
-        def edit_user():
-            selected_item = tree.selection()
-            if not selected_item:
-                messagebox.showwarning("No Selection", "Please select a user to edit.")
-                return
+        # Filter Option
+        filter_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
+        filter_frame.pack(fill="x", padx=10, pady=10)
 
-            selected_user = tree.item(selected_item, "values")
-            edit_window = Toplevel(root)
-            edit_window.title("Edit User")
-            edit_window.geometry("500x300")
+        Label(filter_frame, text="Filter By:",bg = MAINFRAME_COLOR).pack(side="left", padx=5)
+        filter_var = StringVar(value="Username")
+        OptionMenu(filter_frame, filter_var, "Username", "Email", command=filter_users).pack(side="left", padx=5)
 
-            Label(edit_window, text="Username:").place(relx=0.1, rely=0.1)
-            username_entry = Entry(edit_window)
-            username_entry.insert(0, selected_user[1])
-            username_entry.place(relx=0.3, rely=0.1)
+        # Display Number of Users
+        display_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
+        display_frame.pack(fill="x", padx=10, pady=10)
 
-            Label(edit_window, text="Name:").place(relx=0.1, rely=0.2)
-            name_entry = Entry(edit_window)
-            name_entry.insert(0, selected_user[2])
-            name_entry.place(relx=0.3, rely=0.2)
+        Label(display_frame, text="Display:",bg=MAINFRAME_COLOR).pack(side="left", padx=5)
+        display_var = StringVar(value="10")
+        OptionMenu(display_frame, display_var, "5", "10", "15", "20", "25", "30", "50", "All", command=display_users).pack(side="left", padx=5)
 
-            Label(edit_window, text="Contact:").place(relx=0.1, rely=0.3)
-            contact_entry = Entry(edit_window)
-            contact_entry.insert(0, selected_user[3])
-            contact_entry.place(relx=0.3, rely=0.3)
+        # Table
+        columns = ("User ID", "Username", "Full Name", "Contact", "Email", "Address")
+        tree = ttk.Treeview(main_frame, columns=columns, show="headings")
 
-            Label(edit_window, text="Email:").place(relx=0.1, rely=0.4)
-            email_entry = Entry(edit_window)
-            email_entry.insert(0, selected_user[4])
-            email_entry.place(relx=0.3, rely=0.4)
+        for col in columns:
+            tree.heading(col, text=col)
+            tree.column(col, anchor=CENTER, width=150)
 
-            Button(edit_window, text="Submit", command=lambda: submit_edit(
-                selected_item, username_entry.get(), name_entry.get(), contact_entry.get(), email_entry.get(), edit_window
-            )).place(relx=0.4, rely=0.6)
+        tree.pack(fill="both", expand=True, padx=10, pady=10)
 
-        def submit_edit(selected_item, username, name, contact, email, window):
-            try:
-                user_id = tree.item(selected_item, "values")[0]
-                conn = sqlite3.connect(DATABASE_FILE)  # Replace with your actual database name
-                c = conn.cursor()
-                c.execute("""
-                    UPDATE users
-                    SET username = ?, fullname = ?, contact = ?, email = ?
-                    WHERE user_id = ?
-                """, (username, name, contact, email, user_id))
-                conn.commit()
-                conn.close()
-                refresh_table()  # Refresh the table after editing
-                window.destroy()
-            except Exception as e:
-                messagebox.showerror("Error", f"An error occurred: {e}")
+        # Buttons
+        button_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
+        button_frame.pack(fill="x", padx=10, pady=10)
 
-        def delete_user():
-            selected_item = tree.selection()
-            if not selected_item:
-                messagebox.showwarning("No Selection", "Please select a user to delete.")
-                return
+        Button(button_frame, text="Add User", bg=BUTTON_COLOR, fg=FG_COLOR, command=register_user,font=button_font).pack(side="left", padx=5)
+        Button(button_frame, text="Delete User", bg=LOGOUT_COLOR, fg=FG_COLOR, command=delete_user,font=button_font).pack(side="right", padx=5)
+        Button(button_frame, text="Edit User", bg=BUTTON_COLOR, fg=FG_COLOR, command=edit_user,font=button_font).pack(side="right", padx=5)
 
-            if messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this user?"):
-                user_id = tree.item(selected_item, "values")[0]
-                try:
-                    conn = sqlite3.connect(DATABASE_FILE)  # Replace with your actual database name
-                    c = conn.cursor()
-                    c.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
-                    conn.commit()
-                    conn.close()
-                    refresh_table()  # Refresh the table after deletion
-                except Exception as e:
-                    messagebox.showerror("Error", f"An error occurred: {e}")
+        # Initial Table Refresh
+        refresh_table()
 
 
     # Courses - admin section - bivek
@@ -532,7 +540,7 @@ def openbutton(btn_text):
         #     conn.commit()
     
 
-        header = Label(main_frame, text="Courses", font=header_font, bg=MAINFRAME_COLOR)
+        header = Label(main_frame, text="Courses and Categories", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
 
         # Courses Section
@@ -545,7 +553,7 @@ def openbutton(btn_text):
         stat_box.pack_propagate(False)
         stat_box.pack(side=LEFT, padx=10, pady=10)
             
-        stat_label = Label(stat_box, text=len(get_courses()), font=("Arial", 14, "bold"), fg=FG_COLOR, bg=BUTTON_COLOR)
+        stat_label = Label(stat_box, text=stats()[1][1], font=("Arial", 14, "bold"), fg=FG_COLOR, bg=BUTTON_COLOR)
         stat_label.pack()
         stat_desc = Label(stat_box, text='Total Courses', font=("Arial", 10), fg=FG_COLOR, bg=BUTTON_COLOR)
         stat_desc.pack()
@@ -673,6 +681,7 @@ def openbutton(btn_text):
                     c.execute('DELETE FROM courses WHERE course_id = ?', (item_data["values"][0],))
                     conn.commit()
                     update_course_table(get_courses())
+                    stat_label.config(text=stats()[1][1])
                 
 
         course_action_frame = Frame(main_frame,bg=MAINFRAME_COLOR)
