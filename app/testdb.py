@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS users (
     contact TEXT,
     address TEXT,
     password TEXT NOT NULL
+    securityquestion TEXT NOT NULL,
+    securityanswer TEXT NOT NULL
 )
 """)
 

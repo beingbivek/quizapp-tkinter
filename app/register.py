@@ -28,8 +28,10 @@ def register_user():
     email = email_entry.get().strip()
     password = pass_entry.get().strip()
     confirm_password = confirm_pass_entry.get().strip()
+    security_question = sq.get().strip()
+    sq_answer = sq_ans_entry.get().strip()
 
-    if not (fullname and username and contact and email and password and confirm_password):
+    if not (fullname and username and contact and email and password and confirm_password and sq_answer):
         messagebox.showerror("Error", "Please fill all the fields!")
         return
 
@@ -91,8 +93,8 @@ def register_user():
         c = conn.cursor()
         c.execute("""
             INSERT INTO users (fullname, email, username, contact, password)
-            VALUES (?, ?, ?, ?, ?)
-        """, (fullname, email, username, contact, secret))
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (fullname, email, username, contact, secret, security_question, sq_answer))
         conn.commit()
         messagebox.showinfo("Success", "Registration successful!")
         open_login(register)
@@ -167,12 +169,21 @@ Label(frame, text="Confirm Password:", bg='white', fg='black').place(x=250, y=50
 confirm_pass_entry = Entry(frame, show="*",bg='black',fg='white')
 confirm_pass_entry.place(x=250, y=70)
 
+sq = StringVar()
+sq.set(security_questions[0])
+Label(frame, text="Select Security Question:", bg='white', fg='black').place(x=250, y=90)
+OptionMenu(frame, sq, *security_questions).place(x=210, y=110)
+# confirm_pass_entry.place(x=250, y=70)
+
+Label(frame, text="Security Answer:", bg='white', fg='black').place(x=250, y=140)
+sq_ans_entry = Entry(frame, show="*",bg='black',fg='white')
+sq_ans_entry.place(x=250, y=160)
+
 Button(frame, text="Register", command=register_user,fg='white',bg=button_color).place(x=200, y=190)
 
 infotopframe = Frame(register, bd=1, relief="ridge", padx=0, pady=0, bg=header_color)
 infotopframe.place(x=100, y=140, width=500, height=20)
 Label(infotopframe, text="Register", font=("Arial", 10), padx=15, pady=0, fg='white',bg=header_color).place(x=0, y=0)
-
 
 backframe = Frame(register, bd=1, relief="ridge", padx=0, pady=0, bg='black')
 backframe.place(x=450, y=140, width=50, height=20)

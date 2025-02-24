@@ -18,7 +18,9 @@ def create_database():
             username TEXT NOT NULL UNIQUE,
             contact TEXT,
             address TEXT,
-            password TEXT NOT NULL
+            password TEXT NOT NULL,
+            securityquestion TEXT NOT NULL,
+            securityanswer TEXT NOT NULL
         )
         """)
 

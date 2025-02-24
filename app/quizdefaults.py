@@ -36,6 +36,28 @@ utf = 'utf-8'
 
 # Defaults lists
 defcourses = ['CEE','Driving','IOE','Loksewa']
+security_questions = [
+    "What was the name of your first pet?",
+    "What is your mother's maiden name?",
+    "What was the make and model of your first car?",
+    "In what city were you born?",
+    "What is the name of your favorite childhood teacher?",
+    "What is your favorite book?",
+    "What is your favorite movie?",
+    "What is the name of your first school?",
+    "What is your father's middle name?",
+    "What was the name of your first childhood friend?",
+    "What is your favorite food?",
+    "What was your childhood nickname?",
+    "What is the name of the street you grew up on?",
+    "What was the name of your first employer?",
+    "What was the first concert you attended?",
+    "What is the name of your favorite sports team?",
+    "What is your dream job?",
+    "What was the name of your first stuffed animal?",
+    "Where did you go on your first vacation?",
+    "What is the name of your favorite musician or band?"
+]
 
 
 # Paths for runpy
