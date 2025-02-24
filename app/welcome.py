@@ -247,7 +247,7 @@ IOE (Institute of Engineering)
 
 Whether you're preparing for competitive exams or brushing up your knowledge,
 Quiz App is here to help you succeed. Start your journey today!
-''', font=("Arial", 13), bg=frame_bg, fg=label_text_color).place(x=-10, y=0)
+''', font=("Arial", 10), bg=frame_bg, fg=label_text_color).place(x=0, y=0)
 
 # Buttons
 Button(frame, text="Register", command=open_registration, fg='white', bg=button_color).place(x=0, y=190)

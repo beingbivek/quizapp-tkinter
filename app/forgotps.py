@@ -2,6 +2,8 @@ from tkinter import *
 from tkinter import messagebox
 import runpy
 import tkinter.font as font
+import sqlite3
+import pybase64
 
 # Colors (matched with Register and Login pages)
 bgcolor = "#E0E0E0"  # Background color
@@ -25,9 +27,10 @@ def open_registration():
 
 def forgot_pw():
     username_or_email = name_entry.get().strip()
+    contact = contact_entry.get().strip()
     newpassword = user_entry.get().strip()
 
-    if not username_or_email or not newpassword:
+    if not username_or_email or not contact or not newpassword:
         messagebox.showerror("Error", "All fields are required")
         return
 
@@ -44,9 +47,39 @@ def forgot_pw():
         messagebox.showerror("Error", "Password must be at least 6 characters long")
         return
 
-    # Show success message with user details (masking password)
-    user_info = f"Username/Email: {username_or_email}\nNew Password: {'*' * len(newpassword)}"
-    messagebox.showinfo("Success", f"Password updated successfully!\n\n{user_info}")
+    try:
+        # Encrypt the new password using Base64
+        secret = newpassword.encode('ascii')  # Encode the password to bytes
+        secret = pybase64.b64encode(secret)  # Encrypt using Base64
+        secret = secret.decode('ascii')  # Convert back to string for storage
+
+        conn = sqlite3.connect('quiz.db')  # Replace with your actual database name
+        c = conn.cursor()
+
+        # Check if username/email and contact match
+        c.execute("""
+            SELECT * FROM users 
+            WHERE (username = ? OR email = ?) AND contact = ?
+        """, (username_or_email, username_or_email, contact))
+
+        user = c.fetchone()
+
+        if user:
+            # Update the password
+            c.execute("""
+                UPDATE users 
+                SET password = ?
+                WHERE (username = ? OR email = ?) AND contact = ?
+            """, (secret, username_or_email, username_or_email, contact))
+            conn.commit()
+            conn.close()
+            messagebox.showinfo("Success", "Password updated successfully!")
+            forgotps.destroy()
+            runpy.run_path(r'..\quizapp-tkinter\app\login.py')
+        else:
+            messagebox.showerror("Error", "Username/Email or Contact Number does not match")
+    except Exception as e:
+        messagebox.showerror("Error", f"An error occurred: {e}")
 
 forgotps = Tk()
 forgotps.title("Forgot Password")
@@ -69,7 +102,7 @@ def adjust_frames(event=None):
     framemain.place(x=0, y=0, width=window_width, height=window_height)
     topframemain.place(x=0, y=0, width=window_width, height=25)
     welcomeframe.place(x=x_main + 150, y=y_main + 70, width=400, height=60)
-    frame.place(x=x_main + 200, y=y_main + 140, width=300, height=250)
+    frame.place(x=x_main + 200, y=y_main + 140, width=300, height=300)  # Increased height for new field
     infotopframe.place(x=x_main + 200, y=y_main + 140, width=300, height=20)
     backframe.place(x=x_main + 450, y=y_main + 140, width=50, height=20)
     register_button.place(x=button_x, y=50)
@@ -89,15 +122,19 @@ welcomeframe.place(x=150, y=70, width=400, height=60)
 Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 25, "bold"), bg=tablecolor, fg='white').pack(pady=10, padx=10)
 
 frame = Frame(forgotps, bd=2, relief="ridge", padx=20, pady=20, bg='white')
-frame.place(x=200, y=140, width=300, height=250)
+frame.place(x=200, y=140, width=300, height=300)  # Increased height for new field
 
 Label(frame, text="Email/Username:", bg='white', fg=label_text_color).place(x=5, y=0)
 name_entry = Entry(frame, bg='black', fg='white')
 name_entry.place(x=5, y=20)
 
-Label(frame, text="New Password:", bg='white', fg=label_text_color).place(x=5, y=50)
+Label(frame, text="Contact Number:", bg='white', fg=label_text_color).place(x=5, y=50)
+contact_entry = Entry(frame, bg='black', fg='white')
+contact_entry.place(x=5, y=70)
+
+Label(frame, text="New Password:", bg='white', fg=label_text_color).place(x=5, y=100)
 user_entry = Entry(frame, show="*", bg='black', fg='white')
-user_entry.place(x=5, y=70)
+user_entry.place(x=5, y=120)
 
 Button(frame, text="Update", command=forgot_pw, fg='white', bg=button_color).place(x=100, y=190)
 

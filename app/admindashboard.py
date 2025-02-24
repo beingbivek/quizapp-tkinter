@@ -189,6 +189,17 @@ def openbutton(btn_text):
             for row in rows:
                 tree.insert("", "end", values=row)  # Insert fetched data into the table
             tree.configure(height=len(rows))
+            update_stat_data()  # Update the stat data with the total number of users
+
+        # Function to update the stat data
+        def update_stat_data():
+            total_users = len(rows)  # Get the total number of users
+            stat_data[0] = (str(total_users), "Total Users")  # Update the stat data
+            for i, stat in enumerate(stat_data):
+                stat_label = stat_boxes[i].winfo_children()[0]
+                stat_desc = stat_boxes[i].winfo_children()[1]
+                stat_label.config(text=stat[0])
+                stat_desc.config(text=stat[1])
 
         # Colors
         bgcolor = "#E0E0E0"
@@ -204,10 +215,13 @@ def openbutton(btn_text):
         stats_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
         stats_frame.place(relx=0.05, rely=0.1, relwidth=0.9, relheight=0.1)
 
-        stat_data = [("123", "Total Users")]
+        stat_data = [("0", "Total Users")]  # Initialize with 0, will be updated dynamically
+        stat_boxes = []  # To store the stat boxes for updating later
+
         for i, stat in enumerate(stat_data):
             stat_box = Frame(stats_frame, bg=button_color, width=120, height=60)
             stat_box.place(relx=i * 0.3, rely=0, relwidth=0.2, relheight=1)
+            stat_boxes.append(stat_box)  # Add the stat box to the list
 
             stat_label = Label(stat_box, text=stat[0], font=("Arial", 14, "bold"), fg="white", bg=button_color)
             stat_label.place(relx=0.5, rely=0.3, anchor=CENTER)
@@ -219,11 +233,7 @@ def openbutton(btn_text):
         add_button.place(relx=0.8, rely=0.2, relwidth=0.15, relheight=0.6)
 
         # User display options
-        no_of_user = ["3", "6", "9", "12"]
-        selected_user_no = StringVar(value="No. of user displayed")
-        user_dropdown = OptionMenu(main_frame, selected_user_no, *no_of_user, command=lambda x: user_no_selected(x))
-        user_dropdown.config(font=("Arial", 10), width=13)
-        user_dropdown.place(relx=0.05, rely=0.25)
+
 
         # Filter options
         filter_value = ["Username", "SN"]
@@ -267,32 +277,22 @@ def openbutton(btn_text):
         delete_button.place(relx=0.15, rely=0.9, relwidth=0.1, relheight=0.05)
 
 
-        # Functions
-        def user_no_selected(selected_user_no):
-            for row in tree.get_children():
-                tree.delete(row)
-
-            num_rows = int(selected_user_no)
-            for i in range(min(num_rows, len(rows))):
-                tree.insert("", "end", values=rows[i])
-
-            tree.configure(height=num_rows)
-
         def filter_info(filter_with):
+            global rows
+            if filter_with == "Username":
+                rows = sorted(rows, key=lambda x: x[1].lower())  # Sort by username
+            elif filter_with == "SN":
+                rows = sorted(rows, key=lambda x: int(x[0]))  # Sort by user ID (SN)
+            else:
+                rows = fetch_users()  # Reset to original data
+
             for row in tree.get_children():
                 tree.delete(row)
 
-            if filter_with == "Username":
-                sorted_rows = sorted(rows, key=lambda x: x[1].lower())
-            elif filter_with == "SN":
-                sorted_rows = sorted(rows, key=lambda x: int(x[0]))
-            else:
-                sorted_rows = rows
-
-            for row in sorted_rows:
+            for row in rows:
                 tree.insert("", "end", values=row)
 
-            tree.configure(height=len(sorted_rows))
+            tree.configure(height=len(rows))
 
         def search_table():
             search_term = search_entry.get().strip().lower()
@@ -331,7 +331,7 @@ def openbutton(btn_text):
             Button(register_window, text="Submit", command=lambda: submit_registration(
                 username_entry.get(), name_entry.get(), contact_entry.get(), email_entry.get(), register_window
             )).place(relx=0.4, rely=0.6)
-        
+
         def submit_registration(username, name, contact, email, window):
             try:
                 conn = sqlite3.connect('quiz.db')  # Replace with your actual database name
