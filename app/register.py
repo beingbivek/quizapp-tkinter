@@ -95,8 +95,7 @@ def register_user():
         """, (fullname, email, username, contact, secret))
         conn.commit()
         messagebox.showinfo("Success", "Registration successful!")
-        register.destroy()
-        runpy.run_path(r'..\quizapp-tkinter\app\login.py')
+        open_login(register)
     except sqlite3.IntegrityError:
         messagebox.showerror("Error", "Username or email already exists!")
     except Exception as e:
