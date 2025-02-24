@@ -1155,7 +1155,7 @@ def openbutton(btn_text):
         #header section
         header = Label(main_frame, text="Mock Test", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
-
+    
         #takes data from mock table
         def fetch_mock_tests():
             conn = sqlite3.connect(DATABASE_FILE)
@@ -1175,13 +1175,13 @@ def openbutton(btn_text):
            return questions
         
         #takes data from corses
-        def delete_question(question_id):
+        def fetch_courses():
             conn = sqlite3.connect(DATABASE_FILE)
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM mockquestions WHERE mockquestion_id = ?", (question_id,))
-            conn.commit()
+            cursor.execute("SELECT * FROM courses")
+            courses = cursor.fetchall()
             conn.close()
-            update_questions_table()
+            return courses
 
        # Modify fetch_categories to filter by course_id
         def fetch_categories(course_id=None):
@@ -1246,6 +1246,11 @@ def openbutton(btn_text):
             add_mocktest.geometry("600x300")
             add_mocktest.attributes('-topmost', True)
     
+            
+           
+            
+            
+            
             Label(add_mocktest, text="Enter Mock Test Name:").pack()
             e1 = Entry(add_mocktest, width=35)
             e1.pack(pady=10)
@@ -1445,9 +1450,6 @@ def openbutton(btn_text):
                 mock_test_table.delete(row)
             for test in fetch_mock_tests():
                 mock_test_table.insert("", "end", values=(test[0], test[1], test[2], test[3],test[4]))
-
-       
-        # setup_database()
         
         #main frame for table
         mocktable_frame = Frame(main_frame,bg = MAINFRAME_COLOR)
@@ -1462,9 +1464,6 @@ def openbutton(btn_text):
         delete_btn = Button(mocktest_frame, text="Delete Mock Test", command=delete_mock_test, bg= LOGOUT_COLOR, font= button_font, fg= FG_COLOR  )
         delete_btn.pack(side=RIGHT, pady=10)
         
-
-
-
         # Create UI elements
         list_mocktest = ["ID", "Mock Test Name","Mocktest Description", "Full Mark", "Pass Mark"]
         mock_test_table = ttk.Treeview(mocktable_frame, columns=list_mocktest, show="headings")
@@ -1489,9 +1488,6 @@ def openbutton(btn_text):
         delete_btn = Button(btn_frame, text="Delete Mock QNs", command=delete_selected_question, bg= LOGOUT_COLOR, font= button_font, fg= FG_COLOR  )
         delete_btn.pack(side=RIGHT, pady=10)
         
-
-      
-
         #question table
         
         questions_table = ttk.Treeview(main_frame, columns=("ID", "Mock Test-Name", "Course-Name", "Category", "Questions"), show="headings")
@@ -1500,30 +1496,9 @@ def openbutton(btn_text):
                questions_table.column(col,anchor=CENTER)
         questions_table.pack()
 
-       
-
-
-        delete_btn = Button(btn_frame, text="Delete", command=delete_mock_test, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
-        delete_btn.pack(side=LEFT, padx=10)
-        
-
-        #question table
-        questions_table = ttk.Treeview(main_frame, columns=("ID", "Mock Test-Name", "Course-Name", "Category", "Questions"), show="headings")
-        for col in ["ID", "Mock Test-Name", "Course-Name", "Category", "Questions"]:
-               questions_table.heading(col, text=col)
-        questions_table.pack()
-
-        delete_btn = Button(btn_frame, text="Delete QNs", command=delete_selected_question, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
-        delete_btn.pack(side=LEFT, padx=10)
-        
-
-
         update_mock_test_table()
         update_questions_table()
-       
-
-
-
+        
     # Question - admin section - aayush
     elif btn_text == buttons[5]:
 
