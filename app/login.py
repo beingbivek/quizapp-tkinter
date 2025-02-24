@@ -8,7 +8,7 @@ def decrypt_password(encrypted_password):
         if encrypted_password is None:
             # raise ValueError("No password found in the database.")
             messagebox.showerror('Error','Error in getting password from Database.\nContact the Support.')
-            
+
         secret = encrypted_password.encode(utf)  # Encode the encrypted password to bytes
         secret = pybase64.b64decode(secret)  # Decrypt using Base64
         secret = secret.decode(utf)
@@ -81,11 +81,11 @@ def adjust_frames(event=None):
     button_x = window_width - 200
     
     framemain.place(x=0, y=0, width=window_width, height=window_height)
-    topframemain.place(x=0, y=0, width=window_width, height=25)
-    welcomeframe.place(x=x_main + 150, y=y_main + 70, width=400, height=60)
-    frame.place(x=x_main + 200, y=y_main + 140, width=300, height=250)
-    infotopframe.place(x=x_main + 200, y=y_main + 140, width=300, height=20)
-    backframe.place(x=x_main + 450, y=y_main + 140, width=50, height=20)
+    topframemain.place(x=0, y=0, width=window_width, height=35) #done
+    welcomeframe.place(x=x_main + 50, y=y_main - 100, width=500, height=60) #done
+    frame.place(x=x_main + 100, y=y_main + 40, width=400, height=400) #done
+    infotopframe.place(x=x_main + 100, y=y_main + 25, width=400, height=20)
+    backframe.place(x=x_main + 425, y=y_main + 25, width=75, height=20)
     register_button.place(x=button_x, y=50)
     login_button.place(x=button_x + 100, y=50)
 
@@ -107,17 +107,17 @@ maxminbtns(user_login)
 frame = Frame(user_login, bd=2, relief="ridge", padx=20, pady=20, bg='white')
 frame.place(x=200, y=140, width=300, height=250)
 
-Label(frame, text="Email/Username:", bg='white', fg=label_text_color).place(x=5, y=0)
-name_entry = Entry(frame, bg='black', fg='white')
-name_entry.place(x=5, y=20)
+Label(frame, text="Email/Username:", bg='white', fg=label_text_color,font=button_font).place(x=5, y=0)
+name_entry = Entry(frame, bg='black', fg='white',font=button_font)
+name_entry.place(x=5, y=30)
 
-Label(frame, text="Password:", bg='white', fg=label_text_color).place(x=5, y=50)
-user_entry = Entry(frame, show="*", bg='black', fg='white')
-user_entry.place(x=5, y=70)
+Label(frame, text="Password:", bg='white', fg=label_text_color,font=button_font).place(x=5, y=60)
+user_entry = Entry(frame, show="*", bg='black', fg='white',font=button_font)
+user_entry.place(x=5, y=90)
 
-Button(frame, text="Forgot Password", command=lambda: go_to_forgot(user_login), fg='white', bg=button_color).place(x=122, y=110)
-Button(frame, text="Admin Login", command=lambda: open_admin_login(user_login), fg='white', bg=button_color).place(x=156, y=150)
-Button(frame, text="Login", command=login, fg='white', bg=button_color).place(x=100, y=190)
+Button(frame, text="Forgot Password", command=lambda: go_to_forgot(user_login), fg='white', bg=button_color,font=button_font).place(x=180, y=225)
+Button(frame, text="Admin Login", command=lambda: open_admin_login(user_login), fg='white', bg=button_color,font=button_font).place(x=5, y=225)
+Button(frame, text="Login", command=login, fg='white', bg=button_color,font=button_font).place(x=125, y=150)
 
 infotopframe = Frame(user_login, bd=1, relief="ridge", padx=0, pady=0, bg=header_color)
 infotopframe.place(x=200, y=140, width=300, height=20)
@@ -130,10 +130,10 @@ back_label = Label(backframe, text="Back", bg="black", fg="white", font=("Arial"
 back_label.place(x=0, y=0)
 back_label.bind("<Button-1>", lambda e: back_to_welcome(user_login))
 
-register_button = Button(framemain, text="Register", command=lambda: open_registration(user_login), fg='white', bg=button_color)
+register_button = Button(framemain, text="Register", command=lambda: open_registration(user_login), fg='white', bg=button_color,font=button_font)
 register_button.place(x=500, y=30)
 
-login_button = Button(framemain, text="Login", command=login, fg='white', bg=button_color)
+login_button = Button(framemain, text="Login", command=login, fg='white', bg=button_color,font=button_font)
 login_button.place(x=600, y=30)
 
 adjust_frames()
