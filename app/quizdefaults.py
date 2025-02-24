@@ -86,6 +86,8 @@ def maxminbtns(root):
     label1 = LabelFrame(root, height=35, fg="blue", bg=HEADER_COLOR).place(x=0, y=0)
     btn2 = Button(root, text="✕", command=max, width=4, bg=HEADER_COLOR, border=0, font=button_font)
     btn2.pack(anchor="ne")
+    
+    # Hover Functinality
     btn2.bind('<Enter>', on_enter)
     btn2.bind('<Leave>', on_leave)
 

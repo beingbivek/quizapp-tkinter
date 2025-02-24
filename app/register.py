@@ -19,6 +19,7 @@ register.attributes('-fullscreen', True)
 
 from quizdefaults import *
 
+
 def register_user():
     # Get input values
     fullname = name_entry.get().strip()
@@ -28,19 +29,17 @@ def register_user():
     password = pass_entry.get().strip()
     confirm_password = confirm_pass_entry.get().strip()
 
-    # Validation 1: Check if all fields are filled
     if not (fullname and username and contact and email and password and confirm_password):
         messagebox.showerror("Error", "Please fill all the fields!")
         return
 
-    # Validation 2: Check if passwords match
-    if password != confirm_password:
-        messagebox.showerror("Error", "Passwords do not match!")
+    
+    if not re.match(r"^[a-zA-Z][a-zA-Z0-9_]*$", username):
+        messagebox.showerror("Error", "Username must start with a letter and contain no spaces!")
         return
 
-    # Validation 3: Check if username already exists
     try:
-        conn = sqlite3.connect('quiz.db')
+        conn = sqlite3.connect(DATABASE_FILE)
         c = conn.cursor()
         c.execute("SELECT username FROM users WHERE username = ?", (username,))
         if c.fetchone():
@@ -52,13 +51,16 @@ def register_user():
     finally:
         conn.close()
 
-    # Validation 4: Validate email format and check if it already exists
+    if not (contact.isdigit() and len(contact) == 10):
+        messagebox.showerror("Error", "Contact must be a 10-digit number!")
+        return
+    
     if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email):
         messagebox.showerror("Error", "Invalid email format!")
         return
 
     try:
-        conn = sqlite3.connect('quiz.db')
+        conn = sqlite3.connect(DATABASE_FILE)
         c = conn.cursor()
         c.execute("SELECT email FROM users WHERE email = ?", (email,))
         if c.fetchone():
@@ -70,12 +72,15 @@ def register_user():
     finally:
         conn.close()
 
-    # Validation 5: Check if contact has exactly 10 digits
-    if not (contact.isdigit() and len(contact) == 10):
-        messagebox.showerror("Error", "Contact must be a 10-digit number!")
+    if len(password) < 6:
+        messagebox.showerror("Error", "Passwords should be more than 6 characters.")
         return
 
-    # If all validations pass, proceed with registration
+
+    if password != confirm_password:
+        messagebox.showerror("Error", "Passwords do not match!")
+        return
+    
     try:
         # Encrypt the password using Base64
         secret = password.encode('ascii')  # Encode the password to bytes
@@ -134,6 +139,8 @@ welcomeframe = Frame(register, bd=2, relief="ridge", padx=0, pady=0, bg=tablecol
 welcomeframe.place(x=150, y=70, width=400, height=60)
 Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 25, "bold"), bg=tablecolor,fg='white').pack(pady=10, padx=10)
 
+maxminbtns(register)
+
 frame = Frame(register, bd=2, relief="ridge", padx=20, pady=20, bg='white')
 frame.place(x=100, y=140, width=500, height=250)
 
@@ -167,7 +174,6 @@ infotopframe = Frame(register, bd=1, relief="ridge", padx=0, pady=0, bg=header_c
 infotopframe.place(x=100, y=140, width=500, height=20)
 Label(infotopframe, text="Register", font=("Arial", 10), padx=15, pady=0, fg='white',bg=header_color).place(x=0, y=0)
 
-maxminbtns(register)
 
 backframe = Frame(register, bd=1, relief="ridge", padx=0, pady=0, bg='black')
 backframe.place(x=450, y=140, width=50, height=20)
