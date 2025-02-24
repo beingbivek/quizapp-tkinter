@@ -139,7 +139,7 @@ def openbutton(btn_text):
             try:
                 conn = sqlite3.connect(DATABASE_FILE)
                 c = conn.cursor()
-                c.execute("SELECT user_id, username, fullname, contact, email, address FROM users")
+                c.execute("SELECT * FROM users")
                 users = c.fetchall()
                 conn.close()
                 return users
@@ -160,43 +160,49 @@ def openbutton(btn_text):
         def register_user():
             register_window = Toplevel(main_frame)
             register_window.title("Register User")
-            register_window.geometry("500x400")
+            register_window.geometry("600x800")
+            register_window.resizable(False, False)  # Disable maximize button
+            register_window.configure(bg=bgcolor)
+
+            # Main Frame
+            main_register_frame = Frame(register_window, bg=frame_bg, bd=2, relief="groove")
+            main_register_frame.pack(pady=20, padx=20, fill="both", expand=True)
 
             # Labels and Entries
-            Label(register_window, text="Username:").pack()
-            username_entry = Entry(register_window)
-            username_entry.pack()
+            Label(main_register_frame, text="Username:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
+            username_entry = Entry(main_register_frame, font=labelstyle)
+            username_entry.pack(pady=5, padx=10, fill="x")
 
-            Label(register_window, text="Full Name:").pack()
-            fullname_entry = Entry(register_window)
-            fullname_entry.pack()
+            Label(main_register_frame, text="Full Name:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
+            fullname_entry = Entry(main_register_frame, font=labelstyle)
+            fullname_entry.pack(pady=5, padx=10, fill="x")
 
-            Label(register_window, text="Contact:").pack()
-            contact_entry = Entry(register_window)
-            contact_entry.pack()
+            Label(main_register_frame, text="Contact:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
+            contact_entry = Entry(main_register_frame, font=labelstyle)
+            contact_entry.pack(pady=5, padx=10, fill="x")
 
-            Label(register_window, text="Email:").pack()
-            email_entry = Entry(register_window)
-            email_entry.pack()
+            Label(main_register_frame, text="Email:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
+            email_entry = Entry(main_register_frame, font=labelstyle)
+            email_entry.pack(pady=5, padx=10, fill="x")
 
-            Label(register_window, text="Address:").pack()
-            address_entry = Entry(register_window)
-            address_entry.pack()
+            Label(main_register_frame, text="Address:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
+            address_entry = Entry(main_register_frame, font=labelstyle)
+            address_entry.pack(pady=5, padx=10, fill="x")
 
-            Label(register_window, text="Password:").pack()
-            password_entry = Entry(register_window, show="*")
-            password_entry.pack()
+            Label(main_register_frame, text="Password:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
+            password_entry = Entry(main_register_frame, show="*", font=labelstyle)
+            password_entry.pack(pady=5, padx=10, fill="x")
 
-            Label(register_window, text="Security Question:").pack()
+            Label(main_register_frame, text="Security Question:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
             sq_var = StringVar(value=security_questions[0])
-            OptionMenu(register_window, sq_var, *security_questions).pack()
+            OptionMenu(main_register_frame, sq_var, *security_questions).pack(pady=5, padx=10, fill="x")
 
-            Label(register_window, text="Security Answer:").pack()
-            sq_answer_entry = Entry(register_window)
-            sq_answer_entry.pack()
+            Label(main_register_frame, text="Security Answer:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
+            sq_answer_entry = Entry(main_register_frame, font=labelstyle)
+            sq_answer_entry.pack(pady=5, padx=10, fill="x")
 
             # Submit Button
-            Button(register_window, text="Submit", command=lambda: submit_registration(
+            Button(main_register_frame, text="Submit", bg=button_color, fg=FG_COLOR, font=button_font, command=lambda: submit_registration(
                 username_entry.get(),
                 fullname_entry.get(),
                 contact_entry.get(),
@@ -206,7 +212,7 @@ def openbutton(btn_text):
                 sq_var.get(),
                 sq_answer_entry.get(),
                 register_window
-            )).pack()
+            )).pack(pady=20, padx=10, fill="x")
 
         # Function to submit user registration
         def submit_registration(username, fullname, contact, email, address, password, sq, sq_answer, window):
@@ -245,61 +251,93 @@ def openbutton(btn_text):
                 return
 
             selected_user = tree.item(selected_item, "values")
-            edit_window = Toplevel(root)
+            edit_window = Toplevel(main_frame)
             edit_window.title("Edit User")
-            edit_window.geometry("500x400")
+            edit_window.geometry("400x800")
+            edit_window.resizable(False, False)  # Disable maximize button
+            edit_window.configure(bg=bgcolor)
+
+            # Main Frame
+            main_edit_frame = Frame(edit_window, bg=frame_bg, bd=2, relief="groove")
+            main_edit_frame.pack(pady=20, padx=20, fill="both", expand=True)
+
+            # Fetch user data from the database
+            user_data = selected_user  
 
             # Labels and Entries
-            Label(edit_window, text="Username:").pack()
-            username_entry = Entry(edit_window)
-            username_entry.insert(0, selected_user[1])
-            username_entry.pack()
+            Label(main_edit_frame, text="Username:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
+            username_entry = Entry(main_edit_frame, font=labelstyle)
+            username_entry.insert(0, user_data[3])
+            username_entry.pack(pady=5, padx=10, fill="x")
 
-            Label(edit_window, text="Full Name:").pack()
-            fullname_entry = Entry(edit_window)
-            fullname_entry.insert(0, selected_user[2])
-            fullname_entry.pack()
+            Label(main_edit_frame, text="Full Name:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
+            fullname_entry = Entry(main_edit_frame, font=labelstyle)
+            fullname_entry.insert(0, user_data[1])
+            fullname_entry.pack(pady=5, padx=10, fill="x")
 
-            Label(edit_window, text="Contact:").pack()
-            contact_entry = Entry(edit_window)
-            contact_entry.insert(0, selected_user[3])
-            contact_entry.pack()
+            Label(main_edit_frame, text="Contact:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
+            contact_entry = Entry(main_edit_frame, font=labelstyle)
+            contact_entry.insert(0, user_data[4])
+            contact_entry.pack(pady=5, padx=10, fill="x")
 
-            Label(edit_window, text="Email:").pack()
-            email_entry = Entry(edit_window)
-            email_entry.insert(0, selected_user[4])
-            email_entry.pack()
+            Label(main_edit_frame, text="Email:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
+            email_entry = Entry(main_edit_frame, font=labelstyle)
+            email_entry.insert(0, user_data[2])
+            email_entry.pack(pady=5, padx=10, fill="x")
 
-            Label(edit_window, text="Address:").pack()
-            address_entry = Entry(edit_window)
-            address_entry.insert(0, selected_user[5])
-            address_entry.pack()
+            Label(main_edit_frame, text="Address:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
+            address_entry = Entry(main_edit_frame, font=labelstyle)
+            address_entry.insert(0, user_data[5])
+            address_entry.pack(pady=5, padx=10, fill="x")
 
-            # Submit Button
-            Button(edit_window, text="Submit", command=lambda: submit_edit(
-                selected_user[0],  # user_id
+            Label(main_edit_frame, text="Password:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
+            password_entry = Entry(main_edit_frame, show="*", font=labelstyle)
+            password = str_decode(user_data[6])
+            password_entry.insert(0, password)
+            password_entry.pack(pady=5, padx=10, fill="x")
+
+            Label(main_edit_frame, text="Security Question:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
+            sq_var = StringVar(value=user_data[7])
+            OptionMenu(main_edit_frame, sq_var, *security_questions).pack(pady=5, padx=10, fill="x")
+
+            Label(main_edit_frame, text="Security Answer:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
+            sq_answer_entry = Entry(main_edit_frame, font=labelstyle)
+            sq_answer = str_decode(user_data[8])
+            sq_answer_entry.insert(0, sq_answer)
+            sq_answer_entry.pack(pady=5, padx=10, fill="x")
+
+            # Update Button
+            Button(main_edit_frame, text="Update", bg=button_color, fg=FG_COLOR, font=button_font, command=lambda: submit_edit(
+                selected_user[0],
                 username_entry.get(),
                 fullname_entry.get(),
                 contact_entry.get(),
                 email_entry.get(),
                 address_entry.get(),
+                password_entry.get(),
+                sq_var.get(),
+                sq_answer_entry.get(),
                 edit_window
-            )).pack()
+            )).pack(pady=20, padx=10, fill="x")
 
         # Function to submit user edits
-        def submit_edit(user_id, username, fullname, contact, email, address, window):
-            if not all([username, fullname, contact, email, address]):
+        def submit_edit(user_id,username, fullname, contact, email, address, password, sq, sq_answer, window):
+            if not all([username, fullname, contact, email, address, password, sq, sq_answer]):
                 messagebox.showwarning("Input Error", "All fields are required!")
                 return
+            
+            # Encode password and security answer
+            encoded_password = str_encode(password)
+            encoded_sq_answer = str_encode(sq_answer)
 
             try:
                 conn = sqlite3.connect(DATABASE_FILE)
                 c = conn.cursor()
                 c.execute("""
                     UPDATE users
-                    SET username = ?, fullname = ?, contact = ?, email = ?, address = ?
+                    SET username = ?, fullname = ?, contact = ?, email = ?, address = ?, password = ?, securityquestion = ?, securityanswer = ?
                     WHERE user_id = ?
-                """, (username, fullname, contact, email, address, user_id))
+                """, (username, fullname, contact, email, address, encoded_password, sq, encoded_sq_answer, user_id))
                 conn.commit()
                 conn.close()
 
@@ -414,7 +452,7 @@ def openbutton(btn_text):
         OptionMenu(display_frame, display_var, "5", "10", "15", "20", "25", "30", "50", "All", command=display_users).pack(side="left", padx=5)
 
         # Table
-        columns = ("User ID", "Username", "Full Name", "Contact", "Email", "Address")
+        columns = ("User ID", "Name", "Email", "Username", "Contact", "Address","Password","Security Question","Security Answer")
         tree = ttk.Treeview(main_frame, columns=columns, show="headings")
 
         for col in columns:
