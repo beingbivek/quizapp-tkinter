@@ -1,7 +1,6 @@
 from tkinter import *
 from tkinter import messagebox
 import sqlite3
-import pybase64
 
 def decrypt_password(encrypted_password):
     try:
@@ -36,7 +35,6 @@ def login():
         if user:
             # Retrieve the encrypted password from the database
             encrypted_password = user[6]  # Assuming password is the 6th column in the table
-            print(user)
 
             # Decrypt the password
             decrypted_password = decrypt_password(encrypted_password)
@@ -49,8 +47,8 @@ def login():
             if password == decrypted_password:
                 messagebox.showinfo("Success", "Login successful!")
                 # Writing user ID to a temporary file
-                with open("temp_user_id.txt", "w") as f:
-                    f.write(str(user))
+                with open(USER_FILE, "w") as f:
+                    f.write(",".join(str(data) for data in user))
                 open_user_dashboard(user_login)
             else:
                 messagebox.showerror("Error", "Incorrect password")

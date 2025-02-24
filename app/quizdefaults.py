@@ -23,7 +23,9 @@ label_text_color = "black"  # Text color for labels
 
 # File path
 DATABASE_FILE = r'..\quizapp-tkinter\quiz.db'
-ICON_FILE = r'..\quizapp-tkinter\app\images\quizicon.ico'
+USER_FILE = r'..\quizapp-tkinter\\app\quizdb\user.txt'
+ICON_FILE_WHITE = r'..\quizapp-tkinter\app\images\quizappicon_white.png'
+ICON_FILE_BLACK = r'..\quizapp-tkinter\app\images\quizappicon_black.png'
 
 # Font 
 button_font = font.Font(size=14)

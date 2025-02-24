@@ -1,33 +1,20 @@
 from tkinter import *
-from tkinter import ttk, messagebox, PhotoImage
-import tkinter.font as font
+from tkinter import ttk, messagebox
 import os, runpy, re, json, sqlite3
 from random import *
-
-# Read the user details from the temporary file
-try:
-    with open("temp_user_id.txt", "r") as f:
-        LOGGED_IN_USER = f.read().strip()
-    os.remove("temp_user_id.txt")  # Clean up the temporary file
-except FileNotFoundError:
-    LOGGED_IN_USER = None
-    
+from PIL import Image, ImageTk
 
 # User window
 root = Tk()
 root.configure(bg="white")
 root.attributes("-fullscreen", True)
 
-# Failsafe
-if not LOGGED_IN_USER:
-    messagebox.showerror('User Not Found','User not found in the file\nContact Support.')
-    back_to_welcome(root)
+# Importing defaults after root creation
+from quizdefaults import *
+
 
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
-
-# Importing defaults after root creation
-from quizdefaults import *
 
 root.title("Quiz App - User Dashboard")
 root.configure(bg=MAINFRAME_COLOR)
@@ -36,6 +23,28 @@ root.configure(bg=MAINFRAME_COLOR)
 minclose_windowbtn(root)
 
 # Functions
+
+# Read the user details from the temporary file
+try:
+    if not os.path.exists(USER_FILE):
+        messagebox.showerror('Error', 'User session file not found. Please log in again.')
+        back_to_welcome(root)
+
+    with open(USER_FILE, "r") as f:
+        LOGGED_IN_USER = f.read().strip().split(',')  # Read entire file content
+    # LOGGED_IN_USER[0] = int(LOGGED_IN_USER[0])
+    os.remove(USER_FILE)  # Clean up the temporary file
+except FileNotFoundError:
+    messagebox.showerror('File Error','User File not found.')
+    LOGGED_IN_USER = [0,'Guest','guest@g.com','guest','1234567890','None','','abcd','']
+
+print(LOGGED_IN_USER)
+
+# Fail Safe
+if not LOGGED_IN_USER or len(LOGGED_IN_USER) < 9:
+    messagebox.showerror('Error', 'Invalid user data. Please log in again.')
+    back_to_welcome(root)
+    
 # How many courses
 def get_courses():
     conn = sqlite3.connect(DATABASE_FILE)
@@ -96,14 +105,17 @@ sidebar = Frame(root, bg=SIDEBAR_COLOR, width=200, height=600)
 sidebar.pack(side='left', fill='y')
 
 # Profile Image Placeholder
-img = PhotoImage(file=ICON_FILE)
-profile_img = Label(sidebar, image=img, bg='white', width=15, height=5)
-profile_img.pack(pady=10)
+image = PhotoImage(file=ICON_FILE_BLACK,height=50,width=50)
+# image = image.resize((100, 100), Image.ANTIALIAS)  # Resize to 100x100
+# profile_image = ImageTk.PhotoImage(image)
+profile_img = Label(sidebar, image=image,height=100,width=100)
+profile_img.pack()
 
 # Username and Score
 username_label = Label(sidebar, text=f"{LOGGED_IN_USER[1]}", fg=FG_COLOR, bg=SIDEBAR_COLOR, font=label_font)
 username_label.pack()
 
+print(LOGGED_IN_USER)
 score_label = Label(sidebar, text=f"Score: {total_score_of_user(LOGGED_IN_USER[0])}", fg=FG_COLOR, bg=SIDEBAR_COLOR, font=("Arial", 10))
 score_label.pack()
 
@@ -129,7 +141,7 @@ def openbutton(btn_text):
     # Main Dashboard Code
     if btn_text == "Dashboard":
         # Set logged-in user (Replace with actual login logic)
-        LOGGED_IN_USER_ID = LOGGED_IN_USER[0]  # Change this dynamically based on user session
+        current_user_id = LOGGED_IN_USER[0]
 
         # Connect to database
         conn = sqlite3.connect(DATABASE_FILE)
@@ -211,7 +223,7 @@ def openbutton(btn_text):
             progress_table.heading(col, text=col)
             progress_table.column(col, width=100, anchor='center')
 
-        progress_data = fetch_progress_data(LOGGED_IN_USER_ID)
+        progress_data = fetch_progress_data(current_user_id)
         for i, row in enumerate(progress_data, start=1):
             progress_table.insert('', 'end', values=(i, *row))
         progress_table.pack()
@@ -228,7 +240,7 @@ def openbutton(btn_text):
                         WHERE mr.user_id = ?
                         ORDER BY result_id DESC
                         LIMIT 5
-                    """, (LOGGED_IN_USER_ID,))
+                    """, (current_user_id,))
 
 
         mock_results = cursor.fetchall()
@@ -254,21 +266,22 @@ def openbutton(btn_text):
     #Leaderboard user section.    
     elif btn_text == "LeaderBoard":
 
-        LOGGED_IN_USER = LOGGED_IN_USER[3]  # Change this dynamically based on the logged-in user
+        current_user_id = LOGGED_IN_USER[0]  # Change this dynamically based on the logged-in user
 
-        def fetch_leaderboard_data(logged_in_user):
+        def fetch_leaderboard_data(logged_in_user_id):
             conn = sqlite3.connect(DATABASE_FILE)
             cursor = conn.cursor()
             
             query = """
                 SELECT 
                     c.coursename, 
+                    u.user_id, 
                     u.username, 
                     SUM(mr.result) AS total_score
                 FROM mocktestresults mr
                 JOIN users u ON mr.user_id = u.user_id
                 JOIN courses c ON mr.course_id = c.course_id
-                GROUP BY c.coursename, u.username
+                GROUP BY c.coursename, u.user_id
                 ORDER BY c.coursename, total_score DESC;
             """
             
@@ -279,13 +292,13 @@ def openbutton(btn_text):
             leaderboard_data = {}
             user_positions = {}
 
-            for course, username, total_score in results:
+            for course, user_id, username, total_score in results:
                 if course not in leaderboard_data:
                     leaderboard_data[course] = []
-                leaderboard_data[course].append([len(leaderboard_data[course]) + 1, username, total_score])
+                leaderboard_data[course].append([len(leaderboard_data[course]) + 1, user_id, total_score])
 
                 # Store the position of the logged-in user
-                if username == logged_in_user:
+                if user_id == logged_in_user_id:
                     user_positions[course] = len(leaderboard_data[course])
 
             # Filter data: Top 5 + logged-in user (if they are outside top 5)
@@ -295,7 +308,7 @@ def openbutton(btn_text):
 
                 if course in user_positions and user_positions[course] > 5:
                     # Find logged-in user's data
-                    logged_user_data = next((x for x in users if x[1] == logged_in_user), None)
+                    logged_user_data = next((x for x in users if x[1] == logged_in_user_id), None)
                     if logged_user_data:
                         logged_user_data = [user_positions[course]] + logged_user_data[1:]  # Update with actual position
                         top_5.append(logged_user_data)
@@ -305,7 +318,7 @@ def openbutton(btn_text):
             return filtered_data
 
         def create_table(frame, data):
-            headers = ["SN", "Username", "Score"]
+            headers = ["SN", "User ID", "Score"]
             for col, header in enumerate(headers):
                 Label(frame, text=header, font=("Arial", 12, "bold"), bg="grey", width=10).grid(row=0, column=col, padx=1, pady=1)
 
@@ -318,7 +331,7 @@ def openbutton(btn_text):
         header.pack(pady=10)
 
         # Fetch and populate leaderboard
-        data = fetch_leaderboard_data(LOGGED_IN_USER)
+        data = fetch_leaderboard_data(current_user_id)
 
         positions = [(400, 135), (900, 135), (400, 525), (900, 525)]
         course_titles = list(data.keys())
@@ -334,6 +347,9 @@ def openbutton(btn_text):
     # Edit profile - user section - mukesh
     elif btn_text == "Profile":
         # Edit profile Functions - mukesh
+        if len(LOGGED_IN_USER) < 8:
+            messagebox.showerror('Profile Error','Missing profile data')
+            return
 
         def update_profile_in_db(user_id, fullname, email, username, contact, address, password, sq, sq_answer):
             """Update the user profile in the database."""
