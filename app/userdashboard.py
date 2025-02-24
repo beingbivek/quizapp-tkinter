@@ -26,9 +26,9 @@ minclose_windowbtn(root)
 
 # Read the user details from the temporary file
 try:
-    if not os.path.exists(USER_FILE):
-        messagebox.showerror('Error', 'User session file not found. Please log in again.')
-        back_to_welcome(root)
+    # if not os.path.exists(USER_FILE):
+    #     messagebox.showerror('Error', 'User session file not found. Please log in again.')
+    #     back_to_welcome(root)
 
     with open(USER_FILE, "r") as f:
         LOGGED_IN_USER = f.read().strip().split(',')  # Read entire file content
@@ -405,7 +405,11 @@ def openbutton(btn_text):
             return True
 
         def update_profile():
-            updated_values = [entry.get().strip() for entry in entries] + list(sq.get()) + list(sq_answer_entry.get().strip())
+            if sq_answer_entry:
+                value = sq_answer_entry.get().strip()
+            else:
+                value = ''
+            updated_values = [entry.get().strip() for entry in entries] + list(sq.get()) + list(value)
             fullname, username, contact, email, address, new_password, confirm_password, sec_que, sec_que_answer = updated_values
 
             # Check if the password fields are not empty
@@ -426,7 +430,7 @@ def openbutton(btn_text):
                 password = None
 
             # Checking for security questions
-            if sec_que_answer:
+            if sec_que_answer != '':
                 sec_que_answer = str_encode(sec_que_answer)
                 # Check if the question is same
                 if sec_que == users[7] and sec_que_answer == users[8]:
