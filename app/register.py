@@ -4,6 +4,7 @@ import sqlite3
 import runpy
 import tkinter.font as font
 import pybase64  
+import re
 
 # Colors
 bgcolor = "#E0E0E0"
@@ -16,47 +17,87 @@ register = Tk()
 register.title("Register")
 register.attributes('-fullscreen', True)
 
-def back_to_welcome():
-    register.destroy()
-    runpy.run_path(r'..\quizapp-tkinter\app\welcome.py')
-
-def open_login():
-    register.destroy()
-    runpy.run_path(r'..\quizapp-tkinter\app\login.py')
+from quizdefaults import *
 
 def register_user():
-    fullname = name_entry.get()
-    username = user_entry.get()
-    contact = contact_entry.get()
-    email = email_entry.get()
-    password = pass_entry.get()
-    confirm_password = confirm_pass_entry.get()
+    # Get input values
+    fullname = name_entry.get().strip()
+    username = user_entry.get().strip()
+    contact = contact_entry.get().strip()
+    email = email_entry.get().strip()
+    password = pass_entry.get().strip()
+    confirm_password = confirm_pass_entry.get().strip()
 
-    if password != confirm_password:
-        messagebox.showerror("Error", "Passwords do not match")
+    # Validation 1: Check if all fields are filled
+    if not (fullname and username and contact and email and password and confirm_password):
+        messagebox.showerror("Error", "Please fill all the fields!")
         return
 
+    # Validation 2: Check if passwords match
+    if password != confirm_password:
+        messagebox.showerror("Error", "Passwords do not match!")
+        return
+
+    # Validation 3: Check if username already exists
+    try:
+        conn = sqlite3.connect('quiz.db')
+        c = conn.cursor()
+        c.execute("SELECT username FROM users WHERE username = ?", (username,))
+        if c.fetchone():
+            messagebox.showerror("Error", "Username already exists!")
+            return
+    except sqlite3.Error as e:
+        messagebox.showerror("Error", f"Database error: {e}")
+        return
+    finally:
+        conn.close()
+
+    # Validation 4: Validate email format and check if it already exists
+    if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email):
+        messagebox.showerror("Error", "Invalid email format!")
+        return
+
+    try:
+        conn = sqlite3.connect('quiz.db')
+        c = conn.cursor()
+        c.execute("SELECT email FROM users WHERE email = ?", (email,))
+        if c.fetchone():
+            messagebox.showerror("Error", "Email already exists!")
+            return
+    except sqlite3.Error as e:
+        messagebox.showerror("Error", f"Database error: {e}")
+        return
+    finally:
+        conn.close()
+
+    # Validation 5: Check if contact has exactly 10 digits
+    if not (contact.isdigit() and len(contact) == 10):
+        messagebox.showerror("Error", "Contact must be a 10-digit number!")
+        return
+
+    # If all validations pass, proceed with registration
     try:
         # Encrypt the password using Base64
         secret = password.encode('ascii')  # Encode the password to bytes
         secret = pybase64.b64encode(secret)  # Encrypt using Base64
         secret = secret.decode('ascii')  # Convert back to string for storage
 
-        conn = sqlite3.connect('quiz.db')  # Replace with your actual database name
+        conn = sqlite3.connect(DATABASE_FILE)
         c = conn.cursor()
         c.execute("""
             INSERT INTO users (fullname, email, username, contact, password)
             VALUES (?, ?, ?, ?, ?)
-        """, (fullname, email, username, contact, secret))  # Store the encrypted password
+        """, (fullname, email, username, contact, secret))
         conn.commit()
-        conn.close()
         messagebox.showinfo("Success", "Registration successful!")
         register.destroy()
         runpy.run_path(r'..\quizapp-tkinter\app\login.py')
     except sqlite3.IntegrityError:
-        messagebox.showerror("Error", "Username or email already exists")
+        messagebox.showerror("Error", "Username or email already exists!")
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred: {e}")
+    finally:
+        conn.close()
 
 def adjust_frames(event=None):
     register.update_idletasks()
@@ -126,58 +167,19 @@ infotopframe = Frame(register, bd=1, relief="ridge", padx=0, pady=0, bg=header_c
 infotopframe.place(x=100, y=140, width=500, height=20)
 Label(infotopframe, text="Register", font=("Arial", 10), padx=15, pady=0, fg='white',bg=header_color).place(x=0, y=0)
 
-# Making close and minimize button manually
-MAINFRAME_COLOR = "#E0E0E0"
-SIDEBAR_COLOR = "#2C3E50"
-BUTTON_COLOR = "#34495E"
-HIGHLIGHT_COLOR = "#1A252F"
-HEADER_COLOR = "#57a1f8"
-PROFILE_COLOR = "#1F618D"
-LOGOUT_COLOR = "#E74C3C"
-FG_COLOR = "white"
-button_font = font.Font(size=14)
-
-def min():
-    register.iconify()
-
-def on_enter(i):
-    btn2['background'] = "red"
-
-def on_leave(i):
-    btn2['background'] = HEADER_COLOR
-
-def enter(i):
-    btn['background'] = "red"
-
-def leave(i):
-    btn['background'] = HEADER_COLOR
-
-def max():
-    msg_box = messagebox.askquestion('Exit Application', 'Are you sure you want to close the application?', icon='warning')
-    if msg_box == 'yes':
-        register.destroy()
-
-btn2 = Button(topframemain, text="✕", command=max, width=4, bg=HEADER_COLOR, border=1, font=button_font)
-btn2.place(x=1230,y=-5)
-btn2.bind('<Enter>', on_enter)
-btn2.bind('<Leave>', on_leave)
-
-btn = Button(topframemain, text="-", command=min, width=4, bg=HEADER_COLOR, border=1, font=button_font)
-btn.place(x=1180,y=-5)
-btn.bind('<Enter>', enter)
-btn.bind('<Leave>', leave)
+maxminbtns(register)
 
 backframe = Frame(register, bd=1, relief="ridge", padx=0, pady=0, bg='black')
 backframe.place(x=450, y=140, width=50, height=20)
 
 back_label = Label(backframe, text="Back", bg="black", fg="white", font=("Arial", 10))
 back_label.place(x=0, y=0)
-back_label.bind("<Button-1>", lambda e: back_to_welcome())
+back_label.bind("<Button-1>", lambda e: back_to_welcome(register))
 
 register_button = Button(framemain, text="Register", command=register_user, fg='white',bg=button_color)
 register_button.place(x=500, y=30)
 
-login_button = Button(framemain, text="Login", command=open_login, fg='white',bg=button_color)
+login_button = Button(framemain, text="Login", command=lambda: open_login(register), fg='white',bg=button_color)
 login_button.place(x=600, y=30)
 
 adjust_frames()
