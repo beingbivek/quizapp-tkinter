@@ -7,22 +7,27 @@ import sqlite3
 from random import *
 import os
 import runpy
+import pybase64
+import re #For password validation.
+import json
 
 # Read the user ID from the temporary file
 try:
     with open("temp_user_id.txt", "r") as f:
-        user_id = f.read().strip()
+        LOGGED_IN_USER = f.read().strip()
     os.remove("temp_user_id.txt")  # Clean up the temporary file
 except FileNotFoundError:
-    user_id = None
-import pybase64
-import re #For password validation.
-import json
+    LOGGED_IN_USER = None
+    
 
 # User window
 root = Tk()
 root.configure(bg="white")
 root.attributes("-fullscreen", True)
+
+# Failsafe
+if not LOGGED_IN_USER:
+    back_to_welcome(root)
 
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
@@ -116,7 +121,7 @@ profile_img = Label(sidebar, text="Profile Image", bg='white', width=15, height=
 profile_img.pack(pady=10)
 
 # Username and Score
-username_label = Label(sidebar, text=f"User ID: {user_id}", fg=FG_COLOR, bg=SIDEBAR_COLOR, font=label_font)
+username_label = Label(sidebar, text=f"User ID: {LOGGED_IN_USER}", fg=FG_COLOR, bg=SIDEBAR_COLOR, font=label_font)
 username_label.pack()
 
 score_label = Label(sidebar, text="Score: 1500", fg=FG_COLOR, bg=SIDEBAR_COLOR, font=("Arial", 10))

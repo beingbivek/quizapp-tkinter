@@ -9,9 +9,9 @@ def decrypt_password(encrypted_password):
             # raise ValueError("No password found in the database.")
             messagebox.showerror('Error','Error in getting password from Database.\nContact the Support.')
 
-        secret = encrypted_password.encode(utf)  # Encode the encrypted password to bytes
+        secret = encrypted_password.encode(code)  # Encode the encrypted password to bytes
         secret = pybase64.b64decode(secret)  # Decrypt using Base64
-        secret = secret.decode(utf)
+        secret = secret.decode(code)
         # print(secret)
         return secret  # Convert back to the original password
     except Exception as e:
@@ -55,7 +55,7 @@ def login():
                 messagebox.showinfo("Success", "Login successful!")
                 # Writing user ID to a temporary file
                 with open("temp_user_id.txt", "w") as f:
-                    f.write(str(user[0]))  # Assuming user ID is the first column
+                    f.write(str(user))
                 open_user_dashboard(user_login)
             else:
                 messagebox.showerror("Error", "Incorrect password")

@@ -31,7 +31,7 @@ header_font = ("Arial", 16, "bold")
 labelstyle = ("Helvatica", 14)
 
 # encoding and decoding format
-utf = 'utf-8'
+code = 'ascii'
 
 
 # Defaults lists

@@ -85,9 +85,9 @@ def register_user():
     
     try:
         # Encrypt the password using Base64
-        secret = password.encode(utf)  # Encode the password to bytes
+        secret = password.encode(code)  # Encode the password to bytes
         secret = pybase64.b64encode(secret)  # Encrypt using Base64
-        secret = secret.decode(utf)  # Convert back to string for storage
+        secret = secret.decode(code)  # Convert back to string for storage
 
         conn = sqlite3.connect(DATABASE_FILE)
         c = conn.cursor()
