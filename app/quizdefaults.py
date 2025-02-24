@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 import tkinter.font as font
-import runpy
+import runpy,pybase64
 
 # Default colors for Dashboards
 MAINFRAME_COLOR = "#E0E0E0"
@@ -32,6 +32,19 @@ labelstyle = ("Helvatica", 14)
 
 # encoding and decoding format
 code = 'ascii'
+
+# Encode and decode functions
+def str_encode(value):
+    secret = value.encode(code)  # Encode the password to bytes
+    secret = pybase64.b64encode(secret)  # Encrypt using Base64
+    secret = secret.decode(code)  # Convert back to string for storage
+    return secret
+
+def str_decode(value):
+    secret = value.encode(code)  # Encode the password to bytes
+    secret = pybase64.b64decode(secret)  # decode using Base64
+    secret = secret.decode(code)  # Convert back to string which is the password
+    return secret
 
 
 # Defaults lists

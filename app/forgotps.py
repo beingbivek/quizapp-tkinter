@@ -40,7 +40,7 @@ def forgot_pw():
             user_id, security_question, stored_answer = user
 
             # Check if the security answer matches
-            if security_answer == stored_answer:
+            if str_encode(security_answer) == stored_answer:
                 # Update the password in the database
                 c.execute("""
                     UPDATE users 

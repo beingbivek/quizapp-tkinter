@@ -11,7 +11,7 @@ import pybase64
 import re #For password validation.
 import json
 
-# Read the user ID from the temporary file
+# Read the user details from the temporary file
 try:
     with open("temp_user_id.txt", "r") as f:
         LOGGED_IN_USER = f.read().strip()
@@ -41,37 +41,7 @@ root.configure(bg=MAINFRAME_COLOR)
 
 
 # Making close and minimize button manually
-def min():
-    root.iconify()
-
-def on_enter(i):
-    btn2['background'] = "red"
-
-def on_leave(i):
-    btn2['background'] = HEADER_COLOR
-
-def max():
-    msg_box = messagebox.askquestion('Exit Application', 'Are you sure you want to close the application?', icon='warning')
-    if msg_box == 'yes':
-        root.destroy()
-
-label1 = LabelFrame(root, height=35, fg="blue", bg=HEADER_COLOR).place(x=0, y=0)
-btn2 = Button(root, text="✕", command=max, width=4, bg=HEADER_COLOR, border=0, font=button_font)
-btn2.pack(anchor="ne")
-btn2.bind('<Enter>', on_enter)
-btn2.bind('<Leave>', on_leave)
-
-btn = Button(root, text="-", command=min, width=4, bg=HEADER_COLOR, border=0, font=button_font)
-btn.place(x=screen_width-100, y=0)
-
-def enter(i):
-    btn['background'] = "red"
-
-def leave(i):
-    btn['background'] = HEADER_COLOR
-
-btn.bind('<Enter>', enter)
-btn.bind('<Leave>', leave)
+minclose_windowbtn(root)
 
 # Functions
 # How many courses
@@ -121,7 +91,7 @@ profile_img = Label(sidebar, text="Profile Image", bg='white', width=15, height=
 profile_img.pack(pady=10)
 
 # Username and Score
-username_label = Label(sidebar, text=f"User ID: {LOGGED_IN_USER}", fg=FG_COLOR, bg=SIDEBAR_COLOR, font=label_font)
+username_label = Label(sidebar, text=f"{LOGGED_IN_USER[1]}", fg=FG_COLOR, bg=SIDEBAR_COLOR, font=label_font)
 username_label.pack()
 
 score_label = Label(sidebar, text="Score: 1500", fg=FG_COLOR, bg=SIDEBAR_COLOR, font=("Arial", 10))
@@ -150,7 +120,7 @@ def openbutton(btn_text):
     # Main Dashboard Code
     if btn_text == "Dashboard":
         # Set logged-in user (Replace with actual login logic)
-        LOGGED_IN_USER_ID = 1  # Change this dynamically based on user session
+        LOGGED_IN_USER_ID = LOGGED_IN_USER[0]  # Change this dynamically based on user session
 
         # Connect to database
         conn = sqlite3.connect(DATABASE_FILE)

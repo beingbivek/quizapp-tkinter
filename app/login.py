@@ -8,12 +8,7 @@ def decrypt_password(encrypted_password):
         if encrypted_password is None:
             # raise ValueError("No password found in the database.")
             messagebox.showerror('Error','Error in getting password from Database.\nContact the Support.')
-
-        secret = encrypted_password.encode(code)  # Encode the encrypted password to bytes
-        secret = pybase64.b64decode(secret)  # Decrypt using Base64
-        secret = secret.decode(code)
-        # print(secret)
-        return secret  # Convert back to the original password
+        return str_decode(encrypted_password)  # Convert back to the original password
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred during decryption: {e}")
         return None
