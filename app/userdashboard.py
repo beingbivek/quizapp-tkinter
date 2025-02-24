@@ -96,7 +96,8 @@ sidebar = Frame(root, bg=SIDEBAR_COLOR, width=200, height=600)
 sidebar.pack(side='left', fill='y')
 
 # Profile Image Placeholder
-profile_img = Label(sidebar, image=ICON_FILE, bg='white', width=15, height=5)
+img = PhotoImage(file=ICON_FILE)
+profile_img = Label(sidebar, image=img, bg='white', width=15, height=5)
 profile_img.pack(pady=10)
 
 # Username and Score
