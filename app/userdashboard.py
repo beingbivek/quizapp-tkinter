@@ -406,7 +406,7 @@ def openbutton(btn_text):
 
         def update_profile():
             updated_values = [entry.get().strip() for entry in entries] + list(sq.get()) + list(sq_answer_entry.get().strip())
-            fullname, username, contact, email, address, new_password, confirm_password, sq, sq_answer = updated_values
+            fullname, username, contact, email, address, new_password, confirm_password, sec_que, sec_que_answer = updated_values
 
             # Check if the password fields are not empty
             if new_password or confirm_password:
@@ -426,13 +426,13 @@ def openbutton(btn_text):
                 password = None
 
             # Checking for security questions
-            if sq_answer:
-                sq_answer = str_encode(sq_answer)
+            if sec_que_answer:
+                sec_que_answer = str_encode(sec_que_answer)
                 # Check if the question is same
-                if sq == users[7] and sq_answer == users[8]:
-                    sq_answer = None
+                if sec_que == users[7] and sec_que_answer == users[8]:
+                    sec_que_answer = None
             else:
-                sq_answer = None
+                sec_que_answer = None
 
             # Ask for confirmation
             confirm = messagebox.askyesno("Confirm Update", "Are you sure you want to update your profile?")
@@ -446,8 +446,8 @@ def openbutton(btn_text):
                     contact=contact,
                     address=address,
                     password=password,
-                    sq=sq,
-                    sq_answer=sq_answer
+                    sec_que=sec_que,
+                    sec_que_answer=sec_que_answer
                 )
 
         # Load user profile data
