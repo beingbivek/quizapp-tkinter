@@ -82,6 +82,23 @@ def get_mocktest():
     conn.close()
     return mocktest
 
+# get user scores
+def total_score_of_user(user_id):
+    try:
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT SUM(result) FROM mocktestresults WHERE user_id = ?", (user_id,))
+        total_score = cursor.fetchone()[0]
+
+        conn.close()
+
+        return total_score if total_score is not None else 0  # Return 0 if no results found
+
+    except sqlite3.Error as e:
+        messagebox.showerror("Database error:", f'Error is: {e}')
+        return 0
+
 # Sidebar Frame
 sidebar = Frame(root, bg=SIDEBAR_COLOR, width=200, height=600)
 sidebar.pack(side='left', fill='y')
@@ -94,7 +111,7 @@ profile_img.pack(pady=10)
 username_label = Label(sidebar, text=f"{LOGGED_IN_USER[1]}", fg=FG_COLOR, bg=SIDEBAR_COLOR, font=label_font)
 username_label.pack()
 
-score_label = Label(sidebar, text="Score: 1500", fg=FG_COLOR, bg=SIDEBAR_COLOR, font=("Arial", 10))
+score_label = Label(sidebar, text=f"Score: {total_score_of_user(LOGGED_IN_USER[0])}", fg=FG_COLOR, bg=SIDEBAR_COLOR, font=("Arial", 10))
 score_label.pack()
 
 # Store button references
@@ -116,6 +133,9 @@ def openbutton(btn_text):
 
     # Set the clicked button color
     buttons[btn_text].configure(bg=HIGHLIGHT_COLOR)
+
+    # update score:
+    score_label.config(text=f"Score: {total_score_of_user(LOGGED_IN_USER[0])}")
 
     # Main Dashboard Code
     if btn_text == "Dashboard":
