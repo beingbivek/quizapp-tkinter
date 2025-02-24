@@ -1299,7 +1299,7 @@ def openbutton(btn_text):
         def add_mock_test():
             add_mocktest = Toplevel(main_frame)
             add_mocktest.title("Add Questions To Mock Test")
-            add_mocktest.geometry("800x300")
+            add_mocktest.geometry("400x600")
             add_mocktest.attributes('-topmost', True)
     
             Label(add_mocktest, text="Enter Mock Test Name:").pack()
@@ -1318,11 +1318,9 @@ def openbutton(btn_text):
             e3 = Entry(add_mocktest, width=35)
             e3.pack(pady=10)
 
-            
-
-            Label(add_mocktest, text="Enter Pass Marks:").pack()
-            e3 = Entry(add_mocktest, width=35)
-            e3.pack(pady=10)
+            Label(add_mocktest, text="Full Time (in minutes):").pack()
+            e4 = Entry(add_mocktest, width=35)
+            e4.pack(pady=10)
 
             #saves the input taken from admin 
             def save_mock():
@@ -1330,26 +1328,29 @@ def openbutton(btn_text):
                 mocktest_desc = text_desc.get("1.0", "end-1c")
                 full_marks = e2.get().strip()      # Get the value and strip whitespace
                 pass_marks = e3.get().strip()       # Get the value and strip whitespace
+                full_time = e4.get().strip()       # Get the value and strip whitespace
         
         # Check if any field is empty
-                if not mocktest_name or not mocktest_desc or not full_marks or not pass_marks:
+                if not mocktest_name or not mocktest_desc or not full_marks or not pass_marks or not full_time:
                    messagebox.showwarning("Warning", "Please fill in all fields.")
                    
-
-                elif full_marks <= pass_marks:
+                elif pass_marks <= full_marks:
                     messagebox.showwarning("Warning", "Passmarks should be less than fullmarks!")
-                    
+                    return
+                
+                elif not full_time.isdigit():
+                    messagebox.showwarning('Warning','Enter Full time in Number.')
 
                 else:
                     try:
                         conn = sqlite3.connect(DATABASE_FILE)
                         cursor = conn.cursor()
-                        cursor.execute("INSERT INTO mocktests (mocktest_name, mocktest_desc, fullmark, passmark) VALUES (?,?,?,?)", 
-                                    (mocktest_name,mocktest_desc,full_marks,pass_marks))
+                        cursor.execute("INSERT INTO mocktests (mocktest_name, mocktest_desc, fullmark, passmark, fulltime) VALUES (?,?,?,?,?)", 
+                                    (mocktest_name,mocktest_desc,full_marks,pass_marks,full_time))
                         conn.commit()
                         conn.close()
                         update_mock_test_table()
-                        messagebox.showinfo("Success", "Test added successfully!")
+                        messagebox.showinfo("Success", "Mock Test added successfully!")
                         add_mocktest.destroy()
                     except sqlite3.IntegrityError:
                         messagebox.showerror("Error", "Mock test with this name already exists.")
@@ -1376,7 +1377,7 @@ def openbutton(btn_text):
         def add_mock_question():
             add_question_window = Toplevel(main_frame)
             add_question_window.title("Add Questions To Mock Test")
-            add_question_window.geometry("600x300")
+            add_question_window.geometry("400x700")
             course_id = None
             category_id = None
             add_question_window.attributes('-topmost', True)
@@ -1441,8 +1442,6 @@ def openbutton(btn_text):
             questions_entry = Entry(add_question_window)
             questions_entry.pack()
 
-
-    
             def save_question():
                 selected_test = mock_test_combo.get()
                 course = courses_combo.get()
@@ -1460,8 +1459,6 @@ def openbutton(btn_text):
                     messagebox.showerror('Error', 'Please insert valid no of questions!')
                    
                 else:
-
-                
                     mock_test_id = next((test[0] for test in fetch_mock_tests() if test[1] == selected_test), None)
                     course_id = next((test[0] for test in fetch_courses() if test[1] == course), None)
                     category_id = next((cat[0] for cat in fetch_categories(course_id) if cat[1] == category), None)
@@ -1507,7 +1504,7 @@ def openbutton(btn_text):
             for row in mock_test_table.get_children():
                 mock_test_table.delete(row)
             for test in fetch_mock_tests():
-                mock_test_table.insert("", "end", values=(test[0], test[1], test[2], test[3],test[4]))
+                mock_test_table.insert("", "end", values=test)
         
         #main frame for table
         mocktable_frame = Frame(main_frame,bg = MAINFRAME_COLOR)
@@ -1523,22 +1520,16 @@ def openbutton(btn_text):
         delete_btn.pack(side=RIGHT, pady=10)
         
         # Create UI elements
-        list_mocktest = ["ID", "Mock Test Name","Mocktest Description", "Full Mark", "Pass Mark"]
+        list_mocktest = ["ID", "Mock Test Name","Mocktest Description", "Full Mark", "Pass Mark","Full Time (minutes)"]
         mock_test_table = ttk.Treeview(mocktable_frame, columns=list_mocktest, show="headings")
         for i in list_mocktest:
-
             mock_test_table.heading(i, text=i)
             mock_test_table.column(i,anchor= CENTER)
-        # mock_test_table.heading("Mock Test Name", text="Mock Test Name")
-        # mock_test_table.heading("Mocktest Description", text="Mocktest Description")
-        # mock_test_table.heading("Full Mark", text="Full Mark")
-        # mock_test_table.heading("Pass Mark", text="Pass Mark")
         mock_test_table.pack(fill=BOTH, expand=True)
 
         # Buttons to add mock tests and mock questions
         btn_frame = Frame(mocktable_frame, bg = MAINFRAME_COLOR)
         btn_frame.pack(fill = X,pady=10)
-
         
         add_question_btn = Button(btn_frame, text="Add No Of Questions", command=add_mock_question, bg= BUTTON_COLOR, font= button_font, fg= FG_COLOR  )
         add_question_btn.pack(side=LEFT, pady=10)
