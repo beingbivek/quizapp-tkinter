@@ -92,7 +92,7 @@ def register_user():
         conn = sqlite3.connect(DATABASE_FILE)
         c = conn.cursor()
         c.execute("""
-            INSERT INTO users (fullname, email, username, contact, password)
+            INSERT INTO users (fullname, email, username, contact, password, securityquestion, securityanswer)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (fullname, email, username, contact, secret, security_question, sq_answer))
         conn.commit()
