@@ -28,8 +28,11 @@ DATABASE_FILE = r'..\quizapp-tkinter\quiz.db'
 button_font = font.Font(size=14)
 label_font = ("Arial", 12, "bold")
 header_font = ("Arial", 16, "bold")
-
 labelstyle = ("Helvatica", 14)
+
+# encoding and decoding format
+utf = 'utf-8'
+
 
 # Defaults lists
 defcourses = ['CEE','Driving','IOE','Loksewa']
@@ -47,6 +50,22 @@ def open_login(root):
 def back_to_welcome(root):
     root.destroy()
     runpy.run_path(r'..\quizapp-tkinter\app\welcome.py')
+
+def go_to_forgot(root):
+    root.destroy()
+    runpy.run_path(r'..\quizapp-tkinter\app\forgotps.py')
+
+def open_admin_login(root):
+    root.destroy()
+    runpy.run_path(r'..\quizapp-tkinter\app\admin.py')
+
+def open_user_dashboard(root):
+    root.destroy()
+    runpy.run_path(r'..\quizapp-tkinter\app\userdashboard.py')
+
+def open_admin_dashboard(root):
+    root.destroy()
+    runpy.run_path(r'..\quizapp-tkinter\app\admindashboard.py')
 
 
 # Welcome text
@@ -86,7 +105,7 @@ def maxminbtns(root):
     label1 = LabelFrame(root, height=35, fg="blue", bg=HEADER_COLOR).place(x=0, y=0)
     btn2 = Button(root, text="✕", command=max, width=4, bg=HEADER_COLOR, border=0, font=button_font)
     btn2.pack(anchor="ne")
-    
+
     # Hover Functinality
     btn2.bind('<Enter>', on_enter)
     btn2.bind('<Leave>', on_leave)

@@ -1,41 +1,18 @@
 from tkinter import *
 from tkinter import messagebox
 import sqlite3
-import runpy
-import pybase64  # For decryption
-
-# Colors (matched with Register page)
-bgcolor = "#E0E0E0"
-header_color = "#34495E"
-frame_bg = "#E0E0E0"
-button_color = '#1F618D'
-tablecolor = '#34495E'
-label_text_color = "black"  # Text color for labels
-
-def back_to_welcome():
-    user_login.destroy()
-    runpy.run_path(r'..\quizapp-tkinter\app\welcome.py')
-
-def open_registration():
-    user_login.destroy()
-    runpy.run_path(r'..\quizapp-tkinter\app\register.py')
-
-def go_to_forgot():
-    user_login.destroy()
-    runpy.run_path(r'..\quizapp-tkinter\app\forgotps.py')
-
-def open_admin_login():
-    user_login.destroy()
-    runpy.run_path(r'..\quizapp-tkinter\app\admin.py')
+import pybase64
 
 def decrypt_password(encrypted_password):
     try:
         if encrypted_password is None:
-            raise ValueError("No password found in the database.")
-        secret = encrypted_password.encode('ascii')  # Encode the encrypted password to bytes
+            # raise ValueError("No password found in the database.")
+            messagebox.showerror('Error','Error in getting password from Database.\nContact the Support.')
+            
+        secret = encrypted_password.encode(utf)  # Encode the encrypted password to bytes
         secret = pybase64.b64decode(secret)  # Decrypt using Base64
-        secret = secret.decode('ascii')
-        print(secret)
+        secret = secret.decode(utf)
+        # print(secret)
         return secret  # Convert back to the original password
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred during decryption: {e}")
@@ -51,7 +28,7 @@ def login():
 
     try:
         # Connect to the database
-        conn = sqlite3.connect('quiz.db')  # Replace with your actual database name
+        conn = sqlite3.connect(DATABASE_FILE)  # Replace with your actual database name
         c = conn.cursor()
 
         # Check if the username or email exists in the database
@@ -76,12 +53,10 @@ def login():
             # Check if the entered password matches the decrypted password
             if password == decrypted_password:
                 messagebox.showinfo("Success", "Login successful!")
-                # Write user ID to a temporary file
+                # Writing user ID to a temporary file
                 with open("temp_user_id.txt", "w") as f:
                     f.write(str(user[0]))  # Assuming user ID is the first column
-                user_login.destroy()
-                # Launch userdashboard.py in a new process
-                runpy.run_path(r'..\quizapp-tkinter\app\userdashboard.py')
+                open_user_dashboard(user_login)
             else:
                 messagebox.showerror("Error", "Incorrect password")
         else:
@@ -94,6 +69,8 @@ def login():
 user_login = Tk()
 user_login.title("Login")
 user_login.attributes('-fullscreen', True)
+
+from quizdefaults import *
 
 def adjust_frames(event=None):
     user_login.update_idletasks()
@@ -125,6 +102,8 @@ welcomeframe = Frame(user_login, bd=2, relief="ridge", padx=0, pady=0, bg=tablec
 welcomeframe.place(x=150, y=70, width=400, height=60)
 Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 25, "bold"), bg=tablecolor, fg='white').pack(pady=10, padx=10)
 
+maxminbtns(user_login)
+
 frame = Frame(user_login, bd=2, relief="ridge", padx=20, pady=20, bg='white')
 frame.place(x=200, y=140, width=300, height=250)
 
@@ -136,8 +115,8 @@ Label(frame, text="Password:", bg='white', fg=label_text_color).place(x=5, y=50)
 user_entry = Entry(frame, show="*", bg='black', fg='white')
 user_entry.place(x=5, y=70)
 
-Button(frame, text="Forgot Password", command=go_to_forgot, fg='white', bg=button_color).place(x=122, y=110)
-Button(frame, text="Admin Login", command=open_admin_login, fg='white', bg=button_color).place(x=156, y=150)
+Button(frame, text="Forgot Password", command=lambda: go_to_forgot(user_login), fg='white', bg=button_color).place(x=122, y=110)
+Button(frame, text="Admin Login", command=lambda: open_admin_login(user_login), fg='white', bg=button_color).place(x=156, y=150)
 Button(frame, text="Login", command=login, fg='white', bg=button_color).place(x=100, y=190)
 
 infotopframe = Frame(user_login, bd=1, relief="ridge", padx=0, pady=0, bg=header_color)
@@ -149,9 +128,9 @@ backframe.place(x=450, y=140, width=50, height=20)
 
 back_label = Label(backframe, text="Back", bg="black", fg="white", font=("Arial", 10))
 back_label.place(x=0, y=0)
-back_label.bind("<Button-1>", lambda e: back_to_welcome())
+back_label.bind("<Button-1>", lambda e: back_to_welcome(user_login))
 
-register_button = Button(framemain, text="Register", command=open_registration, fg='white', bg=button_color)
+register_button = Button(framemain, text="Register", command=lambda: open_registration(user_login), fg='white', bg=button_color)
 register_button.place(x=500, y=30)
 
 login_button = Button(framemain, text="Login", command=login, fg='white', bg=button_color)
