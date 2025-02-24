@@ -74,6 +74,8 @@ security_questions = [
     "Where did you go on your first vacation?",
     "What is the name of your favorite musician or band?"
 ]
+incorrect = ['China','Japan','Mexico']
+dummyquestion = [1,'Where is the highest peak in the world?','Nepal',incorrect,1,1]
 
 
 # Paths for runpy

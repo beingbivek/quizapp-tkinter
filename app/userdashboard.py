@@ -32,13 +32,10 @@ try:
 
     with open(USER_FILE, "r") as f:
         LOGGED_IN_USER = f.read().strip().split(',')  # Read entire file content
-    # LOGGED_IN_USER[0] = int(LOGGED_IN_USER[0])
     os.remove(USER_FILE)  # Clean up the temporary file
 except FileNotFoundError:
     messagebox.showerror('File Error','User File not found.')
-    LOGGED_IN_USER = [0,'Guest','guest@g.com','guest','1234567890','None','','abcd','']
-
-print(LOGGED_IN_USER)
+    LOGGED_IN_USER = None
 
 # Fail Safe
 if not LOGGED_IN_USER or len(LOGGED_IN_USER) < 9:
@@ -115,7 +112,6 @@ profile_img.pack()
 username_label = Label(sidebar, text=f"{LOGGED_IN_USER[1]}", fg=FG_COLOR, bg=SIDEBAR_COLOR, font=label_font)
 username_label.pack()
 
-print(LOGGED_IN_USER)
 score_label = Label(sidebar, text=f"Score: {total_score_of_user(LOGGED_IN_USER[0])}", fg=FG_COLOR, bg=SIDEBAR_COLOR, font=("Arial", 10))
 score_label.pack()
 
@@ -143,13 +139,20 @@ def openbutton(btn_text):
         # Set logged-in user (Replace with actual login logic)
         current_user_id = LOGGED_IN_USER[0]
 
-        # Connect to database
-        conn = sqlite3.connect(DATABASE_FILE)
-        cursor = conn.cursor()
+        try:
+            # Connect to database
+            conn = sqlite3.connect(DATABASE_FILE)
+            cursor = conn.cursor()
 
-        # Fetch Random Question for "Question of the Day"
-        cursor.execute("SELECT question_id, question, correct_ans, incorrect_ans, course_id, category_id FROM questions ORDER BY RANDOM() LIMIT 1")
-        qotd_data = cursor.fetchone()
+            # Fetch Random Question for "Question of the Day"
+            cursor.execute("SELECT question_id, question, correct_ans, incorrect_ans, course_id, category_id FROM questions ORDER BY RANDOM() LIMIT 1")
+            qotd_data = cursor.fetchone()
+            if not qotd_data:
+                messagebox.showerror('No Question','There\'s no question in Database so, replace with dummy one.')
+                qotd_data = dummyquestion
+        except Exception as e:
+            messagebox.showerror
+
         question_id, question_text, correct_answer, incorrect_answers, course_id, category_id = qotd_data
 
         # Parse incorrect answers stored as JSON list
@@ -158,9 +161,13 @@ def openbutton(btn_text):
         shuffle(options)
 
         def question_location():
-            coursename = next((name[1] for name in get_courses() if course_id == name[0]),"Random")
-            categoryname = next((name[1] for name in get_categories() if category_id == name[0]),"Question")
-            return coursename + ' ' + categoryname
+            try:
+                coursename = next((name[1] for name in get_courses() if course_id == name[0]),"Random")
+                categoryname = next((name[1] for name in get_categories() if category_id == name[0]),"Question")
+                return coursename + ' ' + categoryname
+            except:
+                messagebox.showerror('No course and categories','There is no course and category data in database.')
+                return 'No Database connection, Solve This'
 
         conn.close()  # Close database connection after fetching question
 

@@ -168,7 +168,7 @@ def openbutton(btn_text):
         # Function to fetch users from the database
         def fetch_users():
             try:
-                conn = sqlite3.connect('quiz.db')  # Replace with your actual database name
+                conn = sqlite3.connect(DATABASE_FILE)  # Replace with your actual database name
                 c = conn.cursor()
                 c.execute("SELECT user_id, username, fullname, contact, email FROM users")
                 users = c.fetchall()
@@ -310,31 +310,40 @@ def openbutton(btn_text):
         def register_user():
             register_window = Toplevel(root)
             register_window.title("Register User")
-            register_window.geometry("400x300")
+            register_window.geometry("500x300")
 
             Label(register_window, text="Username:").place(relx=0.1, rely=0.1)
             username_entry = Entry(register_window)
-            username_entry.place(relx=0.3, rely=0.1)
+            username_entry.place(relx=0.4, rely=0.1)
 
             Label(register_window, text="Name:").place(relx=0.1, rely=0.2)
             name_entry = Entry(register_window)
-            name_entry.place(relx=0.3, rely=0.2)
+            name_entry.place(relx=0.4, rely=0.2)
 
             Label(register_window, text="Contact:").place(relx=0.1, rely=0.3)
             contact_entry = Entry(register_window)
-            contact_entry.place(relx=0.3, rely=0.3)
+            contact_entry.place(relx=0.4, rely=0.3)
 
             Label(register_window, text="Email:").place(relx=0.1, rely=0.4)
             email_entry = Entry(register_window)
-            email_entry.place(relx=0.3, rely=0.4)
+            email_entry.place(relx=0.4, rely=0.4)
+
+            sq = StringVar()
+            sq.set(security_questions[0])
+            Label(register_window, text="Select Security Question:", bg='white', fg='black').place(relx=0.1, rely=0.5)
+            OptionMenu(register_window, sq, *security_questions).place(relx=0.4, rely=0.5)
+
+            Label(register_window, text="Security Answer:").place(relx=0.1, rely=0.6)
+            sq_answer_entry = Entry(register_window)
+            sq_answer_entry.place(relx=0.4, rely=0.6)
 
             Button(register_window, text="Submit", command=lambda: submit_registration(
                 username_entry.get(), name_entry.get(), contact_entry.get(), email_entry.get(), register_window
-            )).place(relx=0.4, rely=0.6)
+            )).place(relx=0.5, rely=0.7)
         
         def submit_registration(username, name, contact, email, window):
             try:
-                conn = sqlite3.connect('quiz.db')  # Replace with your actual database name
+                conn = sqlite3.connect(DATABASE_FILE)  # Replace with your actual database name
                 c = conn.cursor()
                 c.execute("""
                     INSERT INTO users (username, fullname, contact, email, password)
@@ -356,7 +365,7 @@ def openbutton(btn_text):
             selected_user = tree.item(selected_item, "values")
             edit_window = Toplevel(root)
             edit_window.title("Edit User")
-            edit_window.geometry("400x300")
+            edit_window.geometry("500x300")
 
             Label(edit_window, text="Username:").place(relx=0.1, rely=0.1)
             username_entry = Entry(edit_window)
@@ -385,7 +394,7 @@ def openbutton(btn_text):
         def submit_edit(selected_item, username, name, contact, email, window):
             try:
                 user_id = tree.item(selected_item, "values")[0]
-                conn = sqlite3.connect('quiz.db')  # Replace with your actual database name
+                conn = sqlite3.connect(DATABASE_FILE)  # Replace with your actual database name
                 c = conn.cursor()
                 c.execute("""
                     UPDATE users
@@ -408,7 +417,7 @@ def openbutton(btn_text):
             if messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this user?"):
                 user_id = tree.item(selected_item, "values")[0]
                 try:
-                    conn = sqlite3.connect('quiz.db')  # Replace with your actual database name
+                    conn = sqlite3.connect(DATABASE_FILE)  # Replace with your actual database name
                     c = conn.cursor()
                     c.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
                     conn.commit()
@@ -1243,14 +1252,9 @@ def openbutton(btn_text):
         def add_mock_test():
             add_mocktest = Toplevel(main_frame)
             add_mocktest.title("Add Questions To Mock Test")
-            add_mocktest.geometry("600x300")
+            add_mocktest.geometry("800x300")
             add_mocktest.attributes('-topmost', True)
     
-            
-           
-            
-            
-            
             Label(add_mocktest, text="Enter Mock Test Name:").pack()
             e1 = Entry(add_mocktest, width=35)
             e1.pack(pady=10)
@@ -1262,6 +1266,13 @@ def openbutton(btn_text):
             Label(add_mocktest, text="Enter Full Marks:").pack()
             e2 = Entry(add_mocktest, width=35)
             e2.pack(pady=10)
+
+            Label(add_mocktest, text="Enter Pass Marks:").pack()
+            e3 = Entry(add_mocktest, width=35)
+            e3.pack(pady=10)
+
+            
+
             Label(add_mocktest, text="Enter Pass Marks:").pack()
             e3 = Entry(add_mocktest, width=35)
             e3.pack(pady=10)
@@ -1498,7 +1509,7 @@ def openbutton(btn_text):
 
         update_mock_test_table()
         update_questions_table()
-        
+
     # Question - admin section - aayush
     elif btn_text == buttons[5]:
 
