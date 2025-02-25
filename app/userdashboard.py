@@ -188,16 +188,16 @@ def openbutton(btn_text):
         def check_answer():
             selected = selected_option.get()
             if selected == correct_answer:
-                btn_submitqotd.config(state=DISABLED, text="Correct!", bg="green",fg=FG_COLOR)
+                btn_submitqotd.config(state=DISABLED, text="Correct!", bg="green",fg='black')
             else:
-                btn_submitqotd.config(text="Try Again", bg="red")
+                btn_submitqotd.config(text="Try Again", bg="red",fg='black')
 
         for opt in options:
             rb = Radiobutton(main_frame, text=opt, variable=selected_option, value=opt, bg=MAINFRAME_COLOR)
             rb.pack(anchor='w')
             option_buttons.append(rb)
 
-        btn_submitqotd = Button(main_frame, text='Submit', bg=BUTTON_COLOR, command=check_answer)
+        btn_submitqotd = Button(main_frame, text='Submit', bg=BUTTON_COLOR, command=check_answer, font=button_font)
         btn_submitqotd.pack(anchor='w')
 
         # Progress table Function
@@ -249,7 +249,6 @@ def openbutton(btn_text):
                         LIMIT 5
                     """, (current_user_id,))
 
-
         mock_results = cursor.fetchall()
         conn.close()
 
@@ -273,7 +272,7 @@ def openbutton(btn_text):
     #Leaderboard user section.    
     elif btn_text == "LeaderBoard":
 
-        current_user_id = LOGGED_IN_USER[0]  # Change this dynamically based on the logged-in user
+        current_user_id = LOGGED_IN_USER[0]
 
         def fetch_leaderboard_data(logged_in_user_id):
             conn = sqlite3.connect(DATABASE_FILE)
@@ -408,8 +407,9 @@ def openbutton(btn_text):
             if sq_answer_entry:
                 value = sq_answer_entry.get().strip()
             else:
-                value = ''
-            updated_values = [entry.get().strip() for entry in entries] + list(sq.get()) + list(value)
+                value = 'None'
+            updated_values = [entry.get().strip() for entry in entries] + [sq.get().strip(),value]
+            print(updated_values)
             fullname, username, contact, email, address, new_password, confirm_password, sec_que, sec_que_answer = updated_values
 
             # Check if the password fields are not empty
@@ -430,7 +430,7 @@ def openbutton(btn_text):
                 password = None
 
             # Checking for security questions
-            if sec_que_answer != '':
+            if sec_que_answer != 'None':
                 sec_que_answer = str_encode(sec_que_answer)
                 # Check if the question is same
                 if sec_que == users[7] and sec_que_answer == users[8]:
@@ -450,8 +450,8 @@ def openbutton(btn_text):
                     contact=contact,
                     address=address,
                     password=password,
-                    sec_que=sec_que,
-                    sec_que_answer=sec_que_answer
+                    sq=sec_que,
+                    sq_answer=sec_que_answer
                 )
 
         # Load user profile data
@@ -462,6 +462,8 @@ def openbutton(btn_text):
         
         secframe = Frame(main_frame, bd=2, relief='ridge')
         secframe.place(x=380, y=50, width=900, height=700)
+
+        
 
 
         # Labels and Entries
@@ -499,8 +501,6 @@ def openbutton(btn_text):
 
         # Buttons
         Button(main_frame,text='UPDATE', bg=BUTTON_COLOR, fg=FG_COLOR, font=('Arial', 14, 'bold'), command=update_profile).place(x=screen_width/2.5, y=690)
-
-        pass
      
     # Course - usersection - Aayush
     elif btn_text == 'Courses':
