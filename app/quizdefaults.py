@@ -166,3 +166,71 @@ def minclose_windowbtn(root):
 
     btn.bind('<Enter>', enter)
     btn.bind('<Leave>', leave)
+
+def delete_data(conn, table_name, primary_key_column, primary_key_value):
+    """
+    Deletes data from a table and its associated data in related tables.
+    
+    Parameters:
+        conn: SQLite database connection object.
+        table_name: Name of the table from which to delete data.
+        primary_key_column: Name of the primary key column in the table.
+        primary_key_value: Value of the primary key for the record to delete.
+    """
+    try:
+        cursor = conn.cursor()
+
+        # Define the order of deletion based on table relationships
+        deletion_order = [
+            "mocktestresults",  # Child of mocktests, users, and courses
+            "mockquestions",     # Child of mocktests, courses, and categories
+            "questions",         # Child of courses and categories
+            "categories",        # Child of courses
+            "mocktests",         # Parent of mockquestions and mocktestresults
+            "courses",           # Parent of categories, questions, mockquestions, and mocktestresults
+            "users"              # Parent of mocktestresults
+        ]
+
+        # Check if the table is in the deletion order
+        if table_name not in deletion_order:
+            raise ValueError(f"Table '{table_name}' is not supported for deletion.")
+
+        # Get the index of the table in the deletion order
+        table_index = deletion_order.index(table_name)
+
+        # Delete data from the specified table and its child tables
+        for table in deletion_order[table_index:]:
+            if table == table_name:
+                # Delete from the specified table
+                query = f"DELETE FROM {table_name} WHERE {primary_key_column} = ?"
+            else:
+                # Delete from child tables
+                if table == "mocktestresults":
+                    query = f"DELETE FROM mocktestresults WHERE {primary_key_column} = ?"
+                elif table == "mockquestions":
+                    query = f"DELETE FROM mockquestions WHERE {primary_key_column} = ?"
+                elif table == "questions":
+                    query = f"DELETE FROM questions WHERE {primary_key_column} = ?"
+                elif table == "categories":
+                    query = f"DELETE FROM categories WHERE {primary_key_column} = ?"
+                elif table == "mocktests":
+                    query = f"DELETE FROM mocktests WHERE {primary_key_column} = ?"
+                elif table == "courses":
+                    query = f"DELETE FROM courses WHERE {primary_key_column} = ?"
+                elif table == "users":
+                    query = f"DELETE FROM users WHERE {primary_key_column} = ?"
+
+            cursor.execute(query, (primary_key_value,))
+            print(f"Deleted from {table}: {cursor.rowcount} rows affected.")
+
+        # Commit the changes
+        conn.commit()
+        print("Deletion completed successfully.")
+
+    except Exception as e:
+        # Rollback in case of error
+        conn.rollback()
+        print(f"Error during deletion: {e}")
+    finally:
+        # Close the cursor
+        cursor.close()

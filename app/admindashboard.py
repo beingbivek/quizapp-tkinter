@@ -726,7 +726,8 @@ def openbutton(btn_text):
             if selected_item:
                 confirm = messagebox.askokcancel("Confirm Delete", f"Are you sure you want to delete {item_data['values'][1]}?")
                 if confirm:
-                    c.execute('DELETE FROM courses WHERE course_id = ?', (item_data["values"][0],))
+                    # c.execute('DELETE FROM courses WHERE course_id = ?', (item_data["values"][0],))
+                    delete_data(conn,table_name='courses',primary_key_column='course_id',primary_key_value=item_data["values"][0])
                     conn.commit()
                     update_course_table(get_courses())
 
@@ -745,6 +746,33 @@ def openbutton(btn_text):
         # Categories section
 
         # Categories Functions
+
+        def on_category_entry_click(event):
+            # Function to remove placeholder text when the entry is clicked.
+            if search_category_entry.get() == 'Search...':
+                search_category_entry.delete(0, "end")  # delete all the text in the entry
+                search_category_entry.insert(0, '')  # Insert blank for user input
+                search_category_entry.config(fg='black')
+
+        def on_category_focusout(event):
+            # Function to add placeholder text if the entry is empty when focus is lost.
+            if search_category_entry.get() == '':
+                search_category_entry.insert(0, 'Search...')
+                search_category_entry.config(fg='grey')
+                # display all courses after the search bar is empty
+                update_course_table(get_categories())
+
+        def search_category():
+            query = 'SELECT * FROM categories WHERE category_name LIKE ?'
+            # query = f'SELECT * FROM courses'
+            search_term = f'%{search_category_entry.get()}%'
+            # c.execute(query)
+            c.execute(query, (search_term,))
+            results = c.fetchall()
+            # print(results)
+            
+            # show the search result
+            update_category_table(results)
 
         def add_category():
 
@@ -828,12 +856,12 @@ def openbutton(btn_text):
 
         search_category_entry = Entry(search_category_frame, font=button_font)
         search_category_entry.insert(0, 'Search...')  # Add the placeholder text
-        search_category_entry.bind('<FocusIn>', on_entry_click)
-        search_category_entry.bind('<FocusOut>', on_focusout)
+        search_category_entry.bind('<FocusIn>', on_category_entry_click)
+        search_category_entry.bind('<FocusOut>', on_category_focusout)
         search_category_entry.config(fg='grey')
         search_category_entry.pack(side='left')
 
-        search_category_btn = Button(search_category_frame, text='Search', command=search_courses, bg= BUTTON_COLOR, fg=FG_COLOR,font=button_font)
+        search_category_btn = Button(search_category_frame, text='Search', command=search_category, bg= BUTTON_COLOR, fg=FG_COLOR,font=button_font)
         search_category_btn.pack(side='right',padx=10)
 
         add_category_btn = Button(category_frame, text='Add Category', bg=BUTTON_COLOR, fg=FG_COLOR, font=button_font, command=add_category)
@@ -953,6 +981,7 @@ def openbutton(btn_text):
                 confirm = messagebox.askokcancel("Confirm Delete", f"Are you sure you want to delete {item_data['values'][1]} from {item_data['values'][2]}?")
                 if confirm:
                     c.execute('DELETE FROM categories WHERE category_id = ?', (item_data["values"][0],))
+                    delete_data(conn,table_name='categories',primary_key_column='cateogry_id',primary_key_value=item_data["values"][0])
                     conn.commit()
                     update_category_table(get_categories())
 
@@ -1056,9 +1085,7 @@ def openbutton(btn_text):
             populate_table(results)
 
         def course_selected(selected_course_name):
-            refresh_data()  # Simplified to call unified refresh
-            
-        
+            refresh_data() 
             
         def get_mocktest_results(user_id=None, course_id=None):
             conn = sqlite3.connect(DATABASE_FILE)

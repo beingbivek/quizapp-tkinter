@@ -20,7 +20,8 @@ def create_database():
             address TEXT,
             password TEXT NOT NULL,
             securityquestion TEXT NOT NULL,
-            securityanswer TEXT NOT NULL
+            securityanswer TEXT NOT NULL,
+            timestamp DATETIME NOT NULL
         )
         """)
 
