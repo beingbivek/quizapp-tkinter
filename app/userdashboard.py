@@ -186,16 +186,16 @@ def openbutton(btn_text):
         def check_answer():
             selected = selected_option.get()
             if selected == correct_answer:
-                btn_submitqotd.config(state=DISABLED, text="Correct!", bg="green",fg='black')
+                btn_submitqotd.config(state=DISABLED, text="Correct!", bg="green",font=button_font)
             else:
-                btn_submitqotd.config(text="Try Again", bg="red",fg='black')
+                btn_submitqotd.config(text="Try Again", bg="red",font=button_font)
 
         for opt in options:
             rb = Radiobutton(main_frame, text=opt, variable=selected_option, value=opt, bg=MAINFRAME_COLOR)
             rb.pack(anchor='w')
             option_buttons.append(rb)
 
-        btn_submitqotd = Button(main_frame, text='Submit', bg=BUTTON_COLOR, command=check_answer, font=button_font)
+        btn_submitqotd = Button(main_frame, text='Submit', bg=BUTTON_COLOR, command=check_answer, font=button_font,fg=FG_COLOR)
         btn_submitqotd.pack(anchor='w')
 
         # Progress table Function
