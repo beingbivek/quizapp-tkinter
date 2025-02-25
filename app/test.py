@@ -1,146 +1,193 @@
 import tkinter as tk
 from tkinter import ttk
 import sqlite3
-from tkinter import Tk
-root = Tk()
-from quizdefaults import *
 
 # Database connection
-# DATABASE_FILE = "quiz.db"
-LOGGED_IN_USER = [1]  # Example: Replace with your actual logged-in user ID
+DATABASE_FILE = "quiz.db"
 
-# Fetch leaderboard data
-def fetch_leaderboard_data(logged_in_user_id):
+# Fetch questions for a course and category
+def fetch_questions(course_id, category_id=None):
     conn = sqlite3.connect(DATABASE_FILE)
     cursor = conn.cursor()
-    
-    query = """
-        SELECT 
-            c.coursename, 
-            u.user_id, 
-            u.username, 
-            SUM(mr.result) AS total_score
-        FROM mocktestresults mr
-        JOIN users u ON mr.user_id = u.user_id
-        JOIN courses c ON mr.course_id = c.course_id
-        GROUP BY c.coursename, u.user_id
-        ORDER BY c.coursename, total_score DESC;
-    """
-    
-    cursor.execute(query)
-    results = cursor.fetchall()
+    if category_id:
+        cursor.execute("""
+            SELECT question, correct_ans
+            FROM questions
+            WHERE course_id = ? AND category_id = ?
+        """, (course_id, category_id))
+    else:
+        cursor.execute("""
+            SELECT question, correct_ans
+            FROM questions
+            WHERE course_id = ?
+        """, (course_id,))
+    questions = cursor.fetchall()
     conn.close()
+    return questions
 
-    leaderboard_data = {}
-    user_positions = {}
+# Fetch categories for a course
+def fetch_categories(course_id):
+    conn = sqlite3.connect(DATABASE_FILE)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT category_id, category_name
+        FROM categories
+        WHERE course_id = ?
+    """, (course_id,))
+    categories = cursor.fetchall()
+    conn.close()
+    return categories
 
-    for course, user_id, username, total_score in results:
-        if course not in leaderboard_data:
-            leaderboard_data[course] = []
-        leaderboard_data[course].append([len(leaderboard_data[course]) + 1, username, total_score])
+# Fetch courses from the database
+def get_courses():
+    conn = sqlite3.connect(DATABASE_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT course_id, coursename, coursedesc FROM courses")
+    courses = cursor.fetchall()
+    conn.close()
+    return courses
 
-        # Store the position of the logged-in user
-        if user_id == logged_in_user_id:
-            user_positions[course] = len(leaderboard_data[course])
+# Display course description
+def show_course_description(course_desc, frame_bottom2_inner, frame_bottom2_canvas):
+    # Clear the existing content in the inner frame
+    for widget in frame_bottom2_inner.winfo_children():
+        widget.destroy()
 
-    # Filter data: Top 5 + logged-in user (if they are outside top 5)
-    filtered_data = {}
-    for course, users in leaderboard_data.items():
-        top_5 = users[:5]  # Get top 5 users
+    # Display the course description
+    label = tk.Label(frame_bottom2_inner, text=course_desc, font=("Arial", 12), wraplength=500, justify="left")
+    label.pack(pady=10, padx=10, fill="both", expand=True)
 
-        if course in user_positions and user_positions[course] > 5:
-            # Find logged-in user's data
-            logged_user_data = next((x for x in users if x[1] == logged_in_user_id), None)
-            if logged_user_data:
-                logged_user_data = [user_positions[course]] + logged_user_data[1:]  # Update with actual position
-                top_5.append(logged_user_data)
+    # Update scroll region after content is added
+    frame_bottom2_inner.update_idletasks()
+    frame_bottom2_canvas.config(scrollregion=frame_bottom2_canvas.bbox("all"))
 
-        filtered_data[course] = top_5
+# Display questions for the selected category
+def show_questions(course_id, category_name, frame_bottom2_inner, frame_bottom2_canvas):
+    # Clear the existing content in the inner frame
+    for widget in frame_bottom2_inner.winfo_children():
+        widget.destroy()
 
-    return filtered_data
+    # Fetch questions based on the selected category
+    if category_name == "All":
+        questions = fetch_questions(course_id)
+    else:
+        categories = fetch_categories(course_id)
+        category_id = next((cat[0] for cat in categories if cat[1] == category_name), None)
+        questions = fetch_questions(course_id, category_id)
 
-# Create a scrollable table using Treeview
-def create_table(frame, data, course_name):
-    # Course title
-    title_label = tk.Label(frame, text=course_name, font=("Arial", 14, "bold"), fg="black", bg="#E74C3C")
-    title_label.pack(pady=5)
+    # Display the questions
+    for question, correct_ans in questions:
+        question_frame = tk.Frame(frame_bottom2_inner, bd=2, relief="groove")
+        question_frame.pack(fill="x", pady=5, padx=10)
 
-    # Create a Treeview widget
-    tree = ttk.Treeview(frame, columns=("SN", "Username", "Score"), show="headings")
-    tree.heading("SN", text="SN")
-    tree.heading("Username", text="Username")
-    tree.heading("Score", text="Score")
-    tree.column("SN", width=50, anchor="center")
-    tree.column("Username", width=150, anchor="center")
-    tree.column("Score", width=100, anchor="center")
+        question_label = tk.Label(question_frame, text=f"Q: {question}", font=("Arial", 12), anchor="w")
+        question_label.pack(fill="x", padx=5, pady=2)
 
-    # Insert data into the Treeview
-    for row in data:
-        tree.insert("", "end", values=row)
+        answer_label = tk.Label(question_frame, text=f"Correct Answer: {correct_ans}", font=("Arial", 12), anchor="w", fg="green")
+        answer_label.pack(fill="x", padx=5, pady=2)
 
-    # Add a vertical scrollbar for the table
-    scrollbar = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
-    tree.configure(yscrollcommand=scrollbar.set)
-    scrollbar.pack(side="right", fill="y")
-    tree.pack(side="left", fill="both", expand=True)
+    # Update scroll region after content is added
+    frame_bottom2_inner.update_idletasks()
+    frame_bottom2_canvas.config(scrollregion=frame_bottom2_canvas.bbox("all"))
 
-# Main application
-def create_leaderboard(main_frame):
-    # Header
-    header = tk.Label(main_frame, text="Leaderboard", font=("Arial", 16, "bold"), bg="white")
-    header.pack(pady=10)
 
-    # Fetch leaderboard data
-    data = fetch_leaderboard_data(LOGGED_IN_USER[0])
+# Handle course button click
+def on_course_button_click(course_id, course_desc, frame_bottom1, frame_bottom2_inner, frame_bottom2_canvas):
+    # Clear the existing content in frame_bottom1
+    for widget in frame_bottom1.winfo_children():
+        widget.destroy()
 
-    # Create a Canvas for scrollable content
-    canvas = tk.Canvas(main_frame, bg="white")
-    canvas.pack(side="left", fill="both", expand=True)
+    # Add a button to show course description
+    desc_button = tk.Button(frame_bottom1, text="Show Course Description",
+                            command=lambda: show_course_description(course_desc, frame_bottom2_inner, frame_bottom2_canvas))
+    desc_button.pack(side="left", padx=10, pady=10)
 
-    # Add a vertical scrollbar
-    scrollbar = ttk.Scrollbar(main_frame, orient="vertical", command=canvas.yview)
-    scrollbar.pack(side="right", fill="y")
-    canvas.configure(yscrollcommand=scrollbar.set)
+    # Fetch categories for the course
+    categories = fetch_categories(course_id)
+    category_names = ["All"] + [cat[1] for cat in categories]
 
-    # Frame to hold all tables
-    table_container = tk.Frame(canvas, bg="white")
-    canvas.create_window((0, 0), window=table_container, anchor="nw")
+    # Add a dropdown for categories
+    category_var = tk.StringVar(value="All")
+    category_dropdown = ttk.Combobox(frame_bottom1, textvariable=category_var, values=category_names, state="readonly")
+    category_dropdown.pack(side="left", padx=10, pady=10)
 
-    # Function to update scroll region
-    def update_scroll_region(event):
-        canvas.configure(scrollregion=canvas.bbox("all"))
+    # Add a button to show questions
+    show_questions_button = tk.Button(frame_bottom1, text="Show Questions",
+                                     command=lambda: show_questions(course_id, category_var.get(), frame_bottom2_inner, frame_bottom2_canvas))
+    show_questions_button.pack(side="left", padx=10, pady=10)
 
-    table_container.bind("<Configure>", update_scroll_region)
+# Main function to create the course page
+def create_course_page(main_frame):
+    # Fetch courses from the database
+    courses = get_courses()
 
-    # Display all leaderboard tables (2 per row)
-    courses = list(data.keys())
-    for i in range(0, len(courses), 2):
-        row_frame = tk.Frame(table_container, bg="white")
-        row_frame.pack(fill="x", pady=10)
+    # Upper Frame: Course Buttons with horizontal scrolling
+    upper_frame_canvas = tk.Canvas(main_frame, bg="#f0f4f8", highlightthickness=0)
+    upper_frame_canvas.pack(fill="x", pady=10, side="top")
+    upper_frame = tk.Frame(upper_frame_canvas, bg="#f0f4f8")
+    upper_frame_canvas.create_window((0, 0), window=upper_frame, anchor="nw")
 
-        # First table in the row
-        if i < len(courses):
-            course1 = courses[i]
-            table_frame1 = tk.Frame(row_frame, bd=2, relief="groove")
-            table_frame1.pack(side="left", fill="both", expand=True, padx=10)
-            create_table(table_frame1, data[course1], course1)
+    # Horizontal scrollbar for upper frame
+    x_scrollbar = tk.Scrollbar(upper_frame_canvas, orient="horizontal", command=upper_frame_canvas.xview)
+    upper_frame_canvas.configure(xscrollcommand=x_scrollbar.set, xscrollincrement='1')
+    x_scrollbar.pack(side="top", fill="x",pady=50)
+    upper_frame_canvas.configure(yscrollcommand=lambda *args: None) # Disable vertical scrolling for upper frame
 
-        # Second table in the row
-        if i + 1 < len(courses):
-            course2 = courses[i + 1]
-            table_frame2 = tk.Frame(row_frame, bd=2, relief="groove")
-            table_frame2.pack(side="left", fill="both", expand=True, padx=10)
-            create_table(table_frame2, data[course2], course2)
+
+    for course_id, course_name, course_desc in courses:
+        course_button = tk.Button(upper_frame, text=course_name,
+                                    command=lambda cid=course_id, desc=course_desc:
+                                    on_course_button_click(cid, desc, frame_bottom1, frame_bottom2_inner, frame_bottom2_canvas))
+        course_button.pack(side="left", padx=10, pady=10)
+
+    upper_frame.update_idletasks()
+    upper_frame_canvas.config(scrollregion=upper_frame_canvas.bbox("all"))
+    upper_frame_canvas.config(width=main_frame.winfo_width()) # Adjust width if needed
+
+
+    # Bottom Frame: Divided into two sub-frames
+    bottom_frame = tk.Frame(main_frame, bg="#f0f4f8")
+    bottom_frame.pack(fill="both", expand=True, side="top")
+
+    # Frame Bottom 1: Course Description Button and Category Dropdown
+    global frame_bottom1
+    frame_bottom1 = tk.Frame(bottom_frame, bg="#f0f4f8")
+    frame_bottom1.pack(fill="x", pady=10)
+
+    # Frame Bottom 2: Display Course Description or Questions with vertical scrolling
+    frame_bottom2_canvas = tk.Canvas(bottom_frame, bg="#f0f4f8", highlightthickness=0)
+    frame_bottom2_canvas.pack(fill="both", expand=True)
+    frame_bottom2_inner = tk.Frame(frame_bottom2_canvas, bg="#f0f4f8")
+    frame_bottom2_canvas.create_window((0, 0), window=frame_bottom2_inner, anchor="nw")
+
+    # Vertical scrollbar for bottom frame 2
+    y_scrollbar = tk.Scrollbar(frame_bottom2_canvas, orient="vertical", command=frame_bottom2_canvas.yview)
+    frame_bottom2_canvas.configure(yscrollcommand=y_scrollbar.set, yscrollincrement='1')
+    y_scrollbar.pack(side="right", fill="y")
+    frame_bottom2_canvas.configure(xscrollcommand=lambda *args: None) # Disable horizontal scrolling for bottom frame 2
+
+
+    global frame_bottom2_inner_global
+    frame_bottom2_inner_global = frame_bottom2_inner
+    global frame_bottom2_canvas_global
+    frame_bottom2_canvas_global = frame_bottom2_canvas
+
+    # Show description of the first course by default
+    if courses:
+        first_course_id, first_course_name, first_course_desc = courses[0]
+        on_course_button_click(first_course_id, first_course_desc, frame_bottom1, frame_bottom2_inner, frame_bottom2_canvas)
+        show_course_description(first_course_desc, frame_bottom2_inner, frame_bottom2_canvas) # Directly show description
+
 
 # Example usage
 if __name__ == "__main__":
     root = tk.Tk()
-    root.title("Leaderboard")
+    root.title("Course Page")
     root.geometry("800x600")
 
-    main_frame = tk.Frame(root)
+    main_frame = tk.Frame(root, bg="#f0f4f8")
     main_frame.pack(fill="both", expand=True)
 
-    create_leaderboard(main_frame)
+    create_course_page(main_frame)
 
     root.mainloop()

@@ -325,7 +325,7 @@ def openbutton(btn_text):
         # Create a scrollable table using Treeview
         def create_table(frame, data, course_name):
             # Course title
-            title_label = Label(frame, text=course_name, font=("Arial", 14, "bold"), fg="black", bg="#E74C3C")
+            title_label = Label(frame, text=course_name, font=("Arial", 14, "bold"), fg="black", bg=MAINFRAME_COLOR)
             title_label.pack(pady=5)
 
             # Create a Treeview widget
@@ -349,14 +349,14 @@ def openbutton(btn_text):
 
         # Main application
         # Header
-        header = Label(main_frame, text="Leaderboard", font=("Arial", 16, "bold"), bg="white")
+        header = Label(main_frame, text="Leaderboard", font=("Arial", 16, "bold"), bg=MAINFRAME_COLOR)
         header.pack(pady=10)
 
         # Fetch leaderboard data
         data = fetch_leaderboard_data(LOGGED_IN_USER[0])
 
         # Create a Canvas for scrollable content
-        canvas = Canvas(main_frame, bg="white")
+        canvas = Canvas(main_frame, bg=MAINFRAME_COLOR)
         canvas.pack(side="left", fill="both", expand=True)
 
         # Add a vertical scrollbar
@@ -365,7 +365,7 @@ def openbutton(btn_text):
         canvas.configure(yscrollcommand=scrollbar.set)
 
         # Frame to hold all tables
-        table_container = Frame(canvas, bg="white")
+        table_container = Frame(canvas, bg=MAINFRAME_COLOR)
         canvas.create_window((0, 0), window=table_container, anchor="nw")
 
         # Function to update scroll region
@@ -552,97 +552,173 @@ def openbutton(btn_text):
     # Course - usersection - Aayush
     elif btn_text == 'Courses':
 
-        def fetch_questions(course_id):
+        def fetch_questions(course_id, category_id=None):
             conn = sqlite3.connect(DATABASE_FILE)
             cursor = conn.cursor()
-            cursor.execute("""
-                SELECT question, correct_ans 
-                FROM questions 
-                WHERE course_id = ?
-            """, (course_id,))
+            if category_id:
+                cursor.execute("""
+                    SELECT question, correct_ans
+                    FROM questions
+                    WHERE course_id = ? AND category_id = ?
+                """, (course_id, category_id))
+            else:
+                cursor.execute("""
+                    SELECT question, correct_ans
+                    FROM questions
+                    WHERE course_id = ?
+                """, (course_id,))
             questions = cursor.fetchall()
             conn.close()
             return questions
 
-        def create_page(container, text):
-            frame = ttk.Frame(container, style="TFrame")
-            label = ttk.Label(frame, text=text, font=("Arial", 16), anchor="center", background="#f0f4f8", foreground="#003366")
-            label.pack(expand=True, fill="both", padx=10, pady=10)
-            return frame
+        # Fetch categories for a course
+        def fetch_categories(course_id):
+            conn = sqlite3.connect(DATABASE_FILE)
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT category_id, category_name
+                FROM categories
+                WHERE course_id = ?
+            """, (course_id,))
+            categories = cursor.fetchall()
+            conn.close()
+            return categories
 
-        def create_question_page(container, questions):
-            frame = ttk.Frame(container, style="TFrame")
-            canvas = Canvas(frame)
-            scrollbar = ttk.Scrollbar(frame, orient="vertical", command=canvas.yview)
-            scrollable_frame = ttk.Frame(canvas)
+        # Display course description
+        def show_course_description(course_desc, frame_bottom2_inner, frame_bottom2_canvas):
+            # Clear the existing content in the inner frame
+            for widget in frame_bottom2_inner.winfo_children():
+                widget.destroy()
 
-            scrollable_frame.bind(
-                "<Configure>",
-                lambda e: canvas.configure(
-                    scrollregion=canvas.bbox("all")
-                )
-            )
-            
-            canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-            canvas.configure(yscrollcommand=scrollbar.set)
-            
+            # Display the course description
+            label = Label(frame_bottom2_inner, text=course_desc, font=("Arial", 12), wraplength=500, justify="left",bg="#f0f4f8")
+            label.pack(pady=10, padx=10, fill="both", expand=True)
+
+            # Update scroll region after content is added
+            frame_bottom2_inner.update_idletasks()
+            frame_bottom2_canvas.config(scrollregion=frame_bottom2_canvas.bbox("all"))
+
+        # Display questions for the selected category
+        def show_questions(course_id, category_name, frame_bottom2_inner, frame_bottom2_canvas):
+            # Clear the existing content in the inner frame
+            for widget in frame_bottom2_inner.winfo_children():
+                widget.destroy()
+
+            # Fetch questions based on the selected category
+            if category_name == "All":
+                questions = fetch_questions(course_id)
+            else:
+                categories = fetch_categories(course_id)
+                category_id = next((cat[0] for cat in categories if cat[1] == category_name), None)
+                questions = fetch_questions(course_id, category_id)
+
+            # Display the questions
             for question, correct_ans in questions:
-                question_label = ttk.Label(scrollable_frame, text=f"Q: {question}", font=("Arial", 12), background="#f0f4f8", foreground="#003366")
-                question_label.pack(anchor="w", padx=10, pady=5)
-                answer_label = ttk.Label(scrollable_frame, text=f"Correct Answer: {correct_ans}", font=("Arial", 12), background="#f0f4f8", foreground="#006400")
-                answer_label.pack(anchor="w", padx=20, pady=5)
-            
-            canvas.pack(side="left", fill="both", expand=True)
-            scrollbar.pack(side="right", fill="y")
-            return frame
+                question_frame = Frame(frame_bottom2_inner, bd=2, relief="groove")
+                question_frame.pack(fill="x", pady=5, padx=10)
 
-        style = ttk.Style()
-        style.theme_use("default")
-        style.configure("TNotebook", background="#003366", borderwidth=0)
-        style.configure("TNotebook.Tab", background="#00509e", foreground="white", font=("Arial", 12, "bold"), padding=(10, 5))
-        style.map("TNotebook.Tab", background=[("selected", "#003366")], foreground=[("selected", "white")])
-        style.configure("TFrame", background="#f0f4f8")
+                question_label = Label(question_frame, text=f"Q: {question}", font=("Arial", 12), anchor="w")
+                question_label.pack(fill="x", padx=5, pady=2)
 
-        # Outer Notebook for Courses (Horizontally Scrollable)
-        outer_canvas = Canvas(main_frame)
-        outer_scrollbar = ttk.Scrollbar(main_frame, orient="horizontal", command=outer_canvas.xview)
-        outer_frame = ttk.Frame(outer_canvas)
+                answer_label = Label(question_frame, text=f"Correct Answer: {correct_ans}", font=("Arial", 12), anchor="w", fg="green")
+                answer_label.pack(fill="x", padx=5, pady=2)
 
-        outer_frame.bind(
-            "<Configure>",
-            lambda e: outer_canvas.configure(
-                scrollregion=outer_canvas.bbox("all")
-            )
-        )
+            # Update scroll region after content is added
+            frame_bottom2_inner.update_idletasks()
+            frame_bottom2_canvas.config(scrollregion=frame_bottom2_canvas.bbox("all"))
 
-        outer_canvas.create_window((0, 0), window=outer_frame, anchor="nw")
-        outer_canvas.configure(xscrollcommand=outer_scrollbar.set)
 
-        course_tabs = ttk.Notebook(outer_frame)
-        course_tabs.pack(expand=True, fill="both")
+        # Handle course button click
+        def on_course_button_click(course_id, course_desc, frame_bottom1, frame_bottom2_inner, frame_bottom2_canvas):
+            # Clear the existing content in frame_bottom1
+            for widget in frame_bottom1.winfo_children():
+                widget.destroy()
 
-        outer_canvas.pack(side="top", fill="both", expand=True)
-        outer_scrollbar.pack(side="bottom", fill="x")
+            # Add a button to show course description
+            desc_button = Button(frame_bottom1, text="Show Course Description",
+                                    command=lambda: show_course_description(course_desc, frame_bottom2_inner, frame_bottom2_canvas),font=button_font,bg=BUTTON_COLOR,fg=FG_COLOR)
+            desc_button.pack(side="left", padx=10, pady=10)
 
+            # Fetch categories for the course
+            categories = fetch_categories(course_id)
+            category_names = ["All"] + [cat[1] for cat in categories]
+
+            Label(frame_bottom1, text='Select a category:',font=button_font,bg="#f0f4f8").pack(side='left',padx=10,pady=10)
+
+            # Add a dropdown for categories
+            category_var = StringVar(value="All")
+            category_dropdown = ttk.Combobox(frame_bottom1, textvariable=category_var, values=category_names, state="readonly",font=button_font)
+            category_dropdown.pack(side="left", padx=10, pady=10)
+
+            # Add a button to show questions
+            show_questions_button = Button(frame_bottom1, text="Show Questions",
+                                            command=lambda: show_questions(course_id, category_var.get(), frame_bottom2_inner, frame_bottom2_canvas),font=button_font,bg=BUTTON_COLOR,fg=FG_COLOR)
+            show_questions_button.pack(side="left", padx=10, pady=10)
+
+        # Fetch courses from the database
         courses = get_courses()
 
+        # Header
+        header = Label(main_frame, text="Courses", font=("Arial", 20, "bold"), bg=MAINFRAME_COLOR)
+        header.pack(pady=10)
+
+        Label(main_frame, text="Select a course, click Show Course Description to know about the course and get it's questions.", font=("Arial", 12, "bold"), bg=MAINFRAME_COLOR).pack(pady=10)
+
+        # Upper Frame: Course Buttons with horizontal scrolling
+        upper_frame_canvas = Canvas(main_frame, bg="#f0f4f8", highlightthickness=0)
+        upper_frame_canvas.pack(fill="x", pady=10, side="top")
+        upper_frame = Frame(upper_frame_canvas, bg="#f0f4f8")
+        upper_frame_canvas.create_window((0, 0), window=upper_frame, anchor="nw")
+
+        # Horizontal scrollbar for upper frame
+        x_scrollbar = Scrollbar(upper_frame_canvas, orient="horizontal", command=upper_frame_canvas.xview)
+        upper_frame_canvas.configure(xscrollcommand=x_scrollbar.set, xscrollincrement='1')
+        x_scrollbar.pack(side="top", fill="x",pady=50)
+        upper_frame_canvas.configure(yscrollcommand=lambda *args: None) # Disable vertical scrolling for upper frame
+
         for course_id, course_name, course_desc in courses:
-            # Create a tab for each course
-            course_tab = ttk.Frame(course_tabs, style="TFrame")
-            course_tabs.add(course_tab, text=course_name)
-            
-            # Inner Notebook for Topics (Exam Pattern and Questions)
-            topic_tabs = ttk.Notebook(course_tab)
-            topic_tabs.pack(expand=True, fill="both")
-            
-            # Exam Pattern Tab
-            exam_pattern_tab = create_page(topic_tabs, course_desc)
-            topic_tabs.add(exam_pattern_tab, text="Exam Pattern")
-            
-            # Questions Tab (Vertically Scrollable)
-            questions = fetch_questions(course_id)
-            questions_tab = create_question_page(topic_tabs, questions)
-            topic_tabs.add(questions_tab, text="Questions")
+            course_button = Button(upper_frame, text=course_name,
+                                        command=lambda cid=course_id, desc=course_desc:
+                                        on_course_button_click(cid, desc, frame_bottom1, frame_bottom2_inner, frame_bottom2_canvas),font=button_font,bg=BUTTON_COLOR,fg=FG_COLOR)
+            course_button.pack(side="left", padx=10, pady=10)
+
+        upper_frame.update_idletasks()
+        upper_frame_canvas.config(scrollregion=upper_frame_canvas.bbox("all"))
+        upper_frame_canvas.config(width=main_frame.winfo_width()) # Adjust width if needed
+
+
+        # Bottom Frame: Divided into two sub-frames
+        bottom_frame = Frame(main_frame, bg="#f0f4f8")
+        bottom_frame.pack(fill="both", expand=True, side="top")
+
+        # Frame Bottom 1: Course Description Button and Category Dropdown
+        global frame_bottom1
+        frame_bottom1 = Frame(bottom_frame, bg="#f0f4f8")
+        frame_bottom1.pack(fill="x", pady=10)
+
+        # Frame Bottom 2: Display Course Description or Questions with vertical scrolling
+        frame_bottom2_canvas = Canvas(bottom_frame, bg="#f0f4f8", highlightthickness=0)
+        frame_bottom2_canvas.pack(fill="both", expand=True)
+        frame_bottom2_inner = Frame(frame_bottom2_canvas, bg="#f0f4f8")
+        frame_bottom2_canvas.create_window((0, 0), window=frame_bottom2_inner, anchor="nw")
+
+        # Vertical scrollbar for bottom frame 2
+        y_scrollbar = Scrollbar(frame_bottom2_canvas, orient="vertical", command=frame_bottom2_canvas.yview)
+        frame_bottom2_canvas.configure(yscrollcommand=y_scrollbar.set, yscrollincrement='1')
+        y_scrollbar.pack(side="right", fill="y")
+        frame_bottom2_canvas.configure(xscrollcommand=lambda *args: None) # Disable horizontal scrolling for bottom frame 2
+
+
+        global frame_bottom2_inner_global
+        frame_bottom2_inner_global = frame_bottom2_inner
+        global frame_bottom2_canvas_global
+        frame_bottom2_canvas_global = frame_bottom2_canvas
+
+        # Show description of the first course by default
+        if courses:
+            first_course_id, first_course_name, first_course_desc = courses[0]
+            on_course_button_click(first_course_id, first_course_desc, frame_bottom1, frame_bottom2_inner, frame_bottom2_canvas)
+            show_course_description(first_course_desc, frame_bottom2_inner, frame_bottom2_canvas) # Directly show description
 
     # Mock Test - user section - Bivek
     elif btn_text == "Mock Test":
