@@ -506,16 +506,36 @@ def openbutton(btn_text):
     # Course - usersection - Aayush
     elif btn_text == 'Courses':
 
+        def fetch_questions(course_id):
+            """Fetch all questions for a given course from the database."""
+            conn = sqlite3.connect(DATABASE_FILE)
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT question, correct_ans 
+                FROM questions 
+                WHERE course_id = ?
+            """, (course_id,))
+            questions = cursor.fetchall()
+            conn.close()
+            return questions
+
         def create_page(container, text):
-            """Creates a page with a label displaying the given text."""
+            """Create a page with a label."""
             frame = ttk.Frame(container, style="TFrame")
             label = ttk.Label(frame, text=text, font=("Arial", 16), anchor="center", background="#f0f4f8", foreground="#003366")
             label.pack(expand=True, fill="both", padx=10, pady=10)
             return frame
 
-            
+        def create_question_page(container, questions):
+            """Create a page to display questions and their correct answers."""
+            frame = ttk.Frame(container, style="TFrame")
+            for question, correct_ans in questions:
+                question_label = ttk.Label(frame, text=f"Q: {question}", font=("Arial", 12), background="#f0f4f8", foreground="#003366")
+                question_label.pack(anchor="w", padx=10, pady=5)
+                answer_label = ttk.Label(frame, text=f"Correct Answer: {correct_ans}", font=("Arial", 12), background="#f0f4f8", foreground="#006400")
+                answer_label.pack(anchor="w", padx=20, pady=5)
+            return frame
 
-        # Set styles
         style = ttk.Style()
         style.theme_use("default")
         style.configure("TNotebook", background="#003366", borderwidth=0)
@@ -527,28 +547,26 @@ def openbutton(btn_text):
         course_tabs = ttk.Notebook(main_frame)
         course_tabs.pack(expand=True, fill="both")
 
-        # Sample Courses
-        courses = {
-            "CEE": ["Exam Pattern", "Questions", "Mock Test"],
-            "IOE": ["Exam Pattern", "Questions", "Mock Test"],
-            "Driving License Exam": ["Exam Pattern", "Questions", "Mock Test"],
-            'Loksewa Exam' : ['Exam Pattern', 'Questions', 'Mock Test']
-    }
-        
+        # Fetch courses from the database
+        courses = get_courses()
 
-        for course_name, topics in courses.items():
+        for course_id, course_name, course_desc in courses:
             # Create a tab for each course
             course_tab = ttk.Frame(course_tabs, style="TFrame")
             course_tabs.add(course_tab, text=course_name)
 
-            # Inner Notebook for Topics
+            # Inner Notebook for Topics (Exam Pattern and Questions)
             topic_tabs = ttk.Notebook(course_tab)
             topic_tabs.pack(expand=True, fill="both")
 
-            for topic_name in topics:
-                # Create a tab for each topic under the course
-                topic_tab = create_page(topic_tabs, f"Content for {topic_name}")
-                topic_tabs.add(topic_tab, text=topic_name)
+            # Exam Pattern Tab
+            exam_pattern_tab = create_page(topic_tabs, course_desc)
+            topic_tabs.add(exam_pattern_tab, text="Exam Pattern")
+
+            # Questions Tab
+            questions = fetch_questions(course_id)
+            questions_tab = create_question_page(topic_tabs, questions)
+            topic_tabs.add(questions_tab, text="Questions")
 
     # Mock Test - user section - Bivek
     elif btn_text == "Mock Test":

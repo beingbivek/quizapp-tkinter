@@ -144,7 +144,7 @@ def minclose_windowbtn(root):
         if msg_box == 'yes':
             root.destroy()
 
-    Label(root, text="Quiz App", font=("Arial", 12), padx=20, pady=5, bg=header_color, fg='white').place(x=0, y=0)
+    Label(root, text="Quiz App", font=("Arial", 12), padx=20, pady=5, bg=header_color, fg='white',width=200).place(x=0, y=0)
 
     label1 = LabelFrame(root, height=35, fg="blue", bg=HEADER_COLOR).place(x=0, y=0)
     btn2 = Button(root, text="✕", command=max, width=4, bg=HEADER_COLOR, border=0, font=button_font)
