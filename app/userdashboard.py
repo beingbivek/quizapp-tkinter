@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import ttk, messagebox
 import os, runpy, re, json, sqlite3
 from random import *
-from PIL import Image, ImageTk
+from PIL import ImageTk
 
 # User window
 root = Tk()
@@ -102,10 +102,8 @@ sidebar = Frame(root, bg=SIDEBAR_COLOR, width=200, height=600)
 sidebar.pack(side='left', fill='y')
 
 # Profile Image Placeholder
-image = PhotoImage(file=ICON_FILE_BLACK,height=50,width=50)
-# image = image.resize((100, 100), Image.ANTIALIAS)  # Resize to 100x100
-# profile_image = ImageTk.PhotoImage(image)
-profile_img = Label(sidebar, image=image,height=100,width=100)
+profile_image = ImageTk.PhotoImage(file=ICON_FILE_WHITE)
+profile_img = Label(sidebar, image=profile_image,height=100,width=100, bg=SIDEBAR_COLOR)
 profile_img.pack()
 
 # Username and Score
@@ -463,8 +461,11 @@ def openbutton(btn_text):
         secframe = Frame(main_frame, bd=2, relief='ridge')
         secframe.place(x=380, y=50, width=900, height=700)
 
+        score = Label(main_frame, text=f'Score:{total_score_of_user(users[0])}',font=('Arial',12)).place(x=780,y=225)
         
-
+        profile = Label(main_frame, text='👦', font=('Arial',60)).place(x=775,y=110)
+       
+        username = Label(main_frame, text=users[3], font=('Arial', 14, 'bold')).place(x=770, y=255)
 
         # Labels and Entries
         labels_entries = [
