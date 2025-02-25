@@ -1,24 +1,12 @@
 from tkinter import *
 from tkinter import messagebox
-import sqlite3
-import runpy
-import tkinter.font as font
-import pybase64  
-import re
-
-# Colors
-bgcolor = "#E0E0E0"
-header_color = "#34495E"
-frame_bg = "#E0E0E0" 
-button_color = '#1F618D'
-tablecolor = '#34495E'
+import sqlite3, re
 
 register = Tk()
 register.title("Register")
 register.attributes('-fullscreen', True)
 
 from quizdefaults import *
-
 
 def register_user():
     # Get input values
@@ -119,10 +107,10 @@ def adjust_frames(event=None):
 
     framemain.place(x=0, y=0, width=window_width, height=window_height)
     topframemain.place(x=0, y=0, width=window_width, height=25)
-    welcomeframe.place(x=x_main+60, y=y_main - 80, width=400, height=60)
-    frame.place(x=x_main, y=y_main, width=500, height=250)
-    infotopframe.place(x=x_main, y=y_main, width=500, height=20)
-    backframe.place(x=x_main + 450, y=y_main, width=50, height=20)
+    welcomeframe.place(x=x_main+60, y=y_main - 80, width=500, height=60) #welcome to quiz
+    frame.place(x=x_main, y=y_main, width=600, height=350) # frame for every entry
+    infotopframe.place(x=x_main, y=y_main, width=575, height=30) # frame for top of everything frame
+    backframe.place(x=x_main + 550, y=y_main, width=50, height=30)#back button frame
     register_button.place(x=button_x, y=50)
     login_button.place(x=button_x + 100, y=50)
 
@@ -144,41 +132,40 @@ minclose_windowbtn(register)
 frame = Frame(register, bd=2, relief="ridge", padx=20, pady=20, bg='white')
 frame.place(x=100, y=140, width=500, height=250)
 
-Label(frame, text="Name:", bg='white', fg='black').place(x=5, y=0)
-name_entry = Entry(frame,bg='black',fg='white')
-name_entry.place(x=5, y=20)
+Label(frame, text="Name:", bg='white', fg='black', font=label_font).place(x=5, y=5)
+name_entry = Entry(frame,bg='black',fg='white', font=label_font, width=30)
+name_entry.place(x=5, y=25)
 
-Label(frame, text="Username:", bg='white', fg='black').place(x=5, y=50)
-user_entry = Entry(frame,bg='black',fg='white')
-user_entry.place(x=5, y=70)
+Label(frame, text="Username:", bg='white', fg='black', font=label_font).place(x=5, y=55)
+user_entry = Entry(frame,bg='black',fg='white', font=label_font, width=30)
+user_entry.place(x=5, y=75)
 
-Label(frame, text="Contact Number:", bg='white', fg='black').place(x=5, y=100)
-contact_entry = Entry(frame,bg='black',fg='white')
-contact_entry.place(x=5, y=120)
+Label(frame, text="Contact Number:", bg='white', fg='black', font=label_font).place(x=5, y=105)
+contact_entry = Entry(frame,bg='black',fg='white', font=label_font, width=30)
+contact_entry.place(x=5, y=125)
 
-Label(frame, text="E-mail:", bg='white', fg='black').place(x=5, y=150)
-email_entry = Entry(frame,bg='black',fg='white')
-email_entry.place(x=5, y=170)
+Label(frame, text="E-mail:", bg='white', fg='black', font=label_font).place(x=5, y=155)
+email_entry = Entry(frame,bg='black',fg='white', font=label_font, width=30)
+email_entry.place(x=5, y=175)
 
-Label(frame, text="Password:", bg='white', fg='black').place(x=250, y=0)
-pass_entry = Entry(frame, show="*",bg='black',fg='white')
-pass_entry.place(x=250, y=20)
+Label(frame, text="Password:", bg='white', fg='black', font=label_font).place(x=290, y=5)
+pass_entry = Entry(frame, show="*",bg='black',fg='white', font=label_font, width=30)
+pass_entry.place(x=290, y=25)
 
-Label(frame, text="Confirm Password:", bg='white', fg='black').place(x=250, y=50)
-confirm_pass_entry = Entry(frame, show="*",bg='black',fg='white')
-confirm_pass_entry.place(x=250, y=70)
+Label(frame, text="Confirm Password:", bg='white', fg='black', font=label_font).place(x=290, y=55)
+confirm_pass_entry = Entry(frame, show="*",bg='black',fg='white', font=label_font, width=30)
+confirm_pass_entry.place(x=290, y=75)
 
 sq = StringVar()
 sq.set(security_questions[0])
-Label(frame, text="Select Security Question:", bg='white', fg='black').place(x=250, y=90)
-OptionMenu(frame, sq, *security_questions).place(x=210, y=110)
-# confirm_pass_entry.place(x=250, y=70)
+Label(frame, text="Select Security Question:", bg='white', fg='black', font=label_font).place(x=290, y=105)
+OptionMenu(frame, sq, *security_questions).place(x=290, y=125)
 
-Label(frame, text="Security Answer:", bg='white', fg='black').place(x=250, y=140)
-sq_ans_entry = Entry(frame, show="*",bg='black',fg='white')
-sq_ans_entry.place(x=250, y=160)
+Label(frame, text="Security Answer:", bg='white', fg='black', font=label_font).place(x=290, y=155)
+sq_ans_entry = Entry(frame, show="*",bg='black',fg='white', font=label_font, width=30)
+sq_ans_entry.place(x=290, y=175)
 
-Button(frame, text="Register", command=register_user,fg='white',bg=button_color).place(x=200, y=190)
+Button(frame, text="Register", command=register_user,fg='white',bg=BUTTON_COLOR,font=button_font).place(x=230, y=250)
 
 infotopframe = Frame(register, bd=1, relief="ridge", padx=0, pady=0, bg=header_color)
 infotopframe.place(x=100, y=140, width=500, height=20)
@@ -191,10 +178,10 @@ back_label = Label(backframe, text="Back", bg="black", fg="white", font=("Arial"
 back_label.place(x=0, y=0)
 back_label.bind("<Button-1>", lambda e: back_to_welcome(register))
 
-register_button = Button(framemain, text="Register", command=register_user, fg='white',bg=button_color)
+register_button = Button(framemain, text="Register", command=register_user, fg='white',bg=button_color,font=button_font)
 register_button.place(x=500, y=30)
 
-login_button = Button(framemain, text="Login", command=lambda: open_login(register), fg='white',bg=button_color)
+login_button = Button(framemain, text="Login", command=lambda: open_login(register), fg='white',bg=button_color,font=button_font)
 login_button.place(x=600, y=30)
 
 adjust_frames()
