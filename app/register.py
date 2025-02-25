@@ -77,8 +77,7 @@ def register_user():
         secret = str_encode(password)
         sq_answer = str_encode(sq_answer)
 
-        # Convert to ISO 8601 format without microseconds
-        timestamp = datetime.now().replace(microsecond=0).isoformat()
+        timestamp = datetime.now().replace(microsecond=0)
 
         conn = sqlite3.connect(DATABASE_FILE)
         c = conn.cursor()
