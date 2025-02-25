@@ -3,3 +3,4 @@ pillow
 sqllite3
 pybase64
 pip install tkcalendar
+faker

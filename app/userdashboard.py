@@ -25,17 +25,19 @@ minclose_windowbtn(root)
 # Functions
 
 # Read the user details from the temporary file
-try:
-    # if not os.path.exists(USER_FILE):
-    #     messagebox.showerror('Error', 'User session file not found. Please log in again.')
-    #     back_to_welcome(root)
+# try:
+#     # if not os.path.exists(USER_FILE):
+#     #     messagebox.showerror('Error', 'User session file not found. Please log in again.')
+#     #     back_to_welcome(root)
 
-    with open(USER_FILE, "r") as f:
-        LOGGED_IN_USER = f.read().strip().split(',')  # Read entire file content
-    os.remove(USER_FILE)  # Clean up the temporary file
-except FileNotFoundError:
-    messagebox.showerror('File Error','User File not found.')
-    LOGGED_IN_USER = None
+#     with open(USER_FILE, "r") as f:
+#         LOGGED_IN_USER = f.read().strip().split(',')  # Read entire file content
+#     os.remove(USER_FILE)  # Clean up the temporary file
+# except FileNotFoundError:
+#     messagebox.showerror('File Error','User File not found.')
+#     LOGGED_IN_USER = None
+LOGGED_IN_USER = ['101', 'bivek', 'a@gmail.com', 'aaaassss', '9812345670', 'None', 'YWFhYXNzc3M=', 'What was the name of your first pet?', 'Y29jbw==', '2025-02-25T18:00:25']
+print(LOGGED_IN_USER)
 
 # Fail Safe
 if not LOGGED_IN_USER or len(LOGGED_IN_USER) < 9:
@@ -270,8 +272,7 @@ def openbutton(btn_text):
     #Leaderboard user section.    
     elif btn_text == "LeaderBoard":
 
-        current_user_id = LOGGED_IN_USER[0]
-
+        # Fetch leaderboard data
         def fetch_leaderboard_data(logged_in_user_id):
             conn = sqlite3.connect(DATABASE_FILE)
             cursor = conn.cursor()
@@ -299,7 +300,7 @@ def openbutton(btn_text):
             for course, user_id, username, total_score in results:
                 if course not in leaderboard_data:
                     leaderboard_data[course] = []
-                leaderboard_data[course].append([len(leaderboard_data[course]) + 1, user_id, total_score])
+                leaderboard_data[course].append([len(leaderboard_data[course]) + 1, username, total_score])
 
                 # Store the position of the logged-in user
                 if user_id == logged_in_user_id:
@@ -321,32 +322,77 @@ def openbutton(btn_text):
 
             return filtered_data
 
-        def create_table(frame, data):
-            headers = ["SN", "User ID", "Score"]
-            for col, header in enumerate(headers):
-                Label(frame, text=header, font=("Arial", 12, "bold"), bg="grey", width=10).grid(row=0, column=col, padx=1, pady=1)
+        # Create a scrollable table using Treeview
+        def create_table(frame, data, course_name):
+            # Course title
+            title_label = Label(frame, text=course_name, font=("Arial", 14, "bold"), fg="black", bg="#E74C3C")
+            title_label.pack(pady=5)
 
-            for row_idx, row_data in enumerate(data):
-                for col_idx, value in enumerate(row_data):
-                    Label(frame, text=value, font=("Arial", 12), bg="white", width=10, relief="ridge").grid(row=row_idx + 1, column=col_idx, padx=1, pady=1)
+            # Create a Treeview widget
+            tree = ttk.Treeview(frame, columns=("SN", "Username", "Score"), show="headings")
+            tree.heading("SN", text="SN")
+            tree.heading("Username", text="Username")
+            tree.heading("Score", text="Score")
+            tree.column("SN", width=50, anchor="center")
+            tree.column("Username", width=150, anchor="center")
+            tree.column("Score", width=100, anchor="center")
 
-        
+            # Insert data into the Treeview
+            for row in data:
+                tree.insert("", "end", values=row)
+
+            # Add a vertical scrollbar for the table
+            scrollbar = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
+            tree.configure(yscrollcommand=scrollbar.set)
+            scrollbar.pack(side="right", fill="y")
+            tree.pack(side="left", fill="both", expand=True)
+
+        # Main application
+        # Header
         header = Label(main_frame, text="Leaderboard", font=("Arial", 16, "bold"), bg="white")
         header.pack(pady=10)
 
-        # Fetch and populate leaderboard
-        data = fetch_leaderboard_data(current_user_id)
+        # Fetch leaderboard data
+        data = fetch_leaderboard_data(LOGGED_IN_USER[0])
 
-        positions = [(400, 135), (900, 135), (400, 525), (900, 525)]
-        course_titles = list(data.keys())
+        # Create a Canvas for scrollable content
+        canvas = Canvas(main_frame, bg="white")
+        canvas.pack(side="left", fill="both", expand=True)
 
-        for i, course in enumerate(course_titles[:4]):  # Display up to 4 courses
-            table_frame = Frame(main_frame, bd=2)
-            table_frame.place(x=positions[i][0], y=positions[i][1], width=390, height=250)
-            Label(main_frame, text=course, font=('Arial', 14, 'bold'), fg='black', bg='#E74C3C').place(x=positions[i][0], y=positions[i][1] - 35)
-            create_table(table_frame, data[course])
+        # Add a vertical scrollbar
+        scrollbar = ttk.Scrollbar(main_frame, orient="vertical", command=canvas.yview)
+        scrollbar.pack(side="right", fill="y")
+        canvas.configure(yscrollcommand=scrollbar.set)
 
-        pass
+        # Frame to hold all tables
+        table_container = Frame(canvas, bg="white")
+        canvas.create_window((0, 0), window=table_container, anchor="nw")
+
+        # Function to update scroll region
+        def update_scroll_region(event):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+
+        table_container.bind("<Configure>", update_scroll_region)
+
+        # Display all leaderboard tables (2 per row)
+        courses = list(data.keys())
+        for i in range(0, len(courses), 2):
+            row_frame = Frame(table_container, bg="white")
+            row_frame.pack(fill="x", pady=10)
+
+            # First table in the row
+            if i < len(courses):
+                course1 = courses[i]
+                table_frame1 = Frame(row_frame, bd=2, relief="groove")
+                table_frame1.pack(side="left", fill="both", expand=True, padx=10)
+                create_table(table_frame1, data[course1], course1)
+
+            # Second table in the row
+            if i + 1 < len(courses):
+                course2 = courses[i + 1]
+                table_frame2 = Frame(row_frame, bd=2, relief="groove")
+                table_frame2.pack(side="left", fill="both", expand=True, padx=10)
+                create_table(table_frame2, data[course2], course2)
     
     # Edit profile - user section - mukesh
     elif btn_text == "Profile":
@@ -494,20 +540,19 @@ def openbutton(btn_text):
         sq = StringVar()
         sq.set(users[7])
         # Label(main_frame, text="Select Security Question:", bg='white', fg='black').place(x=250, y=90)
-        Label(main_frame, text='Change Security Question').place(x=950, y=480)
-        OptionMenu(main_frame, sq, *security_questions).place(x=950, y=500)
+        Label(main_frame, text='Change Security Question').place(x=950, y=540)
+        OptionMenu(main_frame, sq, *security_questions).place(x=950, y=560)
 
-        Label(main_frame, text='New Security Answer').place(x=950, y=580)
-        sq_answer_entry = Entry(main_frame, width=35).place(x=950,y=600)
+        Label(main_frame, text='New Security Answer').place(x=950, y=600)
+        sq_answer_entry = Entry(main_frame, width=35).place(x=950,y=620)
 
         # Buttons
-        Button(main_frame,text='UPDATE', bg=BUTTON_COLOR, fg=FG_COLOR, font=('Arial', 14, 'bold'), command=update_profile).place(x=screen_width/2.5, y=690)
+        Button(main_frame,text='UPDATE', bg=BUTTON_COLOR, fg=FG_COLOR, font=('Arial', 14, 'bold'), command=update_profile).place(x=screen_width/2.5, y=700)
      
     # Course - usersection - Aayush
     elif btn_text == 'Courses':
 
         def fetch_questions(course_id):
-            """Fetch all questions for a given course from the database."""
             conn = sqlite3.connect(DATABASE_FILE)
             cursor = conn.cursor()
             cursor.execute("""
@@ -520,20 +565,35 @@ def openbutton(btn_text):
             return questions
 
         def create_page(container, text):
-            """Create a page with a label."""
             frame = ttk.Frame(container, style="TFrame")
             label = ttk.Label(frame, text=text, font=("Arial", 16), anchor="center", background="#f0f4f8", foreground="#003366")
             label.pack(expand=True, fill="both", padx=10, pady=10)
             return frame
 
         def create_question_page(container, questions):
-            """Create a page to display questions and their correct answers."""
             frame = ttk.Frame(container, style="TFrame")
+            canvas = Canvas(frame)
+            scrollbar = ttk.Scrollbar(frame, orient="vertical", command=canvas.yview)
+            scrollable_frame = ttk.Frame(canvas)
+
+            scrollable_frame.bind(
+                "<Configure>",
+                lambda e: canvas.configure(
+                    scrollregion=canvas.bbox("all")
+                )
+            )
+            
+            canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+            canvas.configure(yscrollcommand=scrollbar.set)
+            
             for question, correct_ans in questions:
-                question_label = ttk.Label(frame, text=f"Q: {question}", font=("Arial", 12), background="#f0f4f8", foreground="#003366")
+                question_label = ttk.Label(scrollable_frame, text=f"Q: {question}", font=("Arial", 12), background="#f0f4f8", foreground="#003366")
                 question_label.pack(anchor="w", padx=10, pady=5)
-                answer_label = ttk.Label(frame, text=f"Correct Answer: {correct_ans}", font=("Arial", 12), background="#f0f4f8", foreground="#006400")
+                answer_label = ttk.Label(scrollable_frame, text=f"Correct Answer: {correct_ans}", font=("Arial", 12), background="#f0f4f8", foreground="#006400")
                 answer_label.pack(anchor="w", padx=20, pady=5)
+            
+            canvas.pack(side="left", fill="both", expand=True)
+            scrollbar.pack(side="right", fill="y")
             return frame
 
         style = ttk.Style()
@@ -543,27 +603,43 @@ def openbutton(btn_text):
         style.map("TNotebook.Tab", background=[("selected", "#003366")], foreground=[("selected", "white")])
         style.configure("TFrame", background="#f0f4f8")
 
-        # Outer Notebook for Courses
-        course_tabs = ttk.Notebook(main_frame)
+        # Outer Notebook for Courses (Horizontally Scrollable)
+        outer_canvas = Canvas(main_frame)
+        outer_scrollbar = ttk.Scrollbar(main_frame, orient="horizontal", command=outer_canvas.xview)
+        outer_frame = ttk.Frame(outer_canvas)
+
+        outer_frame.bind(
+            "<Configure>",
+            lambda e: outer_canvas.configure(
+                scrollregion=outer_canvas.bbox("all")
+            )
+        )
+
+        outer_canvas.create_window((0, 0), window=outer_frame, anchor="nw")
+        outer_canvas.configure(xscrollcommand=outer_scrollbar.set)
+
+        course_tabs = ttk.Notebook(outer_frame)
         course_tabs.pack(expand=True, fill="both")
 
-        # Fetch courses from the database
+        outer_canvas.pack(side="top", fill="both", expand=True)
+        outer_scrollbar.pack(side="bottom", fill="x")
+
         courses = get_courses()
 
         for course_id, course_name, course_desc in courses:
             # Create a tab for each course
             course_tab = ttk.Frame(course_tabs, style="TFrame")
             course_tabs.add(course_tab, text=course_name)
-
+            
             # Inner Notebook for Topics (Exam Pattern and Questions)
             topic_tabs = ttk.Notebook(course_tab)
             topic_tabs.pack(expand=True, fill="both")
-
+            
             # Exam Pattern Tab
             exam_pattern_tab = create_page(topic_tabs, course_desc)
             topic_tabs.add(exam_pattern_tab, text="Exam Pattern")
-
-            # Questions Tab
+            
+            # Questions Tab (Vertically Scrollable)
             questions = fetch_questions(course_id)
             questions_tab = create_question_page(topic_tabs, questions)
             topic_tabs.add(questions_tab, text="Questions")
@@ -624,15 +700,6 @@ def openbutton(btn_text):
                 mocktest_name, fulltime = get_mocktest_fulltime(
                     next((mt[0] for mt in get_mocktest() if mt[1] == mocktestname), 1)
                 )
-
-                # # Question Functions
-                # def get_questions():
-                #     conn = sqlite3.connect(DATABASE_FILE)
-                #     c = conn.cursor()
-                #     c.execute()
-                #     pass
-
-
 
                 time_left = fulltime * 60  
                 mock_running = True  # Mock test is active
@@ -742,10 +809,9 @@ def openbutton(btn_text):
                     # Calculate percentage
                     percentage = (score / total) * 100 if total > 0 else 0
                     scaled_score = (score / total) * fullmark if total > 0 else 0
-                    scaled_score = scaled_score
                     
                     # Save result (assuming current_user is available)
-                    current_user_id = 1  # Replace with actual logged-in user ID
+                    current_user_id = LOGGED_IN_USER[0]
                     cursor.execute("""INSERT INTO mocktestresults 
                                    (mocktest_id, user_id, course_id, result, resulttime)
                                    VALUES (?, ?, ?, ?, datetime('now'))""",
