@@ -506,7 +506,7 @@ def openbutton(btn_text):
             update_course_table(results)
 
         def update_course_table(results):
-            stat_label.config(text=len(get_courses()))
+            stat_course_count.config(text=stats()[1][1])
             for row in course_table.get_children():
                 course_table.delete(row)
             for row in results:
@@ -587,14 +587,24 @@ def openbutton(btn_text):
 
         stats_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
         stats_frame.pack()
-        stat_box = Frame(stats_frame, bg=BUTTON_COLOR, width=120, height=60)
-        stat_box.pack_propagate(False)
-        stat_box.pack(side=LEFT, padx=10, pady=10)
+
+        stat_course_box = Frame(stats_frame, bg=BUTTON_COLOR, width=120, height=60)
+        stat_course_box.pack_propagate(False)
+        stat_course_box.pack(side=LEFT, padx=10, pady=10)
             
-        stat_label = Label(stat_box, text=stats()[1][1], font=("Arial", 14, "bold"), fg=FG_COLOR, bg=BUTTON_COLOR)
-        stat_label.pack()
-        stat_desc = Label(stat_box, text='Total Courses', font=("Arial", 10), fg=FG_COLOR, bg=BUTTON_COLOR)
-        stat_desc.pack()
+        stat_course_count = Label(stat_course_box, text=stats()[1][1], font=("Arial", 14, "bold"), fg=FG_COLOR, bg=BUTTON_COLOR)
+        stat_course_count.pack()
+        stat_course_label = Label(stat_course_box, text='Total Courses', font=("Arial", 10), fg=FG_COLOR, bg=BUTTON_COLOR)
+        stat_course_label.pack()
+
+        stat_category_box = Frame(stats_frame, bg=BUTTON_COLOR, width=120, height=60)
+        stat_category_box.pack_propagate(False)
+        stat_category_box.pack(side=LEFT, padx=10, pady=10)
+            
+        stat_category_count = Label(stat_category_box, text=stats()[2][1], font=("Arial", 14, "bold"), fg=FG_COLOR, bg=BUTTON_COLOR)
+        stat_category_count.pack()
+        stat_category_label = Label(stat_category_box, text='Total Categories', font=("Arial", 10), fg=FG_COLOR, bg=BUTTON_COLOR)
+        stat_category_label.pack()
 
         # Search Frame for courses
         course_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
@@ -719,8 +729,6 @@ def openbutton(btn_text):
                     c.execute('DELETE FROM courses WHERE course_id = ?', (item_data["values"][0],))
                     conn.commit()
                     update_course_table(get_courses())
-                    stat_label.config(text=stats()[1][1])
-                
 
         course_action_frame = Frame(main_frame,bg=MAINFRAME_COLOR)
         course_action_frame.pack()
@@ -805,30 +813,11 @@ def openbutton(btn_text):
             close_category_btn.pack(side='right', padx=5, pady=5)
 
         def update_category_table(results):
+            stat_category_count.config(text=stats()[2][1])
             for row in category_table.get_children():
                 category_table.delete(row)
             for row in results:
                 category_table.insert('', 'end', values=row)
-
-        # All categories data with coursename
-        def get_categories():
-            
-            c.execute('SELECT * FROM categories')
-            categories = c.fetchall()
-            categories = [list(category) for category in categories]
-            # print(categories)
-            courses = get_courses()
-            # print(courses)
-
-            for category in categories:
-                for course in courses:
-                    if category[2] == course[0]:
-                        category[2] = course[1]
-                        break
-            
-            # print(categories)
-
-            return categories
 
         # Search Frame for courses
         category_frame = Frame(main_frame, bg=MAINFRAME_COLOR)
@@ -880,8 +869,6 @@ def openbutton(btn_text):
         # To display all courses at first
         update_category_table(get_categories())
 
-        # Edit and Delete Button Functions
-
 
         # On click in category record
 
@@ -892,6 +879,7 @@ def openbutton(btn_text):
 
         category_table.bind('<<TreeviewSelect>>', on_category_select)
 
+        # Edit and Delete Button Functions
         def edit_category_record():
             def save_edit_category():
                 try:
@@ -968,7 +956,7 @@ def openbutton(btn_text):
                     conn.commit()
                     update_category_table(get_categories())
 
-        # EDIT / DELETE Buttons for Courses
+        # EDIT / DELETE Buttons for Categories
 
         category_action_frame = Frame(main_frame,bg=MAINFRAME_COLOR)
         category_action_frame.pack()
@@ -1105,6 +1093,7 @@ def openbutton(btn_text):
 
             c.execute(query, tuple(params))
             results = c.fetchall()
+            print(results)
             conn.close()
             return results
             
@@ -1229,15 +1218,6 @@ def openbutton(btn_text):
            questions = cursor.fetchall()
            conn.close()
            return questions
-        
-        #takes data from corses
-        def fetch_courses():
-            conn = sqlite3.connect(DATABASE_FILE)
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM courses")
-            courses = cursor.fetchall()
-            conn.close()
-            return courses
 
        # Modify fetch_categories to filter by course_id
         def fetch_categories(course_id=None):
@@ -1258,7 +1238,6 @@ def openbutton(btn_text):
             conn.commit()
             conn.close()
             update_questions_table()
-
 
         def delete_selected_question():
             selected_item = questions_table.selection()
@@ -1292,7 +1271,7 @@ def openbutton(btn_text):
                 questions_table.delete(row)
            for question in fetch_questions():
                 mocktest_name = next((test[1] for test in fetch_mock_tests() if test[0] == question[1]), None)
-                course_name = next((test[1] for test in fetch_courses() if test[0] == question[2]), None)
+                course_name = next((test[1] for test in get_courses() if test[0] == question[2]), None)
                 questions_table.insert("", "end", values=(question[0], mocktest_name, course_name, question[3], question[4]))
         
         #Function to add mocktest name, full marks, passmarks
@@ -1389,7 +1368,7 @@ def openbutton(btn_text):
             mock_test_combo.pack()
             
             Label(add_question_window, text="Courses:").pack()
-            course_names = [test[1] for test in fetch_courses()]
+            course_names = [test[1] for test in get_courses()]
             courses_combo = ttk.Combobox(add_question_window, values= course_names, state='readonly')
             courses_combo.pack()
             
@@ -1401,7 +1380,7 @@ def openbutton(btn_text):
               # Update categories based on selected course
             def update_categories(event):
                 selected_course_name = courses_combo.get()
-                course_id = next((course[0] for course in fetch_courses() if course[1] == selected_course_name), None)
+                course_id = next((course[0] for course in get_courses() if course[1] == selected_course_name), None)
                 if course_id:
                     category_names = [category[1] for category in fetch_categories(course_id)]
                     categories_combo['values'] = category_names
@@ -1413,7 +1392,7 @@ def openbutton(btn_text):
                     selected_course_name = courses_combo.get()
                     nonlocal course_id
                     nonlocal category_id
-                    course_id = next((course[0] for course in fetch_courses() if course[1] == selected_course_name), None)
+                    course_id = next((course[0] for course in get_courses() if course[1] == selected_course_name), None)
 
 
                     category = categories_combo.get()
@@ -1460,7 +1439,7 @@ def openbutton(btn_text):
                    
                 else:
                     mock_test_id = next((test[0] for test in fetch_mock_tests() if test[1] == selected_test), None)
-                    course_id = next((test[0] for test in fetch_courses() if test[1] == course), None)
+                    course_id = next((test[0] for test in get_courses() if test[1] == course), None)
                     category_id = next((cat[0] for cat in fetch_categories(course_id) if cat[1] == category), None)
 
                     # Debugging statements
@@ -1551,12 +1530,9 @@ def openbutton(btn_text):
     # Question - admin section - aayush
     elif btn_text == buttons[5]:
 
-        
         #header section
         header = Label(main_frame, text="Questions", font=header_font, bg=MAINFRAME_COLOR)
         header.pack(pady=10)
-
-
 
         def fetch_questions():
            conn = sqlite3.connect(DATABASE_FILE)
@@ -1565,16 +1541,6 @@ def openbutton(btn_text):
            questions = cursor.fetchall()
            conn.close()
            return questions
-        
-
-        #takes data from corses
-        def fetch_courses():
-            conn = sqlite3.connect(DATABASE_FILE)
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM courses")
-            courses = cursor.fetchall()
-            conn.close()
-            return courses
 
        # Modify fetch_categories to filter by course_id
         def fetch_categories(course_id=None):
@@ -1596,7 +1562,7 @@ def openbutton(btn_text):
 
             i = 0
             for question in fetch_questions():
-                course_name = next((test[1] for test in fetch_courses() if test[0] == question[1]), None)
+                course_name = next((test[1] for test in get_courses() if test[0] == question[1]), None)
                 category_name = next((test[1] for test in fetch_categories() if test[0] == question[2]), None)
 
                 try:
@@ -1636,7 +1602,7 @@ def openbutton(btn_text):
             i = 0
             for question in fetch_questions():
                
-                course_name = next((test[1] for test in fetch_courses() if test[0] == question[1]), None)
+                course_name = next((test[1] for test in get_courses() if test[0] == question[1]), None)
                 category_name = next((test[1] for test in fetch_categories() if test[0] == question[2]), None)
                  # Ensure the data is properly converted into a list
                 try:
@@ -1681,7 +1647,7 @@ def openbutton(btn_text):
 
             #Courses
             Label(add_window, text="Courses:").pack()
-            course_names = [test[1] for test in fetch_courses()]
+            course_names = [test[1] for test in get_courses()]
             courses_combo = ttk.Combobox(add_window, values= course_names, state='readonly')
             courses_combo.pack(pady=10)
 
@@ -1694,7 +1660,7 @@ def openbutton(btn_text):
               # Update categories based on selected course
             def update_categories(event):
                 selected_course_name = courses_combo.get()
-                course_id = next((course[0] for course in fetch_courses() if course[1] == selected_course_name), None)
+                course_id = next((course[0] for course in get_courses() if course[1] == selected_course_name), None)
                 if course_id:
                     category_names = [category[1] for category in fetch_categories(course_id)]
                     categories_combo['values'] = category_names
@@ -1736,7 +1702,7 @@ def openbutton(btn_text):
                     return
                 
                 
-                course_id = next((test[0] for test in fetch_courses() if test[1] == course), None)
+                course_id = next((test[0] for test in get_courses() if test[1] == course), None)
                 category_id = next((cat[0] for cat in fetch_categories(course_id) if cat[1] == category), None)
 
                  # Debugging statements
@@ -1795,7 +1761,7 @@ def openbutton(btn_text):
             Label(edit_window, text="Courses:").pack()
 
             # Fetch courses and set default selection
-            course_names = [course[1] for course in fetch_courses()]
+            course_names = [course[1] for course in get_courses()]
             c_name = StringVar()
             c_name.set(selected_question[4])  # Default selection
 
@@ -1807,7 +1773,7 @@ def openbutton(btn_text):
             Label(edit_window, text="Categories:").pack()
 
             # Fetch initial categories based on the default course
-            default_course_id = next((course[0] for course in fetch_courses() if course[1] == c_name.get()), None)
+            default_course_id = next((course[0] for course in get_courses() if course[1] == c_name.get()), None)
             category_names = [category[1] for category in fetch_categories(default_course_id)]
 
             # Create Category ComboBox
@@ -1820,7 +1786,7 @@ def openbutton(btn_text):
             # Function to update categories when a course is selected
             def update_categories(event):
                 selected_course_name = c_name.get()
-                selected_course_id = next((course[0] for course in fetch_courses() if course[1] == selected_course_name), None)
+                selected_course_id = next((course[0] for course in get_courses() if course[1] == selected_course_name), None)
                 
                 if selected_course_id is not None:
                     new_category_names = [category[1] for category in fetch_categories(selected_course_id)]
@@ -1861,7 +1827,7 @@ def openbutton(btn_text):
                     messagebox.showerror("Error", "Please fill all fields correctly.")
                     return
 
-                course_id = next((test[0] for test in fetch_courses() if test[1] == course), None)
+                course_id = next((test[0] for test in get_courses() if test[1] == course), None)
                 category_id = next((cat[0] for cat in fetch_categories(course_id) if cat[1] == category), None)
 
                 # Retrieve the question ID from the selected question
@@ -1946,14 +1912,7 @@ def openbutton(btn_text):
         total_label= Label(total_frame,text='Total Questions : ',font = button_font)
         total_label.pack(side=RIGHT)
 
-
-
-
         update_questions_table()
-
-
-
-
 
     else:
         label = Label(main_frame, text=btn_text, font=("Arial", 20, "bold"), bg=MAINFRAME_COLOR)

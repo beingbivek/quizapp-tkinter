@@ -25,6 +25,7 @@ label_text_color = "black"  # Text color for labels
 # File path
 DATABASE_FILE = r'..\quizapp-tkinter\quiz.db'
 USER_FILE = r'..\quizapp-tkinter\\app\quizdb\user.txt'
+ICON_FILE = r'..\quizapp-tkinter\app\images\icon\quizicon.ico'
 ICON_FILE_WHITE = r'..\quizapp-tkinter\app\images\qa_white_icon.png'
 ICON_FILE_BLACK = r'..\quizapp-tkinter\app\images\qa_black_icon.png'
 ICON_FILE_WHITE_TOP = r'..\quizapp-tkinter\app\images\qa_white_icon_top.png'
@@ -144,7 +145,7 @@ def minclose_windowbtn(root):
         if msg_box == 'yes':
             root.destroy()
 
-    Label(root, text="Quiz App", font=("Arial", 12), padx=20, pady=5, bg=header_color, fg='white',width=200).place(x=0, y=0)
+    Label(root, text="Quiz App", font=("Arial", 12), padx=20, pady=5, bg=header_color, fg='white',width=screen_width).place(x=0, y=0)
 
     label1 = LabelFrame(root, height=35, fg="blue", bg=HEADER_COLOR).place(x=0, y=0)
     btn2 = Button(root, text="✕", command=max, width=4, bg=HEADER_COLOR, border=0, font=button_font)
