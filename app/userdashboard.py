@@ -25,19 +25,19 @@ minclose_windowbtn(root)
 # Functions
 
 # Read the user details from the temporary file
-# try:
-#     # if not os.path.exists(USER_FILE):
-#     #     messagebox.showerror('Error', 'User session file not found. Please log in again.')
-#     #     back_to_welcome(root)
+try:
+    if not os.path.exists(USER_FILE):
+        messagebox.showerror('Error', 'User session file not found. Please log in again.')
+        back_to_welcome(root)
 
-#     with open(USER_FILE, "r") as f:
-#         LOGGED_IN_USER = f.read().strip().split(',')  # Read entire file content
-#     os.remove(USER_FILE)  # Clean up the temporary file
-# except FileNotFoundError:
-#     messagebox.showerror('File Error','User File not found.')
-#     LOGGED_IN_USER = None
-LOGGED_IN_USER = ['101', 'bivek', 'a@gmail.com', 'aaaassss', '9812345670', 'None', 'YWFhYXNzc3M=', 'What was the name of your first pet?', 'Y29jbw==', '2025-02-25T18:00:25']
-print(LOGGED_IN_USER)
+    with open(USER_FILE, "r") as f:
+        LOGGED_IN_USER = f.read().strip().split(',')  # Read entire file content
+    os.remove(USER_FILE)  # Clean up the temporary file
+except FileNotFoundError:
+    messagebox.showerror('File Error','User File not found.')
+    LOGGED_IN_USER = None
+# LOGGED_IN_USER = ['101', 'bivek', 'a@gmail.com', 'aaaassss', '9812345670', 'None', 'YWFhYXNzc3M=', 'What was the name of your first pet?', 'Y29jbw==', '2025-02-25T18:00:25']
+# print(LOGGED_IN_USER)
 
 # Fail Safe
 if not LOGGED_IN_USER or len(LOGGED_IN_USER) < 9:
