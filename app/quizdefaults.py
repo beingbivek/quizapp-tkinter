@@ -189,18 +189,36 @@ def already_exists(select,table,where,who):
         conn.close()
     return False
 
-
-def delete_data(conn, table_name, primary_key_column, primary_key_value):
-    """
-    Deletes data from a table and its associated data in related tables.
+def delete_data(table_name, primary_key_column, primary_key_value):
     
-    Parameters:
-        conn: SQLite database connection object.
-        table_name: Name of the table from which to delete data.
-        primary_key_column: Name of the primary key column in the table.
-        primary_key_value: Value of the primary key for the record to delete.
-    """
+    def get_table_columns(table_name):
+        """
+        Retrieve the column names of a table.
+
+        Args:
+            table_name (str): Name of the table.
+
+        Returns:
+            list: List of column names.
+        """
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+
+        # Execute the PRAGMA table_info query
+        cursor.execute(f"PRAGMA table_info({table_name})")
+        columns = cursor.fetchall()
+
+        # Extract column names
+        column_names = [column[1] for column in columns]  # Column name is at index 1
+
+        # Close the connection
+        cursor.close()
+        conn.close()
+
+        return column_names      
+
     try:
+        conn = sqlite3.connect(DATABASE_FILE)
         cursor = conn.cursor()
 
         # Define the order of deletion based on table relationships
@@ -218,44 +236,41 @@ def delete_data(conn, table_name, primary_key_column, primary_key_value):
         if table_name not in deletion_order:
             raise ValueError(f"Table '{table_name}' is not supported for deletion.")
 
-        # Get the index of the table in the deletion order
-        table_index = deletion_order.index(table_name)
+        # Disable foreign key enforcement temporarily
+        cursor.execute("PRAGMA foreign_keys = OFF;")
+        conn.commit()
 
-        # Delete data from the specified table and its child tables
-        for table in deletion_order[table_index:]:
+        # Perform the deletion
+        for table in deletion_order:
             if table == table_name:
                 # Delete from the specified table
-                query = f"DELETE FROM {table_name} WHERE {primary_key_column} = ?"
+                query = f"DELETE FROM {table} WHERE {primary_key_column} = ?"
+                cursor.execute(query, (primary_key_value,))
+                conn.commit()
+                print(f"Deleted from {table}.")
             else:
-                # Delete from child tables
-                if table == "mocktestresults":
-                    query = f"DELETE FROM mocktestresults WHERE {primary_key_column} = ?"
-                elif table == "mockquestions":
-                    query = f"DELETE FROM mockquestions WHERE {primary_key_column} = ?"
-                elif table == "questions":
-                    query = f"DELETE FROM questions WHERE {primary_key_column} = ?"
-                elif table == "categories":
-                    query = f"DELETE FROM categories WHERE {primary_key_column} = ?"
-                elif table == "mocktests":
-                    query = f"DELETE FROM mocktests WHERE {primary_key_column} = ?"
-                elif table == "courses":
-                    query = f"DELETE FROM courses WHERE {primary_key_column} = ?"
-                elif table == "users":
-                    query = f"DELETE FROM users WHERE {primary_key_column} = ?"
+                columns = get_table_columns(table)
+                if primary_key_column in columns:
+                    # Perform the deletion from related tables if the column exists
+                    query = f"DELETE FROM {table} WHERE {primary_key_column} = ?"
+                    cursor.execute(query, (primary_key_value,))
+                    conn.commit()
+                    print(f"Deleted from {table}.")
 
-            cursor.execute(query, (primary_key_value,))
-            print(f"Deleted from {table}: {cursor.rowcount} rows affected.")
-
-        # Commit the changes
+        # Re-enable foreign key enforcement
+        cursor.execute("PRAGMA foreign_keys = ON;")
         conn.commit()
+
         print("Deletion completed successfully.")
-        messagebox.showinfo('Delete Success',f'The {primary_key_column} : {primary_key_value} is permanently deleted.')
+        messagebox.showinfo('Delete Success', f'The {primary_key_column} : {primary_key_value} is permanently deleted.')
 
     except Exception as e:
         # Rollback in case of error
         conn.rollback()
         print(f"Error during deletion: {e}")
-        messagebox.showinfo('Delete Error',f"Error during deletion: {e}")
+        messagebox.showinfo('Delete Error', f"Error during deletion: {e}")
+
     finally:
-        # Close the cursor
+        # Close the cursor and connection
         cursor.close()
+        conn.close()

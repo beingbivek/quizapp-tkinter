@@ -402,11 +402,8 @@ def openbutton(btn_text):
             if messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this user?"):
                 user_id = tree.item(selected_item, "values")[0]
                 try:
-                    conn = sqlite3.connect(DATABASE_FILE)
-                    delete_data(conn,'users','user_id',user_id)
-                    conn.close()
+                    delete_data('users','user_id',user_id)
                     refresh_table()  # Refresh the table
-                    # messagebox.showinfo("Success", "User deleted successfully!")
                 except Exception as e:
                     messagebox.showerror("Error", f"An error occurred: {e}")
 
@@ -759,10 +756,9 @@ def openbutton(btn_text):
             if selected_item:
                 confirm = messagebox.askokcancel("Confirm Delete", f"Are you sure you want to delete {item_data['values'][1]}?")
                 if confirm:
-                    # c.execute('DELETE FROM courses WHERE course_id = ?', (item_data["values"][0],))
-                    delete_data(conn,table_name='courses',primary_key_column='course_id',primary_key_value=item_data["values"][0])
-                    conn.commit()
+                    delete_data(table_name='courses',primary_key_column='course_id',primary_key_value=item_data["values"][0])
                     update_course_table(get_courses())
+                    update_category_table(get_categories())
 
         course_action_frame = Frame(main_frame,bg=MAINFRAME_COLOR)
         course_action_frame.pack()
@@ -1013,9 +1009,7 @@ def openbutton(btn_text):
             if selected_item:
                 confirm = messagebox.askokcancel("Confirm Delete", f"Are you sure you want to delete {item_data['values'][1]} from {item_data['values'][2]}?")
                 if confirm:
-                    # c.execute('DELETE FROM categories WHERE category_id = ?', (item_data["values"][0],))
-                    delete_data(conn,table_name='categories',primary_key_column='cateogry_id',primary_key_value=item_data["values"][0])
-                    conn.commit()
+                    delete_data(table_name='categories',primary_key_column='cateogry_id',primary_key_value=item_data["values"][0])
                     update_category_table(get_categories())
 
         # EDIT / DELETE Buttons for Categories
@@ -1292,12 +1286,7 @@ def openbutton(btn_text):
             return categories
         
         def delete_question(question_id):
-            conn = sqlite3.connect(DATABASE_FILE)
-            # cursor = conn.cursor()
-            # cursor.execute("DELETE FROM mockquestions WHERE mockquestion_id = ?", (question_id,))
-            # conn.commit()
-            delete_data(conn,'mockquestions','mockquestion_id',question_id)
-            conn.close()
+            delete_data('mockquestions','mockquestion_id',question_id)
             update_questions_table()
 
         def delete_selected_question():
@@ -1315,17 +1304,9 @@ def openbutton(btn_text):
                 messagebox.showwarning("Warning", "Please select a mock test to delete.")
                 return
             mock_test_id = mock_test_table.item(selected_item)["values"][0]
-            
-            conn = sqlite3.connect(DATABASE_FILE)
-            delete_data(conn,'mocktests','mocktest_id',mock_test_id)
-            # cursor = conn.cursor()
-            # cursor.execute("DELETE FROM mocktests WHERE mocktest_id = ?", (mock_test_id,))
-            # cursor.execute("DELETE FROM mockquestions WHERE mocktest_id = ?", (mock_test_id,))  # Delete related questions
-            # conn.commit()
-            conn.close()
+            delete_data('mocktests','mocktest_id',mock_test_id)
             update_mock_test_table()
             update_questions_table()
-            # messagebox.showinfo("Success", "Mock test deleted successfully!")
 
         #updates question table everytime we make changes
         def update_questions_table():
@@ -1375,12 +1356,13 @@ def openbutton(btn_text):
                 if not mocktest_name or not mocktest_desc or not full_marks or not pass_marks or not full_time:
                    messagebox.showwarning("Warning", "Please fill in all fields.")
                    
+                elif not(full_time.isdigit() and pass_marks.isdigit() and full_marks.isdigit()):
+                    messagebox.showwarning('Warning','These value should be numerical.')
+                    return
+                
                 elif pass_marks <= full_marks:
                     messagebox.showwarning("Warning", "Passmarks should be less than fullmarks!")
                     return
-                
-                elif not full_time.isdigit():
-                    messagebox.showwarning('Warning','Enter Full time in Number.')
 
                 elif already_exists('mocktest_name','mocktests','mocktest_name',mocktest_name):
                     return
@@ -1398,10 +1380,6 @@ def openbutton(btn_text):
                         add_mocktest.destroy()
                     except sqlite3.IntegrityError:
                         messagebox.showerror("Error", "Mock test with this name already exists.")
-                    
-                    
-            
-            #Button(add_mocktest, text="Save", command=save_mock).pack()
 
             add_mocktest.attributes('-toolwindow', True)
 
@@ -1471,8 +1449,8 @@ def openbutton(btn_text):
                 question_no = str(len(question_no))
                 conn.commit()
                 conn.close()
-                check_qno.config(text=f'Total Questions in {categories_combo.get()} :: {question_no}')
-                return question_no
+                check_qno.config(text=f'Total Questions in {categories_combo.get()} : {question_no}')
+                return int(question_no)
                 
 
             courses_combo.bind("<<ComboboxSelected>>", update_categories)  # Bind the event
@@ -1498,7 +1476,7 @@ def openbutton(btn_text):
                     messagebox.showerror("Error", "Please fill all fields correctly.")
                     
               
-                elif num_questions > no_of_question(course_id,category_id):
+                elif int(num_questions) > no_of_question(course_id,category_id):
                     messagebox.showerror('Error', 'Please insert valid no of questions!')
                    
                 else:
@@ -1694,13 +1672,8 @@ def openbutton(btn_text):
             selected_question = questions_table.item(selected_item, "values")
             print(selected_question[0])
             option = messagebox.askokcancel('Delete records',f'Do you want to delete Q:{selected_question[1]}')
-            if option :
-                conn= sqlite3.connect(DATABASE_FILE)
-                delete_data(conn,'questions','question_id',selected_question[0])
-                # cursor= conn.cursor()
-                # cursor.execute('DELETE FROM questions WHERE question_id= ? ', (selected_question[0],))
-                # conn.commit()
-                conn.close()
+            if option:
+                delete_data('questions','question_id',selected_question[0])
                 update_questions_table()
         
         def open_add_question_form():
