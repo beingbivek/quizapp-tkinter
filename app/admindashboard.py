@@ -1689,7 +1689,7 @@ def openbutton(btn_text):
         def delete_question_selected():
             selected_item = questions_table.selection()
             if not selected_item:
-                messagebox.showwarning("No Selection", "Please select a question to edit.")
+                messagebox.showwarning("No Selection", "Please select a question to delete.")
                 return
 
             selected_question = questions_table.item(selected_item, "values")
