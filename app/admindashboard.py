@@ -522,30 +522,31 @@ def openbutton(btn_text):
 
         # Courses Functions
 
-        def on_course_entry_click(event):
+        def on_course_entry_click(event,iscourse):
             # Function to remove placeholder text when the entry is clicked.
-            if search_course_entry.get() == 'Search...':
-                search_course_entry.delete(0, "end")  # delete all the text in the entry
-                search_course_entry.insert(0, '')  # Insert blank for user input
-                search_course_entry.config(fg='black')
+            if iscourse:
+                if search_course_entry.get() == 'Search Course...':
+                    search_course_entry.delete(0, "end")  # delete all the text in the entry
+                    search_course_entry.insert(0, '')  # Insert blank for user input
+                    search_course_entry.config(fg='black')
 
-        def on_course_focusout(event):
+        def on_course_focusout(event,iscourse):
             # Function to add placeholder text if the entry is empty when focus is lost.
-            if search_course_entry.get() == '':
-                search_course_entry.insert(0, 'Search...')
-                search_course_entry.config(fg='grey')
-                # display all courses after the search bar is empty
-                update_course_table(get_courses())
+            if iscourse:
+                if search_course_entry.get() == '':
+                    search_course_entry.insert(0, 'Search Course...')
+                    search_course_entry.config(fg='grey')
+                    # display all courses after the search bar is empty
+                    update_course_table(get_courses())
 
         def search_courses():
-            if not search_course_entry.get()!= 'Search...':
+            if search_course_entry.get() != 'Search Course...':
                 query = f'SELECT * FROM courses WHERE coursename LIKE ?'
                 # query = f'SELECT * FROM courses'
                 search_term = f'%{search_course_entry.get()}%'
                 # c.execute(query)
                 c.execute(query, (search_term,))
                 results = c.fetchall()
-                
                 # show the search result
                 update_course_table(results)
 
@@ -650,9 +651,9 @@ def openbutton(btn_text):
         search_course_frame = Frame(course_frame,bg=MAINFRAME_COLOR)
 
         search_course_entry = Entry(search_course_frame, font=button_font)
-        search_course_entry.insert(0, 'Search...')  # Add the placeholder text
-        search_course_entry.bind('<FocusIn>', on_course_entry_click)
-        search_course_entry.bind('<FocusOut>', on_course_focusout)
+        search_course_entry.insert(0, 'Search Course...')  # Add the placeholder text
+        search_course_entry.bind('<FocusIn>', lambda event: on_course_entry_click(event, iscourse=True))
+        search_course_entry.bind('<FocusOut>', lambda event: on_course_focusout(event,iscourse=True))
         search_course_entry.config(fg='grey')
         search_course_entry.pack(side='left')
 
@@ -792,23 +793,25 @@ def openbutton(btn_text):
 
         # Categories Functions
 
-        def on_category_entry_click(event):
+        def on_category_entry_click(event,iscourse):
             # Function to remove placeholder text when the entry is clicked.
-            if search_category_entry.get() == 'Search...':
-                search_category_entry.delete(0, "end")  # delete all the text in the entry
-                search_category_entry.insert(0, '')  # Insert blank for user input
-                search_category_entry.config(fg='black')
+            if not iscourse:
+                if search_category_entry.get() == 'Search Category...':
+                    search_category_entry.delete(0, "end")  # delete all the text in the entry
+                    search_category_entry.insert(0, '')  # Insert blank for user input
+                    search_category_entry.config(fg='black')
 
-        def on_category_focusout(event):
+        def on_category_focusout(event,iscourse):
             # Function to add placeholder text if the entry is empty when focus is lost.
-            if search_category_entry.get() == '':
-                search_category_entry.insert(0, 'Search...')
-                search_category_entry.config(fg='grey')
-                # display all courses after the search bar is empty
-                update_course_table(get_categories())
+            if not iscourse:
+                if search_category_entry.get() == '':
+                    search_category_entry.insert(0, 'Search Category...')
+                    search_category_entry.config(fg='grey')
+                    # display all courses after the search bar is empty
+                    update_category_table(get_categories())
 
         def search_category():
-            if search_category_entry.get() != 'Search...':
+            if search_category_entry.get() != 'Search Category...':
                 query = 'SELECT * FROM categories WHERE category_name LIKE ?'
                 search_term = f'%{search_category_entry.get()}%'
                 c.execute(query, (search_term,))
@@ -899,9 +902,9 @@ def openbutton(btn_text):
         search_category_frame.pack(side='left',padx=screen_width/6)
 
         search_category_entry = Entry(search_category_frame, font=button_font)
-        search_category_entry.insert(0, 'Search...')  # Add the placeholder text
-        search_category_entry.bind('<FocusIn>', on_category_entry_click)
-        search_category_entry.bind('<FocusOut>', on_category_focusout)
+        search_category_entry.insert(0, 'Search Category...')  # Add the placeholder text
+        search_category_entry.bind('<FocusIn>', lambda event: on_category_entry_click(event,iscourse=False))
+        search_category_entry.bind('<FocusOut>', lambda event: on_category_focusout,iscourse=False)
         search_category_entry.config(fg='grey')
         search_category_entry.pack(side='left')
 
