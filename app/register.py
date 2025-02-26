@@ -23,7 +23,6 @@ def register_user():
     if not (fullname and username and contact and email and password and confirm_password and sq_answer):
         messagebox.showerror("Error", "Please fill all the fields!")
         return
-
     
     if not re.match(r"^[a-zA-Z][a-zA-Z0-9_]*$", username):
         messagebox.showerror("Error", "Username must start with a letter and contain no spaces!")
