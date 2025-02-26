@@ -1,3 +1,4 @@
+import sqlite3
 from tkinter import *
 from tkinter import messagebox
 import tkinter.font as font
@@ -109,6 +110,10 @@ def open_user_dashboard(root):
 def open_admin_dashboard(root):
     root.destroy()
     runpy.run_path(r'..\quizapp-tkinter\app\admindashboard.py')
+    
+def logout(root):
+    root.destroy()
+    runpy.run_path(r'..\quizapp-tkinter\app\welcome.py')
 
 
 # Welcome text
@@ -166,6 +171,24 @@ def minclose_windowbtn(root):
 
     btn.bind('<Enter>', enter)
     btn.bind('<Leave>', leave)
+
+
+# Check if they already exists
+def already_exists(select,table,where,who):            
+    try:
+        conn = sqlite3.connect(DATABASE_FILE)
+        c = conn.cursor()
+        c.execute(f"SELECT {select} FROM {table} WHERE {where} LIKE ?", (who,))
+        if c.fetchone() == []:
+            messagebox.showerror("Error", f"{who} already exists!")
+            return True
+    except sqlite3.Error as e:
+        messagebox.showerror("Error", f"Database error: {e}")
+        return True
+    finally:
+        conn.close()
+    return False
+
 
 def delete_data(conn, table_name, primary_key_column, primary_key_value):
     """
@@ -226,11 +249,13 @@ def delete_data(conn, table_name, primary_key_column, primary_key_value):
         # Commit the changes
         conn.commit()
         print("Deletion completed successfully.")
+        messagebox.showinfo('Delete Success',f'The {primary_key_column} : {primary_key_value} is permanently deleted.')
 
     except Exception as e:
         # Rollback in case of error
         conn.rollback()
         print(f"Error during deletion: {e}")
+        messagebox.showinfo('Delete Error',f"Error during deletion: {e}")
     finally:
         # Close the cursor
         cursor.close()

@@ -936,19 +936,6 @@ def openbutton(btn_text):
                 if isinstance(widget, Button):
                     widget.config(state=NORMAL)  # Enable all buttons
 
-        # def warn_sidebar_access():
-        #     """Warn user when they try to click the sidebar during the test."""
-        #     if mock_running:
-        #         m = messagebox.askyesno("Warning", "You surely want to leave the test while it's running!\nAll done will get lost.")
-        #         if m:
-        #             enable_sidebar()
-
-
-        # # Attach warning function to sidebar buttons
-        # for widget in sidebar.winfo_children():
-        #     if isinstance(widget, Button):
-        #         widget.config(command=lambda: warn_sidebar_access())
-
         # Initialize test state
         start_mock = False
         mock_running = False  # Track if mock test is running
@@ -982,12 +969,8 @@ sidebar_button("LeaderBoard")
 sidebar_button("Mock Test")
 sidebar_button("Profile")
 
-def logout():
-    root.destroy()
-    runpy.run_path(r'..\quizapp-tkinter\app\welcome.py')
-
 # Logout Button
-logout_btn = Button(sidebar, text="Logout", bg=LOGOUT_COLOR, fg=FG_COLOR, font=("Arial", 10, "bold"), width=20, height=2, bd=0,command=logout)
+logout_btn = Button(sidebar, text="Logout", bg=LOGOUT_COLOR, fg=FG_COLOR, font=("Arial", 10, "bold"), width=20, height=2, bd=0,command=lambda: logout(root))
 logout_btn.pack(side='bottom', pady=20)
 
 # Main Content Frame

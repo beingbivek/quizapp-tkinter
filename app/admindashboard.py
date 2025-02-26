@@ -249,6 +249,13 @@ def openbutton(btn_text):
             if not all([username, fullname, contact, email, address, password, sq, sq_answer]):
                 messagebox.showwarning("Input Error", "All fields are required!")
                 return
+            
+            # Email and Username Check    
+            if already_exists('username','users','username',username):
+                return
+            
+            if already_exists('email','users','email',email):
+                return
 
             try:
                 # Encode password and security answer
@@ -351,9 +358,16 @@ def openbutton(btn_text):
             )).pack(pady=20, padx=10, fill="x")
 
         # Function to submit user edits
-        def submit_edit(user_id,username, fullname, contact, email, address, password, sq, sq_answer, window):
+        def submit_edit(user_id, username, fullname, contact, email, address, password, sq, sq_answer, window):
             if not all([username, fullname, contact, email, address, password, sq, sq_answer]):
                 messagebox.showwarning("Input Error", "All fields are required!")
+                return
+            
+            # Email and Username Check    
+            if already_exists('username','users','username',username):
+                return
+            
+            if already_exists('email','users','email',email):
                 return
             
             # Encode password and security answer
@@ -390,12 +404,10 @@ def openbutton(btn_text):
                 user_id = tree.item(selected_item, "values")[0]
                 try:
                     conn = sqlite3.connect(DATABASE_FILE)
-                    c = conn.cursor()
-                    c.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
-                    conn.commit()
+                    delete_data(conn,'users','user_id',user_id)
                     conn.close()
                     refresh_table()  # Refresh the table
-                    messagebox.showinfo("Success", "User deleted successfully!")
+                    # messagebox.showinfo("Success", "User deleted successfully!")
                 except Exception as e:
                     messagebox.showerror("Error", f"An error occurred: {e}")
 
@@ -546,18 +558,14 @@ def openbutton(btn_text):
         def add_course():
 
             def save_course():
+                # Courses check
+                if already_exists('coursename','courses','coursename',course_name_entry.get().strip()):
+                    return
                 try:
-                    all_courses = get_courses()
-                    for course in all_courses:
-                        if course[1].lower() == course_name_entry.get().lower():
-                            messagebox.showerror(title='Course Name Repeated',message='Course Name is being repeated so use another name.')
-                            add_course()
-                            break
-                    else:
-                        c.execute('INSERT INTO courses (coursename) VALUES (?)', (course_name_entry.get(),))
-                        conn.commit()
-                        update_course_table(get_courses())
-                        messagebox.showinfo(title='Success',message='Course successfully created.')
+                    c.execute('INSERT INTO courses (coursename) VALUES (?)', (course_name_entry.get(),))
+                    conn.commit()
+                    update_course_table(get_courses())
+                    messagebox.showinfo(title='Success',message='Course successfully created.')
                 except Exception as e:
                     print(e)
 
@@ -598,14 +606,6 @@ def openbutton(btn_text):
         # Database Connection Open
         conn = sqlite3.connect(DATABASE_FILE)
         c = conn.cursor()
-
-        # demo courses creation or insertion
-        # c.execute('SELECT * FROM courses')
-        # cou = c.fetchall()
-        # if not cou:
-        #     for cn in defcourses:
-        #         c.execute('INSERT INTO courses (coursename) VALUES (?)', (cn,))
-        #     conn.commit()
     
 
         header = Label(main_frame, text="Courses and Categories", font=header_font, bg=MAINFRAME_COLOR)
@@ -696,8 +696,12 @@ def openbutton(btn_text):
         course_table.bind('<<TreeviewSelect>>', on_course_select)
 
         def edit_course_record():
-            def save_edit_course():
-                if course_name_entry.get().isprintable():
+            def save_edit_course():      
+                # Courses check
+                if already_exists('coursename','courses','coursename',course_name_entry.get().strip()):
+                    return
+
+                if course_name_entry.get().strip():
                     try:
                         c.execute('UPDATE courses SET coursename = ? WHERE course_id = ?', (course_name_entry.get(), item_data["values"][0]))
                         conn.commit()
@@ -1010,7 +1014,7 @@ def openbutton(btn_text):
             if selected_item:
                 confirm = messagebox.askokcancel("Confirm Delete", f"Are you sure you want to delete {item_data['values'][1]} from {item_data['values'][2]}?")
                 if confirm:
-                    c.execute('DELETE FROM categories WHERE category_id = ?', (item_data["values"][0],))
+                    # c.execute('DELETE FROM categories WHERE category_id = ?', (item_data["values"][0],))
                     delete_data(conn,table_name='categories',primary_key_column='cateogry_id',primary_key_value=item_data["values"][0])
                     conn.commit()
                     update_category_table(get_categories())
@@ -1290,9 +1294,10 @@ def openbutton(btn_text):
         
         def delete_question(question_id):
             conn = sqlite3.connect(DATABASE_FILE)
-            cursor = conn.cursor()
-            cursor.execute("DELETE FROM mockquestions WHERE mockquestion_id = ?", (question_id,))
-            conn.commit()
+            # cursor = conn.cursor()
+            # cursor.execute("DELETE FROM mockquestions WHERE mockquestion_id = ?", (question_id,))
+            # conn.commit()
+            delete_data(conn,'mockquestions','mockquestion_id',question_id)
             conn.close()
             update_questions_table()
 
@@ -1313,14 +1318,15 @@ def openbutton(btn_text):
             mock_test_id = mock_test_table.item(selected_item)["values"][0]
             
             conn = sqlite3.connect(DATABASE_FILE)
-            cursor = conn.cursor()
-            cursor.execute("DELETE FROM mocktests WHERE mocktest_id = ?", (mock_test_id,))
-            cursor.execute("DELETE FROM mockquestions WHERE mocktest_id = ?", (mock_test_id,))  # Delete related questions
-            conn.commit()
+            delete_data(conn,'mocktests','mocktest_id',mock_test_id)
+            # cursor = conn.cursor()
+            # cursor.execute("DELETE FROM mocktests WHERE mocktest_id = ?", (mock_test_id,))
+            # cursor.execute("DELETE FROM mockquestions WHERE mocktest_id = ?", (mock_test_id,))  # Delete related questions
+            # conn.commit()
             conn.close()
             update_mock_test_table()
             update_questions_table()
-            messagebox.showinfo("Success", "Mock test deleted successfully!")
+            # messagebox.showinfo("Success", "Mock test deleted successfully!")
 
         #updates question table everytime we make changes
         def update_questions_table():
@@ -1376,6 +1382,9 @@ def openbutton(btn_text):
                 
                 elif not full_time.isdigit():
                     messagebox.showwarning('Warning','Enter Full time in Number.')
+
+                elif already_exists('mocktest_name','mocktests','mocktest_name',mocktest_name):
+                    return
 
                 else:
                     try:
@@ -1450,7 +1459,6 @@ def openbutton(btn_text):
                     nonlocal course_id
                     nonlocal category_id
                     course_id = next((course[0] for course in get_courses() if course[1] == selected_course_name), None)
-
 
                     category = categories_combo.get()
                     category_id = next((cat[0] for cat in fetch_categories(course_id) if cat[1] == category), None)
@@ -1688,12 +1696,11 @@ def openbutton(btn_text):
             print(selected_question[0])
             option = messagebox.askokcancel('Delete records',f'Do you want to delete Q:{selected_question[1]}')
             if option :
-
-
                 conn= sqlite3.connect(DATABASE_FILE)
-                cursor= conn.cursor()
-                cursor.execute('DELETE FROM questions WHERE question_id= ? ', (selected_question[0],))
-                conn.commit()
+                delete_data(conn,'questions','question_id',selected_question[0])
+                # cursor= conn.cursor()
+                # cursor.execute('DELETE FROM questions WHERE question_id= ? ', (selected_question[0],))
+                # conn.commit()
                 conn.close()
                 update_questions_table()
         
@@ -1997,12 +2004,7 @@ for btn_text in buttons:
     sidebarbutton.pack(pady=2)
     buttons_dict[btn_text] = sidebarbutton
 
-def logout():
-    root.destroy()
-    runpy.run_path(r'..\quizapp-tkinter\app\welcome.py')
-    pass
-
-logout_btn = Button(sidebar, text="🔓 LogOut", bg=LOGOUT_COLOR, fg=FG_COLOR, relief=FLAT, width=20, height=2,command=logout)
+logout_btn = Button(sidebar, text="🔓 LogOut", bg=LOGOUT_COLOR, fg=FG_COLOR, relief=FLAT, width=20, height=2,command=lambda: logout(root))
 logout_btn.pack(pady=20)
 
 # Main Dashboard
