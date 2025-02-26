@@ -8,14 +8,15 @@ from tkinter import *
 from tkinter import messagebox
 
 root = Tk()
+from quizdefaults import *
 
 # Default values (replace with your actual defaults)
-DATABASE_FILE = "quiz.db"
-security_questions = [
-    "What is your mother's maiden name?",
-    "What was the name of your first pet?",
-    "What city were you born in?"
-]
+# DATABASE_FILE = "quiz.db"
+# security_questions = [
+#     "What is your mother's maiden name?",
+#     "What was the name of your first pet?",
+#     "What city were you born in?"
+# ]
 
 def create_database():
     try:
