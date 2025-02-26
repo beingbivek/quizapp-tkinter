@@ -570,6 +570,7 @@ def openbutton(btn_text):
                         conn.commit()
                         update_course_table(get_courses())
                         messagebox.showinfo(title='Success',message='Course successfully created.')
+                        add_course_window.destroy()
                     except Exception as e:
                         messagebox.showerror('Error',f'While Saving Course error has occured: {e}')
                         print(e)
@@ -714,8 +715,8 @@ def openbutton(btn_text):
                         c.execute('UPDATE courses SET coursename = ? WHERE course_id = ?', (course_name_entry.get(), item_data["values"][0]))
                         conn.commit()
                         update_course_table(get_courses())
-                        edit_course_window.destroy()
                         messagebox.showinfo(title='Success',message='Course Edited successfully.')
+                        edit_course_window.destroy()
                     except Exception as e:
                         messagebox.showerror(title='Error in Editing Course',message='Edit Course Error: ' + str(e))
                 else:
@@ -828,9 +829,9 @@ def openbutton(btn_text):
                     try:
                         c.execute('INSERT INTO categories (category_name, course_id) VALUES (?,?)', (category_name_entry.get(),next((course[0] for course in get_courses() if course[1] == selected_course.get()),None)))
                         conn.commit()
-                        add_category_window.destroy()
+                        messagebox.showinfo(title='Success',message='Category successfully created.')
                         update_category_table(get_categories())
-                        messagebox.showinfo(title='Success',message='Course successfully created.')
+                        add_category_window.destroy()
                     except Exception as e:
                         messagebox.showerror(title='Error in Adding Categories',message='Save Category Error: ' + str(e))
                 else:
@@ -962,8 +963,8 @@ def openbutton(btn_text):
                         c.execute('UPDATE categories SET category_name = ?,course_id = ? WHERE category_id = ?', (category_name_entry.get(),next((course[0] for course in get_courses() if course[1] == selected_course.get()),None),item_data["values"][0]))
                         conn.commit()
                         update_category_table(get_categories())
-                        edit_category_window.destroy()
                         messagebox.showinfo(title='Success',message='Category Edited successfully.')
+                        edit_category_window.destroy()
                     except Exception as e:
                         messagebox.showerror(title='Error in Editing Category',message='Edit Category Error: ' + str(e))
                 else:
