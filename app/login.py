@@ -36,9 +36,10 @@ def login():
             # Check if the entered password matches the decrypted password
             if password == decrypted_password:
                 messagebox.showinfo("Success", "Login successful!")
+                print(",".join(str(data) for data in user))
                 # Writing user ID to a temporary file
                 with open(USER_FILE, "w") as f:
-                    f.write(",".join(str(data) for data in user))
+                    f.write(str(tuple(user)))
                 open_user_dashboard(user_login)
             else:
                 messagebox.showerror("Error", "Incorrect password")

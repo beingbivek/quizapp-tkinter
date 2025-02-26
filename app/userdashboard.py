@@ -1,3 +1,4 @@
+import ast
 from tkinter import *
 from tkinter import ttk, messagebox
 import os, re, json, sqlite3
@@ -31,7 +32,9 @@ try:
         back_to_welcome(root)
 
     with open(USER_FILE, "r") as f:
-        LOGGED_IN_USER = f.read().strip().split(',')  # Read entire file content
+        print(ast.literal_eval(f.read().strip()))
+        f.seek(0)
+        LOGGED_IN_USER = ast.literal_eval(f.read().strip()) # Read entire file content
     os.remove(USER_FILE)  # Clean up the temporary file
 except FileNotFoundError:
     messagebox.showerror('File Error','User File not found.')
@@ -41,6 +44,8 @@ except FileNotFoundError:
 if not LOGGED_IN_USER or len(LOGGED_IN_USER) < 9:
     messagebox.showerror('Error', 'Invalid user data. Please log in again.')
     back_to_welcome(root)
+
+print(LOGGED_IN_USER)
     
 # How many courses
 def get_courses():
@@ -536,7 +541,7 @@ def openbutton(btn_text):
 
         # Security Question Part
         sq = StringVar()
-        sq.set(users[7])
+        sq.set(users[6])
         # Label(main_frame, text="Select Security Question:", bg='white', fg='black').place(x=250, y=90)
         Label(main_frame, text='Change Security Question').place(x=950, y=540)
         OptionMenu(main_frame, sq, *security_questions).place(x=950, y=560)
