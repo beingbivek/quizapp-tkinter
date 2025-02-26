@@ -152,7 +152,7 @@ minclose_windowbtn(forgotps)
 
 # Username/Email field
 Label(frame, text="Username or Email:", bg='white', fg=label_text_color).place(x=5, y=10)
-name_entry = Entry(frame, bg='black', fg='white')
+name_entry = Entry(frame)
 name_entry.place(x=5, y=30)
 
 # Fetch Security Question button
@@ -165,17 +165,17 @@ security_label.place(x=5, y=100)
 
 # Security Answer field
 Label(frame, text="Security Answer:", bg='white', fg=label_text_color).place(x=5, y=130)
-answer_entry = Entry(frame, bg='black', fg='white', state=DISABLED)  # Disabled until question is fetched
+answer_entry = Entry(frame, state=DISABLED)  # Disabled until question is fetched
 answer_entry.place(x=5, y=150)
 
 # New Password field
 Label(frame, text="New Password:", bg='white', fg=label_text_color).place(x=5, y=180)
-newpass_entry = Entry(frame, show="*", bg='black', fg='white', state=DISABLED)  # Disabled until question is fetched
+newpass_entry = Entry(frame, show="*", state=DISABLED)  # Disabled until question is fetched
 newpass_entry.place(x=5, y=200)
 
 # Confirm Password field
 Label(frame, text="Confirm Password:", bg='white', fg=label_text_color).place(x=5, y=230)
-confirmpass_entry = Entry(frame, show="*", bg='black', fg='white', state=DISABLED)  # Disabled until question is fetched
+confirmpass_entry = Entry(frame, show="*", state=DISABLED)  # Disabled until question is fetched
 confirmpass_entry.place(x=5, y=250)
 
 # Update Password button

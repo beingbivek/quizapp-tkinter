@@ -2,16 +2,6 @@ from tkinter import *
 from tkinter import messagebox
 import sqlite3
 
-def decrypt_password(encrypted_password):
-    try:
-        if encrypted_password is None:
-            # raise ValueError("No password found in the database.")
-            messagebox.showerror('Error','Error in getting password from Database.\nContact the Support.')
-        return str_decode(encrypted_password)  # Convert back to the original password
-    except Exception as e:
-        messagebox.showerror("Error", f"An error occurred during decryption: {e}")
-        return None
-
 def login():
     username_or_email = name_entry.get()
     password = user_entry.get()
@@ -37,7 +27,7 @@ def login():
             encrypted_password = user[6]  # Assuming password is the 6th column in the table
 
             # Decrypt the password
-            decrypted_password = decrypt_password(encrypted_password)
+            decrypted_password = str_decode(encrypted_password)
 
             if decrypted_password is None:
                 messagebox.showerror("Error", "Failed to decrypt password. Please contact support.")

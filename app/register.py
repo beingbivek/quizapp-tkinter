@@ -29,18 +29,11 @@ def register_user():
         messagebox.showerror("Error", "Username must start with a letter and contain no spaces!")
         return
 
-    try:
-        conn = sqlite3.connect(DATABASE_FILE)
-        c = conn.cursor()
-        c.execute("SELECT username FROM users WHERE username = ?", (username,))
-        if c.fetchone() == []:
-            messagebox.showerror("Error", "Username already exists!")
-            return
-    except sqlite3.Error as e:
-        messagebox.showerror("Error", f"Database error: {e}")
+    if already_exists('username','users','username',username):
         return
-    finally:
-        conn.close()
+    
+    if already_exists('email','users','email',email):
+        return
 
     if not (contact.isdigit() and len(contact) == 10):
         messagebox.showerror("Error", "Contact must be a 10-digit number!")
@@ -49,19 +42,6 @@ def register_user():
     if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email):
         messagebox.showerror("Error", "Invalid email format!")
         return
-
-    try:
-        conn = sqlite3.connect(DATABASE_FILE)
-        c = conn.cursor()
-        c.execute("SELECT email FROM users WHERE email = ?", (email,))
-        if c.fetchone():
-            messagebox.showerror("Error", "Email already exists!")
-            return
-    except sqlite3.Error as e:
-        messagebox.showerror("Error", f"Database error: {e}")
-        return
-    finally:
-        conn.close()
 
     if len(password) < 6:
         messagebox.showerror("Error", "Passwords should be more than 6 characters.")
