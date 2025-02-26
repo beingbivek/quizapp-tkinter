@@ -1,6 +1,7 @@
 import sqlite3
 from tkinter import *
 from tkinter import messagebox
+from tkinter import ttk
 import tkinter.font as font
 import runpy,pybase64
 
@@ -274,3 +275,36 @@ def delete_data(table_name, primary_key_column, primary_key_value):
         # Close the cursor and connection
         cursor.close()
         conn.close()
+
+def mocktestresult_table(root,user_id):
+    # Fetch Latest 5 Mock Test Results
+    conn = sqlite3.connect(DATABASE_FILE)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+                    SELECT m.mocktest_id, m.mocktest_name, mr.result, c.coursename, m.fullmark
+                    FROM mocktestresults mr
+                    JOIN mocktests m ON mr.mocktest_id = m.mocktest_id
+                    JOIN courses c ON mr.course_id = c.course_id
+                    WHERE mr.user_id = ?
+                    ORDER BY result_id DESC
+                """, (user_id,))
+
+    mock_results = cursor.fetchall()
+    conn.close()
+
+    # Mock Test Results Table
+    mock_label = Label(root, text="Previous Mock Test Results", font=("Arial", 14, "bold"), bg=MAINFRAME_COLOR)
+    mock_label.pack(pady=20)
+
+    mock_columns = ("SN", "Mock Test ID", "Datetime", "Course", "Result")
+    mock_table = ttk.Treeview(root, columns=mock_columns, show='headings', height=4)
+
+    for col in mock_columns:
+        mock_table.heading(col, text=col)
+        mock_table.column(col, width=120, anchor='center')
+
+    for i, row in enumerate(mock_results, start=1):
+        mock_table.insert('', END, values=(i, row[0], row[1], row[3], f"{row[2]}/{row[4]}"))
+
+    mock_table.pack()

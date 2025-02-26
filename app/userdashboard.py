@@ -231,38 +231,9 @@ def openbutton(btn_text):
             progress_table.insert('', 'end', values=(i, *row))
         progress_table.pack()
 
-        # Fetch Latest 5 Mock Test Results
-        conn = sqlite3.connect(DATABASE_FILE)
-        cursor = conn.cursor()
+        # Build Mock Table results
 
-        cursor.execute("""
-                        SELECT m.mocktest_id, m.mocktest_name, mr.result, c.coursename
-                        FROM mocktestresults mr
-                        JOIN mocktests m ON mr.mocktest_id = m.mocktest_id
-                        JOIN courses c ON mr.course_id = c.course_id
-                        WHERE mr.user_id = ?
-                        ORDER BY result_id DESC
-                        LIMIT 5
-                    """, (current_user_id,))
-
-        mock_results = cursor.fetchall()
-        conn.close()
-
-        # Mock Test Results Table
-        mock_label = Label(main_frame, text="Previous Mock Test Results", font=("Arial", 14, "bold"), bg=MAINFRAME_COLOR)
-        mock_label.pack(anchor='w', pady=10)
-
-        mock_columns = ("SN", "Mock Test ID", "Datetime", "Course", "Result")
-        mock_table = ttk.Treeview(main_frame, columns=mock_columns, show='headings', height=4)
-
-        for col in mock_columns:
-            mock_table.heading(col, text=col)
-            mock_table.column(col, width=120, anchor='center')
-
-        for i, row in enumerate(mock_results, start=1):
-            mock_table.insert('', END, values=(i, row[0], row[1], row[3], f"{row[2]}/100"))
-
-        mock_table.pack()
+        mocktestresult_table(main_frame,LOGGED_IN_USER[0])
 
         
     #Leaderboard user section.    
@@ -944,6 +915,10 @@ def openbutton(btn_text):
                 start_button = Button(bg=BUTTON_COLOR, fg=FG_COLOR, text='Start', font=button_font,
                                       master=mocktest_frame, command=start_mocktest)
                 start_button.pack(padx=10, pady=10)
+
+                # Build Mock Table results
+
+                mocktestresult_table(mocktest_frame,LOGGED_IN_USER[0])
 
         # 🔹 Functions to Lock and Unlock Sidebar
         def disable_sidebar():
