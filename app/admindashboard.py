@@ -520,14 +520,14 @@ def openbutton(btn_text):
 
         # Courses Functions
 
-        def on_entry_click(event):
+        def on_course_entry_click(event):
             # Function to remove placeholder text when the entry is clicked.
             if search_course_entry.get() == 'Search...':
                 search_course_entry.delete(0, "end")  # delete all the text in the entry
                 search_course_entry.insert(0, '')  # Insert blank for user input
                 search_course_entry.config(fg='black')
 
-        def on_focusout(event):
+        def on_course_focusout(event):
             # Function to add placeholder text if the entry is empty when focus is lost.
             if search_course_entry.get() == '':
                 search_course_entry.insert(0, 'Search...')
@@ -536,15 +536,16 @@ def openbutton(btn_text):
                 update_course_table(get_courses())
 
         def search_courses():
-            query = f'SELECT * FROM courses WHERE coursename LIKE ?'
-            # query = f'SELECT * FROM courses'
-            search_term = f'%{search_course_entry.get()}%'
-            # c.execute(query)
-            c.execute(query, (search_term,))
-            results = c.fetchall()
-            
-            # show the search result
-            update_course_table(results)
+            if not search_course_entry.get()!= 'Search...':
+                query = f'SELECT * FROM courses WHERE coursename LIKE ?'
+                # query = f'SELECT * FROM courses'
+                search_term = f'%{search_course_entry.get()}%'
+                # c.execute(query)
+                c.execute(query, (search_term,))
+                results = c.fetchall()
+                
+                # show the search result
+                update_course_table(results)
 
         def update_course_table(results):
             stat_course_count.config(text=stats()[1][1])
@@ -644,8 +645,8 @@ def openbutton(btn_text):
 
         search_course_entry = Entry(search_course_frame, font=button_font)
         search_course_entry.insert(0, 'Search...')  # Add the placeholder text
-        search_course_entry.bind('<FocusIn>', on_entry_click)
-        search_course_entry.bind('<FocusOut>', on_focusout)
+        search_course_entry.bind('<FocusIn>', on_course_entry_click)
+        search_course_entry.bind('<FocusOut>', on_course_focusout)
         search_course_entry.config(fg='grey')
         search_course_entry.pack(side='left')
 
@@ -721,7 +722,7 @@ def openbutton(btn_text):
             item_data = course_table.item(selected_item)
             if selected_item:
                 edit_course_window = Toplevel(main_frame)
-                edit_course_window.title('Add Course')
+                edit_course_window.title('Edit Course')
                 edit_course_window.geometry('400x300')
 
                 edit_course_window.resizable(False, False)  # Prevent window resizing
@@ -795,13 +796,15 @@ def openbutton(btn_text):
                 update_course_table(get_categories())
 
         def search_category():
-            query = 'SELECT * FROM categories WHERE category_name LIKE ?'
-            search_term = f'%{search_category_entry.get()}%'
-            c.execute(query, (search_term,))
-            results = c.fetchall()
-            
-            # show the search result
-            update_category_table(results)
+            if search_category_entry.get() != 'Search...':
+                query = 'SELECT * FROM categories WHERE category_name LIKE ?'
+                search_term = f'%{search_category_entry.get()}%'
+                c.execute(query, (search_term,))
+                results = [list(data) for data in c.fetchall()]
+                for result in results:
+                    result[2] = next((course[1] for course in get_courses() if result[2] == course[0]),0)
+                # show the search result
+                update_category_table(results)
 
         def add_category():
 
@@ -922,7 +925,7 @@ def openbutton(btn_text):
         # c.execute('UPDATE categories SET course_id = 1 WHERE category_id = 1')
         # conn.commit()
 
-        # To display all courses at first
+        # To display all categories at first
         update_category_table(get_categories())
 
 
