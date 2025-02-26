@@ -541,7 +541,7 @@ def openbutton(btn_text):
 
         # Security Question Part
         sq = StringVar()
-        sq.set(users[6])
+        sq.set(users[7])
         # Label(main_frame, text="Select Security Question:", bg='white', fg='black').place(x=250, y=90)
         Label(main_frame, text='Change Security Question').place(x=950, y=540)
         OptionMenu(main_frame, sq, *security_questions).place(x=950, y=560)
