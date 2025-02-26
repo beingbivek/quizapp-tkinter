@@ -70,11 +70,19 @@ def stats():
     # Data from all tables
     conn = sqlite3.connect(DATABASE_FILE)
     c = conn.cursor()
-    c.execute('SELECT * FROM sqlite_sequence')
-    stat_data = c.fetchall()
+    c.execute('SELECT name FROM sqlite_sequence')
+    table_names = c.fetchall()
+    print(table_names)
+    stat_list = []
+    for table_name in table_names:
+        table = table_name[0]
+        c.execute(f'SELECT COUNT(*) FROM {table}')
+        number = c.fetchone()[0]
+        stat_list.append([table,number])
+    print(stat_list)
     conn.commit()
     conn.close()
-    return stat_data
+    return stat_list
 
 def calculate_percentage_increase(today_count, yesterday_count):
     if yesterday_count == 0:
