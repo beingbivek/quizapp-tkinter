@@ -563,14 +563,17 @@ def openbutton(btn_text):
                 # Courses check
                 if already_exists('coursename','courses','coursename',course_name_entry.get().strip()):
                     return
-                try:
-                    c.execute('INSERT INTO courses (coursename) VALUES (?)', (course_name_entry.get(),))
-                    conn.commit()
-                    update_course_table(get_courses())
-                    messagebox.showinfo(title='Success',message='Course successfully created.')
-                except Exception as e:
-                    messagebox.showerror('Error',f'While Saving Course error has occured: {e}')
-                    print(e)
+                if course_name_entry.get():
+                    try:
+                        c.execute('INSERT INTO courses (coursename) VALUES (?)', (course_name_entry.get(),))
+                        conn.commit()
+                        update_course_table(get_courses())
+                        messagebox.showinfo(title='Success',message='Course successfully created.')
+                    except Exception as e:
+                        messagebox.showerror('Error',f'While Saving Course error has occured: {e}')
+                        print(e)
+                else:
+                    messagebox.showerror('Blank Course','Cannot have no course name.')
 
             def cancel_course():
                 add_course_window.destroy()
@@ -818,7 +821,7 @@ def openbutton(btn_text):
         def add_category():
 
             def save_category():
-                if category_name_entry.get().isprintable():
+                if category_name_entry.get():
                     try:
                         c.execute('INSERT INTO categories (category_name, course_id) VALUES (?,?)', (category_name_entry.get(),next((course[0] for course in get_courses() if course[1] == selected_course.get()),None)))
                         conn.commit()
@@ -951,14 +954,17 @@ def openbutton(btn_text):
         # Edit and Delete Button Functions
         def edit_category_record():
             def save_edit_category():
-                try:
-                    c.execute('UPDATE categories SET category_name = ?,course_id = ? WHERE category_id = ?', (category_name_entry.get(),next((course[0] for course in get_courses() if course[1] == selected_course.get()),None),item_data["values"][0]))
-                    conn.commit()
-                    update_category_table(get_categories())
-                    edit_category_window.destroy()
-                    messagebox.showinfo(title='Success',message='Category Edited successfully.')
-                except Exception as e:
-                    messagebox.showerror(title='Error in Editing Category',message='Edit Category Error: ' + str(e))
+                if category_name_entry.get():
+                    try:
+                        c.execute('UPDATE categories SET category_name = ?,course_id = ? WHERE category_id = ?', (category_name_entry.get(),next((course[0] for course in get_courses() if course[1] == selected_course.get()),None),item_data["values"][0]))
+                        conn.commit()
+                        update_category_table(get_categories())
+                        edit_category_window.destroy()
+                        messagebox.showinfo(title='Success',message='Category Edited successfully.')
+                    except Exception as e:
+                        messagebox.showerror(title='Error in Editing Category',message='Edit Category Error: ' + str(e))
+                else:
+                    messagebox.showinfo('Empty Category',"The Category Field is empty.")
 
             def cancel_edit_category():
                 edit_category_window.destroy()
