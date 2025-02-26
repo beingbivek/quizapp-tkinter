@@ -436,8 +436,10 @@ def openbutton(btn_text):
                     SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, securityquestion = ?
                     WHERE user_id = ?
                     """
-                    c.execute(query, (fullname, email, username, contact, address, sq, user_id))    
-                
+                    c.execute(query, (fullname, email, username, contact, address, sq, user_id))   
+
+                c.execute('SELECT * FROM users where user_id = ?',(user_id,)) 
+                LOGGED_IN_USER = c.fetchone()
                 conn.commit()
                 conn.close()
                 messagebox.showinfo("Success", "Profile updated successfully!")
