@@ -1033,7 +1033,7 @@ def openbutton(btn_text):
             if selected_item:
                 confirm = messagebox.askokcancel("Confirm Delete", f"Are you sure you want to delete {item_data['values'][1]} from {item_data['values'][2]}?")
                 if confirm:
-                    delete_data(table_name='categories',primary_key_column='cateogry_id',primary_key_value=item_data["values"][0])
+                    delete_data(table_name='categories',primary_key_column='category_id',primary_key_value=item_data["values"][0])
                     update_category_table(get_categories())
             else:
                 messagebox.showinfo('Not Selected','No Category selected.')
