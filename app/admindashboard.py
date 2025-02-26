@@ -1,12 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
-import tkinter.font as font
-from PIL import ImageTk, Image
-import runpy
-import sqlite3
-from tkinter import simpledialog
-import json
+import sqlite3, json
 from tkcalendar import DateEntry  # Import DateEntry for date selection
 from datetime import datetime, date
 

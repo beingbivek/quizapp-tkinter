@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import ttk, messagebox
-import os, runpy, re, json, sqlite3
+import os, re, json, sqlite3
 from random import *
 from PIL import ImageTk
 
