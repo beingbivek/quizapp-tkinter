@@ -489,7 +489,7 @@ def openbutton(btn_text):
         display_frame.pack(fill="x", padx=10, pady=10)
 
         Label(display_frame, text="Display:",bg=MAINFRAME_COLOR).pack(side="left", padx=5)
-        display_var = StringVar(value="10")
+        display_var = StringVar(value="All")
         OptionMenu(display_frame, display_var, "5", "10", "15", "20", "25", "30", "50", "All", command=display_users).pack(side="left", padx=5)
 
         # Table
