@@ -32,8 +32,6 @@ try:
         back_to_welcome(root)
 
     with open(USER_FILE, "r") as f:
-        print(ast.literal_eval(f.read().strip()))
-        f.seek(0)
         LOGGED_IN_USER = ast.literal_eval(f.read().strip()) # Read entire file content
     os.remove(USER_FILE)  # Clean up the temporary file
 except FileNotFoundError:
@@ -44,8 +42,6 @@ except FileNotFoundError:
 if not LOGGED_IN_USER or len(LOGGED_IN_USER) < 9:
     messagebox.showerror('Error', 'Invalid user data. Please log in again.')
     back_to_welcome(root)
-
-print(LOGGED_IN_USER)
     
 # How many courses
 def get_courses():
@@ -133,9 +129,6 @@ def openbutton(btn_text):
 
     # Set the clicked button color
     buttons[btn_text].configure(bg=HIGHLIGHT_COLOR)
-
-    # update score:
-    score_label.config(text=f"Score: {total_score_of_user(LOGGED_IN_USER[0])}")
 
     # Main Dashboard Code
     if btn_text == "Dashboard":
@@ -407,42 +400,62 @@ def openbutton(btn_text):
         def update_profile_in_db(user_id, fullname, email, username, contact, address, password, sq, sq_answer):
             """Update the user profile in the database."""
             try:
+                update_successful = False
                 conn = sqlite3.connect(DATABASE_FILE)
                 c = conn.cursor()
                 if password and sq_answer:
-                    query = """
-                    UPDATE users
-                    SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, password = ?, securityquestion = ?, securityanswer = ?
-                    WHERE user_id = ?
-                    """
-                    c.execute(query, (fullname, email, username, contact, address, password, sq, sq_answer, user_id))
+                    try:
+                        query = """
+                        UPDATE users
+                        SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, password = ?, securityquestion = ?, securityanswer = ?
+                        WHERE user_id = ?
+                        """
+                        c.execute(query, (fullname, email, username, contact, address, password, sq, sq_answer, user_id))
+                        update_successful = True
+                    except Exception as e:
+                        messagebox.showerror('Error',f'Error in updating user: {e}')
                 elif sq_answer:
-                    query = """
-                    UPDATE users
-                    SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, securityquestion = ?, securityanswer = ?
-                    WHERE user_id = ?
-                    """
-                    c.execute(query, (fullname, email, username, contact, address, sq, sq_answer, user_id))
+                    try:
+                        query = """
+                        UPDATE users
+                        SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, securityquestion = ?, securityanswer = ?
+                        WHERE user_id = ?
+                        """
+                        c.execute(query, (fullname, email, username, contact, address, sq, sq_answer, user_id))
+                        update_successful = True
+                    except Exception as e:
+                        messagebox.showerror('Error',f'Error in updating user: {e}')
                 elif password:
-                    query = """
-                    UPDATE users
-                    SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, password = ?, securityquestion = ?
-                    WHERE user_id = ?
-                    """
-                    c.execute(query, (fullname, email, username, contact, address, password, sq, user_id))
+                    try:
+                        query = """
+                        UPDATE users
+                        SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, password = ?, securityquestion = ?
+                        WHERE user_id = ?
+                        """
+                        c.execute(query, (fullname, email, username, contact, address, password, sq, user_id))
+                        update_successful = True
+                    except Exception as e:
+                        messagebox.showerror('Error',f'Error in updating user: {e}')
                 else:
-                    query = """
-                    UPDATE users
-                    SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, securityquestion = ?
-                    WHERE user_id = ?
-                    """
-                    c.execute(query, (fullname, email, username, contact, address, sq, user_id))   
-
-                c.execute('SELECT * FROM users where user_id = ?',(user_id,)) 
-                LOGGED_IN_USER = c.fetchone()
-                conn.commit()
-                conn.close()
-                messagebox.showinfo("Success", "Profile updated successfully!")
+                    try:
+                        query = """
+                        UPDATE users
+                        SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, securityquestion = ?
+                        WHERE user_id = ?
+                        """
+                        c.execute(query, (fullname, email, username, contact, address, sq, user_id))   
+                        update_successful = True
+                    except Exception as e:
+                        messagebox.showerror('Error',f'Error in updating user: {e}')
+                if update_successful:
+                    c.execute('SELECT * FROM users where user_id = ?',(user_id,)) 
+                    global LOGGED_IN_USER
+                    LOGGED_IN_USER = list(c.fetchone())
+                    conn.commit()
+                    conn.close()
+                    username_label.config(text=LOGGED_IN_USER[3])
+                    label_username.config(text=LOGGED_IN_USER[3])
+                    messagebox.showinfo("Success", "Profile updated successfully!")
             except sqlite3.Error as e:
                 messagebox.showerror("Database Error", f"An error occurred: {e}")
 
@@ -516,7 +529,7 @@ def openbutton(btn_text):
         
         profile = Label(main_frame, text='👦', font=('Arial',60)).place(x=775,y=110)
        
-        username = Label(main_frame, text=users[3], font=('Arial', 14, 'bold')).place(x=770, y=255)
+        label_username = Label(main_frame, text=users[3], font=('Arial', 14, 'bold')).place(x=770, y=255)
 
         # Labels and Entries
         labels_entries = [
@@ -731,6 +744,8 @@ def openbutton(btn_text):
             switchvalue = not switchvalue
             for widget in mocktest_frame.winfo_children():
                 widget.destroy()
+            # update score:
+            score_label.config(text=f"Score: {total_score_of_user(LOGGED_IN_USER[0])}")
             update_frame(switchvalue)
 
         def update_frame(start_mock):
