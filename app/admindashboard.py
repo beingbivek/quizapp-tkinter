@@ -54,9 +54,7 @@ def get_categories(course_id=None):
         cursor.execute("SELECT * FROM categories")
     categories = cursor.fetchall()
     categories = [list(category) for category in categories]
-    # print(categories)
     courses = get_courses()
-    # print(courses)
 
     for category in categories:
         for course in courses:
@@ -72,14 +70,12 @@ def stats():
     c = conn.cursor()
     c.execute('SELECT name FROM sqlite_sequence')
     table_names = c.fetchall()
-    print(table_names)
     stat_list = []
     for table_name in table_names:
         table = table_name[0]
         c.execute(f'SELECT COUNT(*) FROM {table}')
         number = c.fetchone()[0]
         stat_list.append([table,number])
-    print(stat_list)
     conn.commit()
     conn.close()
     return stat_list
@@ -546,7 +542,6 @@ def openbutton(btn_text):
             # c.execute(query)
             c.execute(query, (search_term,))
             results = c.fetchall()
-            # print(results)
             
             # show the search result
             update_course_table(results)
@@ -571,6 +566,7 @@ def openbutton(btn_text):
                     update_course_table(get_courses())
                     messagebox.showinfo(title='Success',message='Course successfully created.')
                 except Exception as e:
+                    messagebox.showerror('Error',f'While Saving Course error has occured: {e}')
                     print(e)
 
             def cancel_course():
@@ -724,7 +720,6 @@ def openbutton(btn_text):
             selected_item = course_table.focus()
             item_data = course_table.item(selected_item)
             if selected_item:
-                # print("Edit item:", item_data['values'][0])
                 edit_course_window = Toplevel(main_frame)
                 edit_course_window.title('Add Course')
                 edit_course_window.geometry('400x300')
@@ -801,12 +796,9 @@ def openbutton(btn_text):
 
         def search_category():
             query = 'SELECT * FROM categories WHERE category_name LIKE ?'
-            # query = f'SELECT * FROM courses'
             search_term = f'%{search_category_entry.get()}%'
-            # c.execute(query)
             c.execute(query, (search_term,))
             results = c.fetchall()
-            # print(results)
             
             # show the search result
             update_category_table(results)
@@ -816,7 +808,6 @@ def openbutton(btn_text):
             def save_category():
                 if category_name_entry.get().isprintable():
                     try:
-                        # print(next((course for course in get_courses() if course[1] == selected_course.get()),None))
                         c.execute('INSERT INTO categories (category_name, course_id) VALUES (?,?)', (category_name_entry.get(),next((course[0] for course in get_courses() if course[1] == selected_course.get()),None)))
                         conn.commit()
                         add_category_window.destroy()
@@ -963,7 +954,6 @@ def openbutton(btn_text):
             selected_item = category_table.focus()
             item_data = category_table.item(selected_item)
             if selected_item:
-                # print("Edit item:", item_data['values'][0])
                 edit_category_window = Toplevel(main_frame)
                 edit_category_window.title('Add Course')
                 edit_category_window.geometry('400x300')
@@ -1155,7 +1145,6 @@ def openbutton(btn_text):
 
             c.execute(query, tuple(params))
             results = c.fetchall()
-            print(results)
             conn.close()
             return results
             
@@ -1492,9 +1481,6 @@ def openbutton(btn_text):
                     course_id = next((test[0] for test in get_courses() if test[1] == course), None)
                     category_id = next((cat[0] for cat in fetch_categories(course_id) if cat[1] == category), None)
 
-                    # Debugging statements
-                    print(f"Mock Test ID: {mock_test_id}, Course ID: {course_id}, Category ID: {category_id}, No of Questions: {num_questions}")
-
                     # Check if IDs are retrieved correctly
                     if not all([mock_test_id, course_id, category_id]):
                         messagebox.showerror("Error", "Could not find the selected IDs. Please check your selections.")
@@ -1678,7 +1664,6 @@ def openbutton(btn_text):
                 return
 
             selected_question = questions_table.item(selected_item, "values")
-            print(selected_question[0])
             option = messagebox.askokcancel('Delete records',f'Do you want to delete Q:{selected_question[1]}')
             if option:
                 delete_data('questions','question_id',selected_question[0])
@@ -1736,8 +1721,6 @@ def openbutton(btn_text):
                 Question = question_box.get("1.0", "end-1c")  # Get the value and strip whitespace
                 Incorrect_ans = f"{Incorrect_box.get("1.0", "end-1c")}"
                 Incorrect_ans = json.dumps(Incorrect_ans.split(','))
-                # print(Incorrect_ans.split(','))
-                # Get the value and strip whitespace
                 Correct_ans = correct_box.get("1.0", "end-1c")      # Get the value and strip whitespace
                 
                 
@@ -1748,9 +1731,6 @@ def openbutton(btn_text):
                 
                 course_id = next((test[0] for test in get_courses() if test[1] == course), None)
                 category_id = next((cat[0] for cat in fetch_categories(course_id) if cat[1] == category), None)
-
-                 # Debugging statements
-                print(f" Course ID: {course_id}, Category ID: {category_id}")
 
                 # Check if IDs are retrieved correctly
                 if not all([ course_id, category_id]):
@@ -1876,9 +1856,6 @@ def openbutton(btn_text):
 
                 # Retrieve the question ID from the selected question
                 question_id = selected_question[0]  # Assuming the question ID is the first element in selected_question
-
-                # Debugging statements
-                print(f"Course ID: {course_id}, Category ID: {category_id}, Question ID: {question_id}")
 
                 # Check if IDs are retrieved correctly
                 if not all([course_id, category_id, question_id]):
