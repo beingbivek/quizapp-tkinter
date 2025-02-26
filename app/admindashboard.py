@@ -196,6 +196,7 @@ def openbutton(btn_text):
             register_window.geometry("600x800")
             register_window.resizable(False, False)  # Disable maximize button
             register_window.configure(bg=bgcolor)
+            register_window.attributes('-topmost', True)
 
             # Main Frame
             main_register_frame = Frame(register_window, bg=frame_bg, bd=2, relief="groove")
@@ -294,6 +295,7 @@ def openbutton(btn_text):
             edit_window = Toplevel(main_frame)
             edit_window.title("Edit User")
             edit_window.geometry("400x800")
+            edit_window.attributes('-topmost', True)
             edit_window.resizable(False, False)  # Disable maximize button
             edit_window.configure(bg=bgcolor)
 
@@ -576,6 +578,7 @@ def openbutton(btn_text):
             add_course_window = Toplevel(main_frame)
             add_course_window.title('Add Course')
             add_course_window.geometry('400x300')
+            add_course_window.attributes('-topmost', True)
 
             add_course_window.resizable(False, False)  # Prevent window resizing
             add_course_window.wm_attributes("-toolwindow", 1) # Disable max and min button
@@ -724,6 +727,7 @@ def openbutton(btn_text):
                 edit_course_window = Toplevel(main_frame)
                 edit_course_window.title('Edit Course')
                 edit_course_window.geometry('400x300')
+                edit_course_window.attributes('-topmost', True)
 
                 edit_course_window.resizable(False, False)  # Prevent window resizing
                 edit_course_window.wm_attributes("-toolwindow", 1) # Disable max and min button
@@ -751,7 +755,9 @@ def openbutton(btn_text):
 
                 close_course_btn = Button(edit_course_row2, text='Cancel', command=cancel_edit_course, font=("Arial", 12), fg='white', bg='red')
                 close_course_btn.pack(side='right', padx=5, pady=5)
-            pass
+            else:
+                messagebox.showinfo('Not Selected','No Course selected.')
+                return
 
         def delete_course_record():
             selected_item = course_table.focus()
@@ -763,6 +769,9 @@ def openbutton(btn_text):
                     delete_data(table_name='courses',primary_key_column='course_id',primary_key_value=item_data["values"][0])
                     update_course_table(get_courses())
                     update_category_table(get_categories())
+            else:
+                messagebox.showinfo('Not Selected','No Course selected.')
+                return
 
         course_action_frame = Frame(main_frame,bg=MAINFRAME_COLOR)
         course_action_frame.pack()
@@ -827,6 +836,7 @@ def openbutton(btn_text):
             add_category_window = Toplevel(main_frame)
             add_category_window.title('Add Category')
             add_category_window.geometry('400x300')
+            add_category_window.attributes('-topmost', True)
 
             add_category_window.resizable(False, False)  # Prevent window resizing
             add_category_window.wm_attributes("-toolwindow", 1) # Disable max and min button
@@ -960,6 +970,7 @@ def openbutton(btn_text):
                 edit_category_window = Toplevel(main_frame)
                 edit_category_window.title('Add Course')
                 edit_category_window.geometry('400x300')
+                edit_category_window.attributes('-topmost', True)
 
                 edit_category_window.resizable(False, False)  # Prevent window resizing
                 edit_category_window.wm_attributes("-toolwindow", 1) # Disable max and min button
@@ -1001,7 +1012,9 @@ def openbutton(btn_text):
 
                 close_category_btn = Button(edit_category_button_row_frame, text='Cancel', command=cancel_edit_category, font=("Arial", 12), fg='white', bg='red')
                 close_category_btn.pack(side='right', padx=5, pady=5)
-            pass
+            else:
+                messagebox.showinfo('Not Selected','No Category selected.')
+                return
 
         def delete_category_record():
             selected_item = category_table.focus()
@@ -1012,6 +1025,9 @@ def openbutton(btn_text):
                 if confirm:
                     delete_data(table_name='categories',primary_key_column='cateogry_id',primary_key_value=item_data["values"][0])
                     update_category_table(get_categories())
+            else:
+                messagebox.showinfo('Not Selected','No Category selected.')
+                return
 
         # EDIT / DELETE Buttons for Categories
 
@@ -1676,6 +1692,7 @@ def openbutton(btn_text):
             add_window = Toplevel(main_frame)
             add_window.title("Add Question")
             add_window.geometry("600x450")
+            add_window.attributes('-topmost', True)
 
             #Courses
             Label(add_window, text="Courses:").pack()
@@ -1702,14 +1719,10 @@ def openbutton(btn_text):
 
             #Question
             Label(add_window,text='Enter question:').pack()
-            #question_box = Entry(add_window, width=35)
-            #question_box.pack()
             question_box= Text(add_window,height= 5,width= 40)
             question_box.pack(pady=10)
             
             Label(add_window, text="Incorrect answer:").pack()
-            #Incorrect_box = Entry(add_window, width=35)
-            #Incorrect_box.pack()
             Incorrect_box = Text(add_window, height= 2, width = 40)
             Incorrect_box.pack(pady=10)
 
@@ -1727,7 +1740,7 @@ def openbutton(btn_text):
                 Correct_ans = correct_box.get("1.0", "end-1c")      # Get the value and strip whitespace
                 
                 
-                if not ( course or category or Question or Incorrect_ans or Correct_ans):
+                if not ( course and category and Question and Incorrect_ans and Correct_ans):
                     messagebox.showerror("Error", "Please fill all fields correctly.")
                     return
                 
@@ -1783,6 +1796,7 @@ def openbutton(btn_text):
             edit_window = Toplevel(main_frame)
             edit_window.title("Edit Question")
             edit_window.geometry("600x450")
+            edit_window.attributes('-topmost', True)
 
             #Courses
             Label(edit_window, text="Courses:").pack()
