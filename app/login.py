@@ -101,11 +101,11 @@ frame = Frame(user_login, bd=2, relief="ridge", padx=20, pady=20, bg='white')
 frame.place(x=200, y=140, width=300, height=250)
 
 Label(frame, text="Email/Username:", bg='white', fg=label_text_color,font=button_font).place(x=5, y=0)
-name_entry = Entry(frame, fg='white',font=button_font)
+name_entry = Entry(frame,font=button_font)
 name_entry.place(x=5, y=30)
 
 Label(frame, text="Password:", bg='white', fg=label_text_color,font=button_font).place(x=5, y=60)
-user_entry = Entry(frame, show="*", fg='white',font=button_font)
+user_entry = Entry(frame, show="*",font=button_font)
 user_entry.place(x=5, y=90)
 
 Button(frame, text="Forgot Password", command=lambda: go_to_forgot(user_login), fg='white', bg=button_color,font=button_font).place(x=180, y=225)

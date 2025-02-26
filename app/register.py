@@ -136,27 +136,27 @@ frame = Frame(register, bd=2, relief="ridge", padx=20, pady=20, bg='white')
 frame.place(x=100, y=140, width=500, height=250)
 
 Label(frame, text="Name:", bg='white', fg='black', font=label_font).place(x=5, y=5)
-name_entry = Entry(frame,fg='white', font=label_font, width=30)
+name_entry = Entry(frame, font=label_font, width=30)
 name_entry.place(x=5, y=25)
 
 Label(frame, text="Username:", bg='white', fg='black', font=label_font).place(x=5, y=55)
-user_entry = Entry(frame,fg='white', font=label_font, width=30)
+user_entry = Entry(frame, font=label_font, width=30)
 user_entry.place(x=5, y=75)
 
 Label(frame, text="Contact Number:", bg='white', fg='black', font=label_font).place(x=5, y=105)
-contact_entry = Entry(frame,fg='white', font=label_font, width=30)
+contact_entry = Entry(frame, font=label_font, width=30)
 contact_entry.place(x=5, y=125)
 
 Label(frame, text="E-mail:", bg='white', fg='black', font=label_font).place(x=5, y=155)
-email_entry = Entry(frame,fg='white', font=label_font, width=30)
+email_entry = Entry(frame, font=label_font, width=30)
 email_entry.place(x=5, y=175)
 
 Label(frame, text="Password:", bg='white', fg='black', font=label_font).place(x=290, y=5)
-pass_entry = Entry(frame, show="*",fg='white', font=label_font, width=30)
+pass_entry = Entry(frame, show="*", font=label_font, width=30)
 pass_entry.place(x=290, y=25)
 
 Label(frame, text="Confirm Password:", bg='white', fg='black', font=label_font).place(x=290, y=55)
-confirm_pass_entry = Entry(frame, show="*",fg='white', font=label_font, width=30)
+confirm_pass_entry = Entry(frame, show="*", font=label_font, width=30)
 confirm_pass_entry.place(x=290, y=75)
 
 sq = StringVar()
@@ -165,7 +165,7 @@ Label(frame, text="Select Security Question:", bg='white', fg='black', font=labe
 OptionMenu(frame, sq, *security_questions).place(x=290, y=125)
 
 Label(frame, text="Security Answer:", bg='white', fg='black', font=label_font).place(x=290, y=155)
-sq_ans_entry = Entry(frame, show="*",fg='white', font=label_font, width=30)
+sq_ans_entry = Entry(frame, show="*", font=label_font, width=30)
 sq_ans_entry.place(x=290, y=175)
 
 Button(frame, text="Register", command=register_user,fg='white',bg=BUTTON_COLOR,font=button_font).place(x=230, y=250)
