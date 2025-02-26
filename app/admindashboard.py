@@ -103,6 +103,10 @@ def get_mocktest_results_stats():
     percentage_increase = calculate_percentage_increase(results_today, results_yesterday)
     return results_today, percentage_increase
 
+style = ttk.Style()
+style.configure("Treeview.Cell", 
+                ellipsis="...")
+
 # Sidebar button functions
 def openbutton(btn_text):
     # Clear the main frame
@@ -494,7 +498,7 @@ def openbutton(btn_text):
 
         for col in columns:
             tree.heading(col, text=col)
-            tree.column(col, anchor=CENTER, width=150)
+            tree.column(col, anchor=CENTER, width=100)
 
         tree.pack(fill="both", expand=True, padx=10, pady=10)
 

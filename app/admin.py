@@ -64,7 +64,7 @@ frame = Frame(admin_login, bd=2, relief="ridge", padx=20, pady=20, bg='white')
 frame.place(x=200, y=140, width=300, height=250)
 
 Label(frame, text="Enter Admin Code:", bg='white', fg=label_text_color).place(x=5, y=0)
-admin_code_entry = Entry(frame, show="*", bg='black', fg='white')
+admin_code_entry = Entry(frame, show="*", fg='white')
 admin_code_entry.place(x=5, y=20)
 
 Button(frame, text="Login", command=admin_login_function, fg='white', bg=button_color).place(x=100, y=190)
