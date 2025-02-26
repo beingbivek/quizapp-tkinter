@@ -81,6 +81,33 @@ def stats():
     conn.close()
     return stat_data
 
+def calculate_percentage_increase(today_count, yesterday_count):
+    if yesterday_count == 0:
+        return 100  # If no data yesterday, consider it as 100% increase
+    return ((today_count - yesterday_count) / yesterday_count) * 100
+
+def get_user_registration_stats():
+    conn = sqlite3.connect(DATABASE_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM users WHERE DATE(timestamp) = DATE('now')")
+    users_today = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) FROM users WHERE DATE(timestamp) = DATE('now', '-1 day')")
+    users_yesterday = cursor.fetchone()[0]
+    conn.close()
+    percentage_increase = calculate_percentage_increase(users_today, users_yesterday)
+    return users_today, percentage_increase
+
+def get_mocktest_results_stats():
+    conn = sqlite3.connect(DATABASE_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM mocktestresults WHERE DATE(resulttime) = DATE('now')")
+    results_today = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) FROM mocktestresults WHERE DATE(resulttime) = DATE('now', '-1 day')")
+    results_yesterday = cursor.fetchone()[0]
+    conn.close()
+    percentage_increase = calculate_percentage_increase(results_today, results_yesterday)
+    return results_today, percentage_increase
+
 # Sidebar button functions
 def openbutton(btn_text):
     # Clear the main frame
@@ -115,6 +142,9 @@ def openbutton(btn_text):
             stat_desc = Label(stat_box, text=stat[0].upper(), font=("Arial", 10), fg=FG_COLOR, bg=BUTTON_COLOR)
             stat_desc.pack()
 
+        userstat = get_user_registration_stats()
+        mockteststat = get_mocktest_results_stats()
+
         # Table Data
         table_frame = Frame(main_frame)
         table_frame.pack(pady=20)
@@ -126,8 +156,8 @@ def openbutton(btn_text):
             tree.heading(col, text=col)
             tree.column(col, anchor=CENTER, width=150)
 
-        tree.insert("", "end", values=("User Registered Today", "56", "Grown by 10%"))
-        tree.insert("", "end", values=("Mock Test Today", "50", "Grown by 10%"))
+        tree.insert("", "end", values=("User Registered Today", userstat[0], f"Changed by {userstat[1]:.2f}%"))
+        tree.insert("", "end", values=("Mock Test Today", mockteststat[0], f"Changed by {mockteststat[1]:.2f}%"))
 
         tree.pack()
 
