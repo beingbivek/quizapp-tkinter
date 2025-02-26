@@ -904,7 +904,7 @@ def openbutton(btn_text):
         search_category_entry = Entry(search_category_frame, font=button_font)
         search_category_entry.insert(0, 'Search Category...')  # Add the placeholder text
         search_category_entry.bind('<FocusIn>', lambda event: on_category_entry_click(event,iscourse=False))
-        search_category_entry.bind('<FocusOut>', lambda event: on_category_focusout,iscourse=False)
+        search_category_entry.bind('<FocusOut>', lambda event: on_category_focusout(event,iscourse=False))
         search_category_entry.config(fg='grey')
         search_category_entry.pack(side='left')
 
