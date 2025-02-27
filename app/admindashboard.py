@@ -265,22 +265,23 @@ def openbutton(btn_text):
                 # Encode password and security answer
                 encoded_password = str_encode(password)
                 encoded_sq_answer = str_encode(sq_answer)
+                timestamp = datetime.now().replace(microsecond=0)
 
                 # Insert into database
                 conn = sqlite3.connect(DATABASE_FILE)
                 c = conn.cursor()
                 c.execute("""
-                    INSERT INTO users (username, fullname, contact, email, address, password, securityquestion, securityanswer)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """, (username, fullname, contact, email, address, encoded_password, sq, encoded_sq_answer))
+                    INSERT INTO users (username, fullname, contact, email, address, password, securityquestion, securityanswer, timestamp)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (username, fullname, contact, email, address, encoded_password, sq, encoded_sq_answer, timestamp))
                 conn.commit()
                 conn.close()
 
                 messagebox.showinfo("Success", "User registered successfully!")
                 refresh_table()  # Refresh the table
                 window.destroy()
-            except sqlite3.IntegrityError:
-                messagebox.showerror("Error", "Username or email already exists!")
+            except sqlite3.IntegrityError as e:
+                messagebox.showerror("Error", f"Username or email already exists!\nError:{e}")
             except Exception as e:
                 messagebox.showerror("Error", f"An error occurred: {e}")
 
