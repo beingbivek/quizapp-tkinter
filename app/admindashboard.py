@@ -260,6 +260,9 @@ def openbutton(btn_text):
             
             if already_exists('email','users','email',email):
                 return
+            
+            if sqlite3.connect(DATABASE_FILE):
+                sqlite3.connect(DATABASE_FILE).close()
 
             try:
                 # Encode password and security answer
