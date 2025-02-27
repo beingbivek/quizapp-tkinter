@@ -171,15 +171,14 @@ Label(topframemain, text="Quiz App", font=("Arial", 12), padx=20, pady=0, bg=hea
 # Making close and minimize button manually
 minclose_windowbtn(welcome)
 
-
 # Welcome frame
 welcomeframe = Frame(welcome, bd=2, relief="ridge", padx=0, pady=0, bg=tablecolor)
 welcomeframe.place(x=150, y=70, width=400, height=60)
 Label(welcomeframe, text="Welcome to Quiz App", font=("Arial", 25, "bold"), bg=tablecolor, fg="white").pack(pady=10, padx=10)
 
 # Welcome message frame
-frame = Frame(welcome, bd=2, relief="ridge", padx=20, pady=20, bg=frame_bg)
-Label(frame, text=welcometxt, font=("Arial", 12), bg=frame_bg, fg=label_text_color).place(x=-10, y=0)
+frame = Frame(welcome, bd=2, relief="ridge", padx=20, pady=20, bg='white')
+Label(frame, text=welcometxt, font=("Arial", 12), bg='white', fg=label_text_color).place(x=-10, y=0)
 
 # Buttons
 Button(frame, text="Register", command=lambda: open_registration(welcome), fg='white', bg=button_color, font=button_font).place(x=50, y=225)
