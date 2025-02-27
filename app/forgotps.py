@@ -41,12 +41,13 @@ def forgot_pw():
 
             # Check if the security answer matches
             if str_encode(security_answer) == stored_answer:
+                password = str_encode(new_password)
                 # Update the password in the database
                 c.execute("""
                     UPDATE users 
                     SET password = ? 
                     WHERE user_id = ?
-                """, (new_password, user_id))
+                """, (password, user_id))
                 conn.commit()
                 messagebox.showinfo("Success", "Password updated successfully!")
                 open_login(forgotps)
