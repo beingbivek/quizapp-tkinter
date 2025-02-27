@@ -119,6 +119,8 @@ buttons = {}
 
 # Sidebar Button Function
 def openbutton(btn_text):
+    # Update username label if updated
+    username_label.config(text=LOGGED_IN_USER[1])
     # Clear the main content area
     for widget in main_frame.winfo_children():
         widget.destroy()
@@ -424,8 +426,6 @@ def openbutton(btn_text):
                     LOGGED_IN_USER = list(c.fetchone())
                     conn.commit()
                     conn.close()
-                    username_label.config(text=LOGGED_IN_USER[3])
-                    label_username.config(text=LOGGED_IN_USER[3])
                     messagebox.showinfo("Success", "Profile updated successfully!")
             except sqlite3.Error as e:
                 messagebox.showerror("Database Error", f"An error occurred: {e}")
@@ -522,7 +522,7 @@ def openbutton(btn_text):
             else:
                 entry = Entry(main_frame, width=35)
             entry.place(x=x, y=y+20)
-            entry.insert(0, value)
+            entry.insert(0, str(value))
             entries.append(entry)
 
         # Security Question Part
