@@ -1,10 +1,8 @@
-import re
-import sqlite3
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 import tkinter.font as font
-import runpy,pybase64
+import runpy,pybase64,sqlite3,re
 
 # Default colors for Dashboards
 MAINFRAME_COLOR = "#E0E0E0"
