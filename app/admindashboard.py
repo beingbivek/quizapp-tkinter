@@ -369,6 +369,9 @@ def openbutton(btn_text):
             if already_exists('email','users','email',email):
                 return
             
+            if sqlite3.connect(DATABASE_FILE):
+                sqlite3.connect(DATABASE_FILE).close()
+            
             # Encode password and security answer
             encoded_password = str_encode(password)
             encoded_sq_answer = str_encode(sq_answer)
@@ -398,6 +401,9 @@ def openbutton(btn_text):
             if not selected_item:
                 messagebox.showwarning("No Selection", "Please select a user to delete.")
                 return
+            
+            if sqlite3.connect(DATABASE_FILE):
+                sqlite3.connect(DATABASE_FILE).close()
 
             if messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this user?"):
                 user_id = tree.item(selected_item, "values")[0]
