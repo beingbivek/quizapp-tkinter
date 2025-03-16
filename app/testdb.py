@@ -9,6 +9,7 @@ from tkinter import messagebox
 
 root = Tk()
 from quizdefaults import *
+root.destroy()
 
 # Default values (replace with your actual defaults)
 # DATABASE_FILE = "quiz.db"
