@@ -28,12 +28,6 @@ def register_user():
         messagebox.showerror("Error", "Username must start with a letter and contain no spaces!")
         return
 
-    if already_exists('username','users','username',username):
-        return
-    
-    if already_exists('email','users','email',email):
-        return
-
     if not (contact.isdigit() and len(contact) == 10):
         messagebox.showerror("Error", "Contact must be a 10-digit number!")
         return

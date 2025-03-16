@@ -31,7 +31,6 @@ def create_database():
             email TEXT NOT NULL UNIQUE,
             username TEXT NOT NULL UNIQUE,
             contact TEXT,
-            address TEXT,
             password TEXT NOT NULL,
             securityquestion TEXT NOT NULL,
             securityanswer TEXT NOT NULL,
@@ -140,15 +139,14 @@ def generate_users(conn, count=50):
             fake.unique.email(),
             fake.user_name(),
             fake.phone_number(),
-            fake.address(),
             encode_data("Password123!"),
             random.choice(security_questions),
             encode_data(fake.word()),
             timestamp
         )
-        c.execute('''INSERT INTO users (fullname, email, username, contact, address,
+        c.execute('''INSERT INTO users (fullname, email, username, contact,
                   password, securityquestion, securityanswer, timestamp)
-                  VALUES (?,?,?,?,?,?,?,?,?)''', user)
+                  VALUES (?,?,?,?,?,?,?,?)''', user)
     conn.commit()
 
 def generate_courses(conn):

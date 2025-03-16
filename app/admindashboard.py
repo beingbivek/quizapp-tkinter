@@ -219,10 +219,6 @@ def openbutton(btn_text):
             email_entry = Entry(main_register_frame, font=labelstyle)
             email_entry.pack(pady=5, padx=10, fill="x")
 
-            Label(main_register_frame, text="Address:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
-            address_entry = Entry(main_register_frame, font=labelstyle)
-            address_entry.pack(pady=5, padx=10, fill="x")
-
             Label(main_register_frame, text="Password:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
             password_entry = Entry(main_register_frame, show="*", font=labelstyle)
             password_entry.pack(pady=5, padx=10, fill="x")
@@ -241,7 +237,6 @@ def openbutton(btn_text):
                 fullname_entry.get(),
                 contact_entry.get(),
                 email_entry.get(),
-                address_entry.get(),
                 password_entry.get(),
                 sq_var.get(),
                 sq_answer_entry.get(),
@@ -249,8 +244,8 @@ def openbutton(btn_text):
             )).pack(pady=20, padx=10, fill="x")
 
         # Function to submit user registration
-        def submit_registration(username, fullname, contact, email, address, password, sq, sq_answer, window):
-            if not all([username, fullname, contact, email, address, password, sq, sq_answer]):
+        def submit_registration(username, fullname, contact, email, password, sq, sq_answer, window):
+            if not all([username, fullname, contact, email, password, sq, sq_answer]):
                 messagebox.showwarning("Input Error", "All fields are required!")
                 return
             
@@ -274,14 +269,15 @@ def openbutton(btn_text):
                 conn = sqlite3.connect(DATABASE_FILE)
                 c = conn.cursor()
                 c.execute("""
-                    INSERT INTO users (username, fullname, contact, email, address, password, securityquestion, securityanswer, timestamp)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (username, fullname, contact, email, address, encoded_password, sq, encoded_sq_answer, timestamp))
+                    INSERT INTO users (username, fullname, contact, email, password, securityquestion, securityanswer, timestamp)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (username, fullname, contact, email, encoded_password, sq, encoded_sq_answer, timestamp))
                 conn.commit()
                 conn.close()
 
                 messagebox.showinfo("Success", "User registered successfully!")
                 refresh_table()  # Refresh the table
+                stat_label.config(text=stats()[0][1])
                 window.destroy()
             except sqlite3.IntegrityError as e:
                 messagebox.showerror("Error", f"Username or email already exists!\nError:{e}")
@@ -331,24 +327,19 @@ def openbutton(btn_text):
             email_entry.insert(0, user_data[2])
             email_entry.pack(pady=5, padx=10, fill="x")
 
-            Label(main_edit_frame, text="Address:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
-            address_entry = Entry(main_edit_frame, font=labelstyle)
-            address_entry.insert(0, user_data[5])
-            address_entry.pack(pady=5, padx=10, fill="x")
-
             Label(main_edit_frame, text="Password:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
             password_entry = Entry(main_edit_frame, show="*", font=labelstyle)
-            password = str_decode(user_data[6])
+            password = str_decode(user_data[5])
             password_entry.insert(0, password)
             password_entry.pack(pady=5, padx=10, fill="x")
 
             Label(main_edit_frame, text="Security Question:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
-            sq_var = StringVar(value=user_data[7])
+            sq_var = StringVar(value=user_data[6])
             OptionMenu(main_edit_frame, sq_var, *security_questions).pack(pady=5, padx=10, fill="x")
 
             Label(main_edit_frame, text="Security Answer:", bg=frame_bg, fg=label_text_color, font=label_font).pack(pady=5)
             sq_answer_entry = Entry(main_edit_frame, font=labelstyle)
-            sq_answer = str_decode(user_data[8])
+            sq_answer = str_decode(user_data[7])
             sq_answer_entry.insert(0, sq_answer)
             sq_answer_entry.pack(pady=5, padx=10, fill="x")
 
@@ -359,7 +350,6 @@ def openbutton(btn_text):
                 fullname_entry.get(),
                 contact_entry.get(),
                 email_entry.get(),
-                address_entry.get(),
                 password_entry.get(),
                 sq_var.get(),
                 sq_answer_entry.get(),
@@ -367,8 +357,8 @@ def openbutton(btn_text):
             )).pack(pady=20, padx=10, fill="x")
 
         # Function to submit user edits
-        def submit_edit(user_id, username, fullname, contact, email, address, password, sq, sq_answer, window):
-            if not all([username, fullname, contact, email, address, password, sq, sq_answer]):
+        def submit_edit(user_id, username, fullname, contact, email, password, sq, sq_answer, window):
+            if not all([username, fullname, contact, email, password, sq, sq_answer]):
                 messagebox.showwarning("Input Error", "All fields are required!")
                 return
             
@@ -388,9 +378,9 @@ def openbutton(btn_text):
                 c = conn.cursor()
                 c.execute("""
                     UPDATE users
-                    SET username = ?, fullname = ?, contact = ?, email = ?, address = ?, password = ?, securityquestion = ?, securityanswer = ?
+                    SET username = ?, fullname = ?, contact = ?, email = ?, password = ?, securityquestion = ?, securityanswer = ?
                     WHERE user_id = ?
-                """, (username, fullname, contact, email, address, encoded_password, sq, encoded_sq_answer, user_id))
+                """, (username, fullname, contact, email, encoded_password, sq, encoded_sq_answer, user_id))
                 conn.commit()
                 conn.close()
 
@@ -414,6 +404,7 @@ def openbutton(btn_text):
                 try:
                     delete_data('users','user_id',user_id)
                     refresh_table()  # Refresh the table
+                    stat_label.config(text=stats()[0][1])
                 except Exception as e:
                     messagebox.showerror("Error", f"An error occurred: {e}")
 

@@ -24,7 +24,7 @@ def login():
 
         if user:
             # Retrieve the encrypted password from the database
-            encrypted_password = user[6]  # Assuming password is the 6th column in the table
+            encrypted_password = user[5]  # Assuming password is the 6th column in the table
 
             # Decrypt the password
             decrypted_password = str_decode(encrypted_password)

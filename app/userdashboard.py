@@ -39,7 +39,7 @@ except FileNotFoundError:
     LOGGED_IN_USER = None
 
 # Fail Safe
-if not LOGGED_IN_USER or len(LOGGED_IN_USER) < 9:
+if not LOGGED_IN_USER or len(LOGGED_IN_USER) < 8:
     messagebox.showerror('Error', 'Invalid user data. Please log in again.')
     back_to_welcome(root)
     
@@ -370,7 +370,7 @@ def openbutton(btn_text):
             messagebox.showerror('Profile Error','Missing profile data')
             return
 
-        def update_profile_in_db(user_id, fullname, email, username, contact, address, password, sq, sq_answer):
+        def update_profile_in_db(user_id, fullname, email, username, contact, password, sq, sq_answer):
             """Update the user profile in the database."""
             try:
                 update_successful = False
@@ -380,10 +380,10 @@ def openbutton(btn_text):
                     try:
                         query = """
                         UPDATE users
-                        SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, password = ?, securityquestion = ?, securityanswer = ?
+                        SET fullname = ?, email = ?, username = ?, contact = ?, password = ?, securityquestion = ?, securityanswer = ?
                         WHERE user_id = ?
                         """
-                        c.execute(query, (fullname, email, username, contact, address, password, sq, sq_answer, user_id))
+                        c.execute(query, (fullname, email, username, contact, password, sq, sq_answer, user_id))
                         update_successful = True
                     except Exception as e:
                         messagebox.showerror('Error',f'Error in updating user: {e}')
@@ -391,10 +391,10 @@ def openbutton(btn_text):
                     try:
                         query = """
                         UPDATE users
-                        SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, securityquestion = ?, securityanswer = ?
+                        SET fullname = ?, email = ?, username = ?, contact = ?, securityquestion = ?, securityanswer = ?
                         WHERE user_id = ?
                         """
-                        c.execute(query, (fullname, email, username, contact, address, sq, sq_answer, user_id))
+                        c.execute(query, (fullname, email, username, contact, sq, sq_answer, user_id))
                         update_successful = True
                     except Exception as e:
                         messagebox.showerror('Error',f'Error in updating user: {e}')
@@ -402,10 +402,10 @@ def openbutton(btn_text):
                     try:
                         query = """
                         UPDATE users
-                        SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, password = ?, securityquestion = ?
+                        SET fullname = ?, email = ?, username = ?, contact = ?, password = ?, securityquestion = ?
                         WHERE user_id = ?
                         """
-                        c.execute(query, (fullname, email, username, contact, address, password, sq, user_id))
+                        c.execute(query, (fullname, email, username, contact, password, sq, user_id))
                         update_successful = True
                     except Exception as e:
                         messagebox.showerror('Error',f'Error in updating user: {e}')
@@ -413,10 +413,10 @@ def openbutton(btn_text):
                     try:
                         query = """
                         UPDATE users
-                        SET fullname = ?, email = ?, username = ?, contact = ?, address = ?, securityquestion = ?
+                        SET fullname = ?, email = ?, username = ?, contact = ?, securityquestion = ?
                         WHERE user_id = ?
                         """
-                        c.execute(query, (fullname, email, username, contact, address, sq, user_id))   
+                        c.execute(query, (fullname, email, username, contact, sq, user_id))   
                         update_successful = True
                     except Exception as e:
                         messagebox.showerror('Error',f'Error in updating user: {e}')
@@ -443,7 +443,7 @@ def openbutton(btn_text):
                 value = 'None'
             updated_values = [entry.get().strip() for entry in entries] + [sq.get().strip(),value]
             print(updated_values)
-            fullname, username, contact, email, address, new_password, confirm_password, sec_que, sec_que_answer = updated_values
+            fullname, username, contact, email, new_password, confirm_password, sec_que, sec_que_answer = updated_values
 
             # Check if the password fields are not empty
             if new_password or confirm_password:
@@ -466,7 +466,7 @@ def openbutton(btn_text):
             if sec_que_answer != 'None':
                 sec_que_answer = str_encode(sec_que_answer)
                 # Check if the question is same
-                if sec_que == users[7] and sec_que_answer == users[8]:
+                if sec_que == users[6] and sec_que_answer == users[7]:
                     sec_que_answer = None
             else:
                 sec_que_answer = None
@@ -481,7 +481,6 @@ def openbutton(btn_text):
                     email=email,
                     username=username,
                     contact=contact,
-                    address=address,
                     password=password,
                     sq=sec_que,
                     sq_answer=sec_que_answer
@@ -508,7 +507,6 @@ def openbutton(btn_text):
             ("User Name", 425, 400, users[3]),
             ("Contact Number", 425, 480, users[4]),
             ("Email", 425, 560, users[2]),
-            ("Address", 950, 480, users[5]),
             ("New Password", 950, 320, "",),
             ("Confirm Password", 950, 400, "")
         ]
@@ -527,7 +525,7 @@ def openbutton(btn_text):
 
         # Security Question Part
         sq = StringVar()
-        sq.set(users[7])
+        sq.set(users[6])
         # Label(main_frame, text="Select Security Question:", bg='white', fg='black').place(x=250, y=90)
         Label(main_frame, text='Change Security Question').place(x=950, y=540)
         OptionMenu(main_frame, sq, *security_questions).place(x=950, y=560)
