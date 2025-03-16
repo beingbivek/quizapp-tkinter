@@ -107,10 +107,6 @@ def get_mocktest_results_stats():
     percentage_increase = calculate_percentage_increase(results_today, results_yesterday)
     return results_today, percentage_increase
 
-style = ttk.Style()
-style.configure("Treeview.Cell", 
-                ellipsis="...")
-
 # Sidebar button functions
 def openbutton(btn_text):
     # Clear the main frame
@@ -491,7 +487,7 @@ def openbutton(btn_text):
         OptionMenu(display_frame, display_var, "5", "10", "15", "20", "25", "30", "50", "All", command=display_users).pack(side="left", padx=5)
 
         # Table
-        columns = ("User ID", "Name", "Email", "Username", "Contact", "Address","Password","Security Question","Security Answer")
+        columns = ("User ID", "Name", "Email", "Username", "Contact","Password","Security Question","Security Answer")
         tree = ttk.Treeview(main_frame, columns=columns, show="headings")
 
         for col in columns:
