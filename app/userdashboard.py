@@ -430,12 +430,6 @@ def openbutton(btn_text):
             except sqlite3.Error as e:
                 messagebox.showerror("Database Error", f"An error occurred: {e}")
 
-        def validate_password(password):
-            # Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 symbol
-            if not re.match(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*[\W_]).+$', password,):
-                return False
-            return True
-
         def update_profile():
             if sq_answer_entry:
                 value = sq_answer_entry.get().strip()
@@ -445,6 +439,10 @@ def openbutton(btn_text):
             print(updated_values)
             fullname, username, contact, email, new_password, confirm_password, sec_que, sec_que_answer = updated_values
 
+            # Checking for valid email and username
+            if not (validate_email(email) and validate_username(username)):
+                return
+
             # Check if the password fields are not empty
             if new_password or confirm_password:
                 # If password fields are not empty, validate the password
@@ -453,7 +451,6 @@ def openbutton(btn_text):
                     return
 
                 if not validate_password(new_password):
-                    messagebox.showerror("Error", "Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 symbol!")
                     return
 
                 # Encrypt the password using base64
@@ -714,6 +711,7 @@ def openbutton(btn_text):
             for widget in mocktest_frame.winfo_children():
                 widget.destroy()
             # update score:
+            global score_label
             score_label.config(text=f"Score: {total_score_of_user(LOGGED_IN_USER[0])}")
             update_frame(switchvalue)
 

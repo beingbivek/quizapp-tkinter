@@ -249,11 +249,8 @@ def openbutton(btn_text):
                 messagebox.showwarning("Input Error", "All fields are required!")
                 return
             
-            # Email and Username Check    
-            if already_exists('username','users','username',username):
-                return
-            
-            if already_exists('email','users','email',email):
+            # Checking for valid email,username and password
+            if not (validate_email(email) and validate_username(username) and validate_password(password)):
                 return
             
             if sqlite3.connect(DATABASE_FILE):
@@ -362,11 +359,8 @@ def openbutton(btn_text):
                 messagebox.showwarning("Input Error", "All fields are required!")
                 return
             
-            # Email and Username Check    
-            if already_exists('username','users','username',username):
-                return
-            
-            if already_exists('email','users','email',email):
+            # Checking for valid email,username and password
+            if not (validate_email(email) and validate_username(username) and validate_password(password)):
                 return
             
             if sqlite3.connect(DATABASE_FILE):

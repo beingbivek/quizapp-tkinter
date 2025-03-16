@@ -24,22 +24,18 @@ def register_user():
         messagebox.showerror("Error", "Please fill all the fields!")
         return
     
-    if not re.match(r"^[a-zA-Z][a-zA-Z0-9_]*$", username):
-        messagebox.showerror("Error", "Username must start with a letter and contain no spaces!")
+    if not validate_username(username):
         return
 
     if not (contact.isdigit() and len(contact) == 10):
         messagebox.showerror("Error", "Contact must be a 10-digit number!")
         return
     
-    if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email):
-        messagebox.showerror("Error", "Invalid email format!")
+    if not validate_email(email):
         return
-
-    if len(password) < 6:
-        messagebox.showerror("Error", "Passwords should be more than 6 characters.")
+    
+    if not validate_password(password):
         return
-
 
     if password != confirm_password:
         messagebox.showerror("Error", "Passwords do not match!")

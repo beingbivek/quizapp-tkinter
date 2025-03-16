@@ -13,15 +13,14 @@ def forgot_pw():
         messagebox.showerror("Error", "All fields are required!")
         return
 
+    if not validate_password(new_password):
+        return
+    
     # Validation: Check if new password and confirm password match
     if new_password != confirm_password:
         messagebox.showerror("Error", "Passwords do not match!")
         return
 
-    # Validation: Check if password length is at least 6 characters
-    if len(new_password) < 6:
-        messagebox.showerror("Error", "Password must be at least 6 characters long!")
-        return
 
     try:
         # Connect to the database

@@ -1,3 +1,4 @@
+import re
 import sqlite3
 from tkinter import *
 from tkinter import messagebox
@@ -173,6 +174,36 @@ def minclose_windowbtn(root):
     btn.bind('<Enter>', enter)
     btn.bind('<Leave>', leave)
 
+# Email Validation Checker
+def validate_email(email):
+    if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email):
+            messagebox.showerror("Error", "Invalid email format!")
+            return False
+    else:
+        return True
+
+# Username Validation Checker
+def validate_username(username):
+    if not re.match(r"^[a-zA-Z][a-zA-Z0-9_]*$", username):
+        messagebox.showerror("Error", "Username must start with a letter and contain no spaces!")
+        return False
+    elif len(username) < 6:
+        messagebox.showerror("Error", "Username must have at least 6 character!")
+        return False
+    else:
+        return True
+
+# Password Validation Checker
+def validate_password(password):
+    # Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 symbol
+    if not re.match(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*[\W_]).+$', password,):
+        messagebox.showerror("Error", "Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 symbol")
+        return False
+    if len(password) < 6:
+        messagebox.showerror("Error", "Password must contain at least 6 characters!")
+        return False
+    else:
+        return True
 
 # Check if they already exists
 def already_exists(select,table,where,who):            
