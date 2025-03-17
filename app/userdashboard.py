@@ -146,10 +146,10 @@ def openbutton(btn_text):
             cursor.execute("SELECT question_id, question, correct_ans, incorrect_ans, course_id, category_id FROM questions ORDER BY RANDOM() LIMIT 1")
             qotd_data = cursor.fetchone()
             if not qotd_data:
-                messagebox.showerror('No Question','There\'s no question in Database so, replace with dummy one.')
+                messagebox.showerror('No Question','There\'s no question in Database so, it\'s replaced with dummy one.')
                 qotd_data = dummyquestion
         except Exception as e:
-            messagebox.showerror
+            messagebox.showerror('DB Error',f'An error occured: {e}')
 
         question_id, question_text, correct_answer, incorrect_answers, course_id, category_id = qotd_data
 

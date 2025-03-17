@@ -1108,7 +1108,7 @@ def openbutton(btn_text):
 
             conn = sqlite3.connect(DATABASE_FILE)
             c = conn.cursor()
-            c.execute("SELECT user_id FROM users WHERE username = ?", (query,))
+            c.execute("SELECT user_id FROM users WHERE username LIKE ?", (query,))
             user_data = c.fetchone()
             conn.close()
             
