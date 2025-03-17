@@ -1,7 +1,7 @@
-import ast
+from ast import literal_eval
 from tkinter import *
 from tkinter import ttk, messagebox
-import os, re, json, sqlite3
+import os, json, sqlite3
 from random import *
 from PIL import ImageTk
 
@@ -32,7 +32,7 @@ try:
         back_to_welcome(root)
 
     with open(USER_FILE, "r") as f:
-        LOGGED_IN_USER = ast.literal_eval(f.read().strip()) # Read entire file content
+        LOGGED_IN_USER = literal_eval(f.read().strip()) # Read entire file content using Abstract Syntax Tree
     os.remove(USER_FILE)  # Clean up the temporary file
 except FileNotFoundError:
     messagebox.showerror('File Error','User File not found.')
@@ -384,6 +384,7 @@ def openbutton(btn_text):
                         WHERE user_id = ?
                         """
                         c.execute(query, (fullname, email, username, contact, password, sq, sq_answer, user_id))
+                        conn.commit()
                         update_successful = True
                     except Exception as e:
                         messagebox.showerror('Error',f'Error in updating user: {e}')
@@ -395,6 +396,7 @@ def openbutton(btn_text):
                         WHERE user_id = ?
                         """
                         c.execute(query, (fullname, email, username, contact, sq, sq_answer, user_id))
+                        conn.commit()
                         update_successful = True
                     except Exception as e:
                         messagebox.showerror('Error',f'Error in updating user: {e}')
@@ -406,6 +408,7 @@ def openbutton(btn_text):
                         WHERE user_id = ?
                         """
                         c.execute(query, (fullname, email, username, contact, password, sq, user_id))
+                        conn.commit()
                         update_successful = True
                     except Exception as e:
                         messagebox.showerror('Error',f'Error in updating user: {e}')
@@ -417,6 +420,7 @@ def openbutton(btn_text):
                         WHERE user_id = ?
                         """
                         c.execute(query, (fullname, email, username, contact, sq, user_id))   
+                        conn.commit()
                         update_successful = True
                     except Exception as e:
                         messagebox.showerror('Error',f'Error in updating user: {e}')
@@ -425,10 +429,13 @@ def openbutton(btn_text):
                     global LOGGED_IN_USER
                     LOGGED_IN_USER = list(c.fetchone())
                     conn.commit()
-                    conn.close()
+                    global username_label
+                    username_label.config(text=LOGGED_IN_USER[1])
                     messagebox.showinfo("Success", "Profile updated successfully!")
             except sqlite3.Error as e:
                 messagebox.showerror("Database Error", f"An error occurred: {e}")
+            finally:
+                conn.close()
 
         def update_profile():
             if sq_answer_entry:
@@ -445,12 +452,13 @@ def openbutton(btn_text):
 
             # Check if the password fields are not empty
             if new_password or confirm_password:
+
+                if not validate_password(new_password):
+                    return
+
                 # If password fields are not empty, validate the password
                 if new_password != confirm_password:
                     messagebox.showerror("Error", "New password and confirm password do not match!")
-                    return
-
-                if not validate_password(new_password):
                     return
 
                 # Encrypt the password using base64

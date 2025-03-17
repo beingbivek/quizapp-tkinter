@@ -318,10 +318,9 @@ def mocktestresult_table(root,user_id):
     cursor = conn.cursor()
 
     cursor.execute("""
-                    SELECT m.mocktest_id, m.mocktest_name, mr.result, c.coursename, m.fullmark
+                    SELECT mr.result_id, m.mocktest_name, mr.result, m.fullmark, mr.resulttime
                     FROM mocktestresults mr
                     JOIN mocktests m ON mr.mocktest_id = m.mocktest_id
-                    JOIN courses c ON mr.course_id = c.course_id
                     WHERE mr.user_id = ?
                     ORDER BY result_id DESC
                 """, (user_id,))
@@ -333,7 +332,7 @@ def mocktestresult_table(root,user_id):
     mock_label = Label(root, text="Previous Mock Test Results", font=("Arial", 14, "bold"), bg=MAINFRAME_COLOR)
     mock_label.pack(pady=20)
 
-    mock_columns = ("SN", "Mock Test ID", "Datetime", "Course", "Result")
+    mock_columns = ("SN", "Result ID","MockTest Name", "Result", "Datetime")
     mock_table = ttk.Treeview(root, columns=mock_columns, show='headings', height=4)
 
     for col in mock_columns:
@@ -341,6 +340,6 @@ def mocktestresult_table(root,user_id):
         mock_table.column(col, width=120, anchor='center')
 
     for i, row in enumerate(mock_results, start=1):
-        mock_table.insert('', END, values=(i, row[0], row[1], row[3], f"{row[2]}/{row[4]}"))
+        mock_table.insert('', END, values=(i, row[0], row[1], f"{row[2]}/{row[3]}", row[4]))
 
     mock_table.pack()
