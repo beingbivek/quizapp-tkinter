@@ -24,17 +24,7 @@ def register_user():
         messagebox.showerror("Error", "Please fill all the fields!")
         return
     
-    if not validate_username(username):
-        return
-
-    if not (contact.isdigit() and len(contact) == 10):
-        messagebox.showerror("Error", "Contact must be a 10-digit number!")
-        return
-    
-    if not validate_email(email):
-        return
-    
-    if not validate_password(password):
+    if not (validate_username(username) and validate_contact(contact) and validate_email(email) and validate_password(password)):
         return
 
     if password != confirm_password:

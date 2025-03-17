@@ -246,7 +246,7 @@ def openbutton(btn_text):
                 return
             
             # Checking for valid email,username and password
-            if not (validate_email(email) and validate_username(username) and validate_password(password)):
+            if not (validate_email(email) and validate_username(username) and validate_password(password) and validate_contact(contact)):
                 return
             
             if sqlite3.connect(DATABASE_FILE):
@@ -266,7 +266,6 @@ def openbutton(btn_text):
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """, (username, fullname, contact, email, encoded_password, sq, encoded_sq_answer, timestamp))
                 conn.commit()
-                conn.close()
 
                 messagebox.showinfo("Success", "User registered successfully!")
                 refresh_table()  # Refresh the table
@@ -276,6 +275,8 @@ def openbutton(btn_text):
                 messagebox.showerror("Error", f"Username or email already exists!\nError:{e}")
             except Exception as e:
                 messagebox.showerror("Error", f"An error occurred: {e}")
+            finally:
+                conn.close()
 
         # Function to edit a user
         def edit_user():
@@ -356,7 +357,7 @@ def openbutton(btn_text):
                 return
             
             # Checking for valid email,username and password
-            if not (validate_email(email) and validate_username(username) and validate_password(password)):
+            if not (validate_email(email) and validate_username(username) and validate_password(password) and validate_contact(contact)):
                 return
             
             if sqlite3.connect(DATABASE_FILE):
@@ -375,7 +376,6 @@ def openbutton(btn_text):
                     WHERE user_id = ?
                 """, (username, fullname, contact, email, encoded_password, sq, encoded_sq_answer, user_id))
                 conn.commit()
-                conn.close()
 
                 messagebox.showinfo("Success", "User updated successfully!")
                 refresh_table()  # Refresh the table
@@ -384,6 +384,8 @@ def openbutton(btn_text):
                 messagebox.showerror("Error", "Username or email already exists!")
             except Exception as e:
                 messagebox.showerror("Error", f"An error occurred: {e}")
+            finally:
+                conn.close()
 
         # Function to delete a user
         def delete_user():

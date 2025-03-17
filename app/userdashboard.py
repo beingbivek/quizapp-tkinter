@@ -439,8 +439,8 @@ def openbutton(btn_text):
             print(updated_values)
             fullname, username, contact, email, new_password, confirm_password, sec_que, sec_que_answer = updated_values
 
-            # Checking for valid email and username
-            if not (validate_email(email) and validate_username(username)):
+            # Checking for valid email,username and password
+            if not (validate_email(email) and validate_username(username) and validate_contact(contact)):
                 return
 
             # Check if the password fields are not empty

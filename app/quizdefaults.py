@@ -203,6 +203,13 @@ def validate_password(password):
     else:
         return True
 
+# Phone Number Validation Checker
+def validate_contact(contact):
+    if not (contact.isdigit() and len(contact) == 10):
+        messagebox.showerror("Error", "Contact must be a 10-digit number!")
+        return False
+    return True
+
 # Check if they already exists
 def already_exists(select,table,where,who):            
     try:
