@@ -1334,7 +1334,8 @@ def openbutton(btn_text):
            for question in fetch_questions():
                 mocktest_name = next((test[1] for test in fetch_mock_tests() if test[0] == question[1]), None)
                 course_name = next((test[1] for test in get_courses() if test[0] == question[2]), None)
-                questions_table.insert("", "end", values=(question[0], mocktest_name, course_name, question[3], question[4]))
+                category_name = next((test[1] for test in get_categories() if test[0] == question[3]), None)
+                questions_table.insert("", "end", values=(question[0], mocktest_name, course_name, category_name, question[4]))
         
         #Function to add mocktest name, full marks, passmarks
         def add_mock_test():
